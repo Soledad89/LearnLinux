@@ -1,0 +1,35 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.32;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a = 2
+while ((((a + 1) - a) - 1) == 0) \
+	a += a
+b = 2
+while (((a + b) - a) == 0) \
+	b += b
+base = int((a + b) - a)
+
+println "a =", a, "b =", b, "base =", base
+
+@

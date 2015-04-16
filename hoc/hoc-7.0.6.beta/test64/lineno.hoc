@@ -1,0 +1,19 @@
+println __LINE__			# 1
+s = "two\
+three"
+println __LINE__			# 4
+s = "five\
+six\
+seven"
+println __LINE__			# 8
+s = "nine\nnine\nnine\nnine\nnine"
+println __LINE__			# 10
+s = \
+	\
+	\
+	\
+	"fifteen\
+sixteen\
+seventeen\
+"
+println __LINE__			# 19

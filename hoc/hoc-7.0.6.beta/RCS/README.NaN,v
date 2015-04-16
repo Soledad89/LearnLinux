@@ -1,0 +1,90 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.01.01.14.44.50;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.14.33;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version
+@
+
+
+1.2
+log
+@Update HP PA book title.
+@
+text
+@From p. 4-59 of the Alpha AXP Architecture Manual:
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 21 of SPARC Architecture Manual v8:
+[same choice as Alpha]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 145 of The PowerPC Architecture:
+[same as Alpha and SPARC]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 2-5 of i860 Microprocessor Programmer's Reference Manual:
+[same as Alpha, SPARC, PowerPC]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 2-15 of MC68881 Floating-Point Coprocessor Users Manual:
+[same as Alpha, SPARC, PowerPC, Intel i860]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 5-3 (sequential 87 of 216) Intel IA-64 Architecture Software
+Developer's Manual, Rev 1.0:
+[same as Alpha, SPARC, PowerPC, Intel i860, MC68881]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 8-7 of Hewlett-Packard PA-RISC 2.0 Architecture:
+[opposite of Alpha, SPARC, PowerPC, i860]
+	quiet NaN:	initial fraction bit of 0
+	signaling NaN:	initial fraction bit of 1
+------------------------------------------------------------------------
+From p. E-2 of MIPS RISC Architecture:
+[no distinction between NaNs]
+	NaN:		initial fraction bit of 0
+------------------------------------------------------------------------
+From Palmer and Morse The 8087 Primer and p. I-25 of iAPX 286
+Programmer's Reference Manual:
+[no distinction between NaNs]
+	NaN:		at least one nonzero fraction bit
+Generated NaNs have negative sign bit.
+
+Experiments on Pentium III show 0/0 -> 0xfff80000_00000000, so the
+leading fraction bit is the only nonzero generated.  However, this can
+be explicitly negated to obtain 0x7ff80000_00000000.
+------------------------------------------------------------------------
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d31 1
+a31 1
+From p. 8-7 of PA-RISC 2.0 Architecture:
+@

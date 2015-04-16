@@ -1,0 +1,101 @@
+head	1.3;
+access;
+symbols;
+locks
+	beebe:1.3; strict;
+comment	@ * @;
+
+
+1.3
+date	2002.07.04.14.44.12;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.01.01.14.47.06;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.11.42;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version
+@
+
+
+1.3
+log
+@Update to use revised fstore() and dstore() functions.
+@
+text
+@/* The body expressions here attempt to defeat inlining optimizers */
+/* to avoid confusion by registers that are longer than memory words. */
+
+#include "stdc.h"
+
+#if defined(STDC)
+float
+fstore(float *f)
+#else
+float
+fstore(f)
+float *f;
+#endif
+{
+	return ((*f + *f + *f + *f)/(float) 4.0);
+}
+
+#if defined(STDC)
+double
+dstore(double *d)
+#else
+double
+dstore(d)
+double *d;
+#endif
+{
+	return ((*d + *d + *d + *d)/(double)4.0);
+}
+@
+
+
+1.2
+log
+@Update to use stdc.h, so this code will compile under K&R C.
+@
+text
+@d8 1
+a8 1
+fstore(float f)
+d12 1
+a12 1
+float f;
+d15 1
+a15 1
+	return ((f + f + f + f)/(float) 4.0);
+d20 1
+a20 1
+dstore(double d)
+d24 1
+a24 1
+double d;
+d27 1
+a27 1
+	return ((d + d + d + d)/(double)4.0);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 26
+a28 2
+float fstore(float f)	{ return ((f + f + f + f)/(float) 4.0); }
+double dstore(double d)	{ return ((d + d + d + d)/(double)4.0); }
+@

@@ -1,0 +1,60 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the handling of signed zero, assuming copysign() is reliable.
+### [02-Jan-2002]
+### ====================================================================
+
+__TEST__ = "copysign(1,0) == 1"
+__assert   (copysign(1,0) == 1)
+__TEST__ = "copysign(1,-0) == -1"
+__assert   (copysign(1,-0) == -1)
+
+__TEST__ = "copysign(1,0 - 0) == 1"
+__assert   (copysign(1,0 - 0) == 1)
+__TEST__ = "copysign(1,-0 - 0) == -1"
+__assert   (copysign(1,-0 - 0) == -1)
+
+__TEST__ = "copysign(1,1 * 0) == 1"
+__assert   (copysign(1,1 * 0) == 1)
+__TEST__ = "copysign(1,-1 * 0) == -1"
+__assert   (copysign(1,-1 * 0) == -1)
+
+__TEST__ = "copysign(1,sqrt(+0)) == 1"
+__assert   (copysign(1,sqrt(+0)) == 1)
+__TEST__ = "copysign(1,sqrt(-0)) == -1"
+__assert   (copysign(1,sqrt(-0)) == -1)
+
+__TEST__ = "copysign(1,sin(+0)) == 1"
+__assert   (copysign(1,sin(+0)) == 1)
+__TEST__ = "copysign(1,sin(-0)) == -1"
+__assert   (copysign(1,sin(-0)) == -1)
+
+__TEST__ = "copysign(1,tan(+0)) == 1"
+__assert   (copysign(1,tan(+0)) == 1)
+__TEST__ = "copysign(1,tan(-0)) == -1"
+__assert   (copysign(1,tan(-0)) == -1)
+
+__TEST__ = "copysign(1,ceil(-0)) == -1"
+__assert   (copysign(1,ceil(-0)) == -1)
+__TEST__ = "copysign(1,ceil(+0)) == 1"
+__assert   (copysign(1,ceil(+0)) == 1)
+
+__TEST__ = "copysign(1,floor(-0)) == -1"
+__assert   (copysign(1,floor(-0)) == -1)
+__TEST__ = "copysign(1,floor(+0)) == 1"
+__assert   (copysign(1,floor(+0)) == 1)
+
+__TEST__ = "copysign(1,nint(-0)) == 1"
+__assert   (copysign(1,nint(-0)) == 1)
+__TEST__ = "copysign(1,nint(+0)) == 1"
+__assert   (copysign(1,nint(+0)) == 1)
+
+__TEST__ = "copysign(1,int(-0)) == -1"
+__assert   (copysign(1,int(-0)) == -1)
+__TEST__ = "copysign(1,int(+0)) == 1"
+__assert   (copysign(1,int(+0)) == 1)
+
+__TEST__ = "copysign(1,trunc(-0)) == -1"
+__assert   (copysign(1,trunc(-0)) == -1)
+__TEST__ = "copysign(1,trunc(+0)) == 1"
+__assert   (copysign(1,trunc(+0)) == 1)

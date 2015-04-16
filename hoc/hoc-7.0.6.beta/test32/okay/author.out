@@ -1,0 +1,23 @@
+------------------------------------------------------------------------
+hoc is described in a series of increasingly powerful versions in this
+book:
+
+	Brian W. Kernighan and Rob Pike
+	The UNIX Programming Environment
+	Prentice-Hall
+	1984
+	pp. xii + 357
+	ISBN 0-13-937699-2 (hardcover), 0-13-937681-X (paperback)
+	LCCN QA76.76.O63 K48 1984
+
+Extensions for IEEE 754 arithmetic, help, additional constants,
+statements, and functions, initialization files, internationalization,
+and GNU readline support were added by:
+
+	Nelson H. F. Beebe <beebe@math.utah.edu>
+
+The extended hoc master Internet source distribution site is at:
+
+	ftp://ftp.math.utah.edu/pub/hoc
+	http://www.math.utah.edu/pub/hoc/
+------------------------------------------------------------------------

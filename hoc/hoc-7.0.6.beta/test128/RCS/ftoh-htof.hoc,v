@@ -1,0 +1,43 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.43.01;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test that ftoh() and htof() are inverse functions.
+### [28-Jul-2002]
+### ====================================================================
+
+for (x = MINSUBNORMAL; x <= MAXNORMAL; x *= 256) \
+{
+	__TEST__ = "htof(ftoh(" x ")) == " x
+	__assert   (htof(ftoh(x)) == x)
+}
+
+for (x = MINSUBNORMAL; x <= MAXNORMAL; x *= 256) \
+{
+	y = rand() * x
+	__TEST__ = "htof(ftoh(" y ")) == " y
+	__assert   (htof(ftoh(y)) == y)
+}
+@

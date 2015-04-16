@@ -1,0 +1,252 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.08.06.13.38.33;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.13.16.37.43;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.2
+log
+@Update to used named, rather than numbered, function/procedure
+arguments.
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test a private implementation of hypot() with certain special
+### arguments.  The code in Hypot() below matches the fallback code in
+### math.c:Hypot(), used when hypot() is not available in the local C
+### library.
+###
+### The test functions will be cleaner and simpler when hoc is
+### extended to support function/procedure arguments of string type.
+### [10-Dec-2001]
+### ====================================================================
+
+__MAXULPS = 1				# allow only 1 one bit of error
+
+func Hypot() \
+{
+	__x = $1
+	__y = $2
+	if (isinf(__x)) \
+		return (__x) \
+	else if (isinf(__y)) \
+		return (__y) \
+	else if (isnan(__x)) \
+		return (__x) \
+	else if (isnan(__y)) \
+		return (__y) \
+	else if (abs(__x) > abs(__y)) \
+		return (abs(__x)*sqrt(1.0 + (__y/__x)*(__y/__x))) \
+	else if (abs(__x) < abs(__y)) \
+		return (abs(__y)*sqrt(1.0 + (__x/__y)*(__x/__y))) \
+	else \
+		return (abs(__x)*sqrt(2.0))
+}
+
+### func scaled_hypot_check() return (Hypot(__SCALE__*$1,__SCALE__*$2) == __SCALE__*$3)
+
+func scaled_hypot_check() \
+{
+	global __MAXULPS, __SCALE__
+
+	__x = $1
+	__y = $2
+	__z = $3
+	__u = Hypot(__SCALE__*__x,__SCALE__*__y)
+	__v = __SCALE__*__z
+
+	if (isnan(__u) || isnan(__v)) \
+		return 0 \
+	else if (isinf(__u) || isinf(__v)) \
+		return 1 \
+	else \
+		return (__absulperr(__u, __v) <= __MAXULPS)
+}
+
+proc test_scaled_hypot() \
+{
+	global __SCALE__, __TEST__
+
+	__SCALE__ = $1
+
+	## print "DEBUG:", __NTEST__, __SCALE__, "\n"
+
+	__TEST__ = "scaled_hypot_check(3,4,5)"
+	__assert(scaled_hypot_check(3,4,5))
+
+	__TEST__ = "scaled_hypot_check(5,12,13)"
+	__assert(scaled_hypot_check(5,12,13))
+
+	__TEST__ = "scaled_hypot_check(20,21,29)"
+	__assert(scaled_hypot_check(20,21,29))
+
+	__SCALE__ = 1			# reset to default
+}
+
+
+__TEST__ = "isinf(Hypot(+Infinity,+NaN))"
+__assert(isinf(Hypot(+Infinity,+NaN)))
+
+__TEST__ = "isinf(Hypot(+Infinity,-NaN))"
+__assert(isinf(Hypot(+Infinity,-NaN)))
+
+__TEST__ = "isinf(Hypot(+NaN,+Infinity))"
+__assert(isinf(Hypot(+NaN,+Infinity)))
+
+__TEST__ = "isinf(Hypot(+NaN,-Infinity))"
+__assert(isinf(Hypot(+NaN,-Infinity)))
+
+__TEST__ = "isinf(Hypot(-Infinity,+NaN))"
+__assert(isinf(Hypot(-Infinity,+NaN)))
+
+__TEST__ = "isinf(Hypot(-Infinity,-NaN))"
+__assert(isinf(Hypot(-Infinity,-NaN)))
+
+__TEST__ = "isinf(Hypot(-NaN,+Infinity))"
+__assert(isinf(Hypot(-NaN,+Infinity)))
+
+__TEST__ = "isinf(Hypot(-NaN,-Infinity))"
+__assert(isinf(Hypot(-NaN,-Infinity)))
+
+
+__TEST__ = "isnan(Hypot(+NaN,+NaN))"
+__assert(isnan(Hypot(+NaN,+NaN)))
+
+__TEST__ = "isnan(Hypot(+NaN,-NaN))"
+__assert(isnan(Hypot(+NaN,-NaN)))
+
+__TEST__ = "isnan(Hypot(-NaN,+NaN))"
+__assert(isnan(Hypot(-NaN,+NaN)))
+
+__TEST__ = "isnan(Hypot(-NaN,-NaN))"
+__assert(isnan(Hypot(-NaN,-NaN)))
+
+
+__TEST__ = "isnan(Hypot(NaN,1.0))"
+__assert(isnan(Hypot(NaN,1.0)))
+
+__TEST__ = "isnan(Hypot(NaN,-1.0))"
+__assert(isnan(Hypot(NaN,-1.0)))
+
+
+__TEST__ = "Hypot(Infinity,0) == Infinity"
+__assert(Hypot(Infinity,0) == Infinity)
+
+__TEST__ = "Hypot(0,Infinity) == Infinity"
+__assert(Hypot(0,Infinity) == Infinity)
+
+
+__TEST__ = "Hypot(0,0) == 0"
+__assert(Hypot(0,0) == 0)
+
+__TEST__ = "Hypot(4,0) == 4"
+__assert(Hypot(4,0) == 4)
+
+
+__TEST__ = "Hypot(+3,+4) == 5"
+__assert(Hypot(+3,+4) == 5)
+
+__TEST__ = "Hypot(+5,+12) == 13"
+__assert(Hypot(+5,+12) == 13)
+
+__TEST__ = "Hypot(+20,+21) == 29"
+__assert(Hypot(+20,+21) == 29)
+
+
+__TEST__ = "Hypot(+3,-4) == 5"
+__assert(Hypot(+3,-4) == 5)
+
+__TEST__ = "Hypot(+5,-12) == 13"
+__assert(Hypot(+5,-12) == 13)
+
+__TEST__ = "Hypot(+20,-21) == 29"
+__assert(Hypot(+20,-21) == 29)
+
+
+__TEST__ = "Hypot(-3,-4) == 5"
+__assert(Hypot(-3,-4) == 5)
+
+__TEST__ = "Hypot(-5,-12) == 13"
+__assert(Hypot(-5,-12) == 13)
+
+__TEST__ = "Hypot(-20,-21) == 29"
+__assert(Hypot(-20,-21) == 29)
+
+
+__TEST__ = "Hypot(-3,+4) == 5"
+__assert(Hypot(-3,+4) == 5)
+
+__TEST__ = "Hypot(-5,+12) == 13"
+__assert(Hypot(-5,+12) == 13)
+
+__TEST__ = "Hypot(-20,+21) == 29"
+__assert(Hypot(-20,+21) == 29)
+
+
+if (__IEEE_754__) \
+{
+	### Since the absolute value of the largest argument to
+	### Hypot() in the tests above is less than 2^5 == 32,
+	### and we require a sum of two of them, as long as the scale
+	### factor does not get within 2*2^5 == 2^6 == 64 of the
+	### overflow limit, we cannot get overflow
+
+	### Test large numbers close to, but below, the IEEE 754
+	### 64-bit overflow limit
+	test_scaled_hypot((1 - 2^(-53))*2^(506))
+
+	### Test small numbers close to, but above, the IEEE 754
+	### 64-bit underflow limit for x^2
+	test_scaled_hypot(2^(-511))
+
+	### Test small numbers close to, but above, the IEEE 754
+	### 64-bit underflow limit for x
+	test_scaled_hypot(2^(-1021))
+
+	test_scaled_hypot(2^(-1022))
+
+	### Test small numbers close to, but below, the IEEE 754
+	### 64-bit underflow limit for normalized x
+	test_scaled_hypot(2^(-1027))
+
+	### Test values that should cause underflow, even with
+	### subnormal numbers:
+	test_scaled_hypot(2^(-1075))
+
+	### Test values that should cause overflow with IEEE 754
+	### 64-bit overflow limit
+	test_scaled_hypot(2^(1023))
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d39 2
+d57 2
+d61 1
+a61 1
+	## print "DEBUG: ", __NTEST__, __SCALE__, "\n"
+@

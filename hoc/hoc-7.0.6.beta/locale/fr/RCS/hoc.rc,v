@@ -1,0 +1,71 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2001.12.11.15.21.22;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### /usr/local/src/hoc/hoc-7.0.0.beta/fr/hoc.rc, Thu Dec  6 06:51:06 2001
+### Edit by Nelson H. F. Beebe <beebe@@math.utah.edu>
+### ====================================================================
+###
+### This is hoc.rc.fr, with French translations of hoc functions.
+### If requested by the settings of the environment variables LC_ALL,
+### LC_MESSAGES, or LANG (in that order of priority), this file will be
+### loaded AFTER hoc.rc.  This means that it can gradually be augmented
+### with translations of messages, leaving the original English text as
+### a fallback.
+###
+### [06-Dec-2001]
+### ====================================================================
+
+### For now, we provide only a few sample translations.  The welcome
+### banner will be printed both in English (from hoc.rc) and in French
+### (from this file).
+proc _internal_bienvenue() \
+{
+	_internal_help_hrule()
+	print "Bienvenue à la calculatrice, hoc.\n"
+	print "C'est la version 7.0 du 8me. décembre, 2001.\n"
+	print "Taper secours() pour assistance, nouvelles() pour des nouvelles, et\n"
+	print "auteur() pour des renseignements sur les auteurs.\n"
+	if (__IEEE_754__) \
+		print "Cette ordinateur supporte l'arithmétique à virgule flottant du standard\nIEEE 754.\n" \
+	else \
+		print "Cette ordinateur ne supporte pas l'arithmétique à virgule flottant du standard\nIEEE 754.\n\n"
+	print "\t****************************************************************\n"
+	print "\tATTENTION: La traduction des messages d'assistance d'hoc\n"
+	print "\td'anglais en français n'est pas encore complètement\n"
+	print "\tachevée. Alors, le mainteneur sera heureux de recevoir des\n"
+	print "\tcontributions dans cette domaine, et également, des propositions\n"
+	print "\td'amélioration des traductions, et aussi du logiciel.  Merci en\n"
+	print "\tavance!\n"
+	print "\t****************************************************************\n"
+
+	_internal_help_hrule()
+}
+
+### French synonyms for some commands
+proc auteur()		author()
+proc nouvelles()	news()
+
+### Print a welcome banner if option --silent was not specified:
+if (__VERBOSE__) _internal_bienvenue()
+@

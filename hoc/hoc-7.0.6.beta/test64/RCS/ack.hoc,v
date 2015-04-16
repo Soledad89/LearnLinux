@@ -1,0 +1,57 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.08.06.13.36.26;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.21.56;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.2
+log
+@Update to used named, rather than numbered, function/procedure
+arguments.
+@
+text
+@func ack(a,b) {
+	global n
+	n = n+1
+	if(a == 0) return (b+1)
+	if(b == 0) 	 return (ack(a - 1, 1))
+	return (ack(a - 1, ack(a, b - 1)))
+}
+n=0
+ack(3,3)
+print n, "calls\n"
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 1
+func ack() {
+d4 3
+a6 3
+	if($1 == 0) return ($2+1)
+	if($2 == 0) 	 return (ack($1 - 1, 1))
+	return (ack($1 - 1, ack($1, $2 - 1)))
+@

@@ -1,0 +1,56 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.08.06.13.43.25;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.21.56;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.2
+log
+@Development snapshot.
+@
+text
+@{
+	n=0
+	b=0
+	while(b < 39916800) {
+		n=n+1
+		b=int(gamma(n) + 0.5)
+		print b, "\n"
+	}
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 7
+a8 7
+n=0
+b=0
+while(b<479001600){
+	n=n+1
+	b=int(gamma(n) + 0.5)
+	print b, "\n"
+}
+@

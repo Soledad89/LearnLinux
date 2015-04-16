@@ -1,0 +1,105 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.08.06.13.43.25;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.07.18.13.45.26;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.2
+log
+@Development snapshot.
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test printf.
+### [17-Jul-2002]
+### ====================================================================
+
+printf "This is a test of printf format items matching the regular expression\n"
+printf "\t%%[-+0 ]?[0-9]*([.][0-9]*)?[deEfgGiosuxX]\n\n"
+
+printf "------------------------------------------------------------------------\n"
+for (k = 0; k <= 3; ++k ) printf "%d\t%i\t%u\t%o\t%x\t%X\n",k,k,k,k,k,k
+
+printf "------------------------------------------------------------------------\n"
+for (k = 1; k <= 2^20; k *= 16) printf "%07d\t%07i\t%07u\t%07o\t%07x\t%07X\n",k,k,k,k,k,k
+
+printf "------------------------------------------------------------------------\n"
+for (k = 0; k <= 3; ++k ) printf "%7d\t%7i\t%7u\t%7o\t%7x\t%7X\n",k,k,k,k,k,k
+
+printf "------------------------------------------------------------------------\n"
+for (k = 0; k <= 3; ++k ) printf "%-7d\t%-7i\t%-7u\t%-7o\t%-7x\t%-7X\n",k,k,k,k,k,k
+
+printf "------------------------------------------------------------------------\n"
+for (k = 1; k <= 1024; k *= 2) printf "%7d\t%7i\t%7u\t%7o\t%7x\t%7X\n",k,k,k,k,k,k
+
+printf "------------------------------------------------------------------------\n"
+for (k = -5; k <= 5; ++k) printf "%d*PI = %8.5f\n", k, k*PI
+
+printf "------------------------------------------------------------------------\n"
+for (k = 0; k <= 75; k += 5) printf "PI^%03d = %16.4E\n", k, PI^k
+
+printf "------------------------------------------------------------------------\n"
+for (k = 0; k <= 75; k += 5) printf "PI^%03d = %16.4e\n", k, PI^k
+
+printf "------------------------------------------------------------------------\n"
+
+for (k = 0; k <= 75; k += 5) printf "PI^%03d = %16.5G\n", k, PI^k
+printf "------------------------------------------------------------------------\n"
+
+for (k = 0; k <= 75; k += 5) printf "PI^%03d = %16.5g\n", k, PI^k
+printf "------------------------------------------------------------------------\n"
+
+printf "This test should produce a format directive error report, and abort\n"
+printf "further processing of this file.\n"
+printf "%a\n", 123
+printf "This text should NOT be output.\n"
+printf "------------------------------------------------------------------------\n"
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d11 1
+a11 1
+for (k = -3; k <= 3; ++k ) printf "%d\t%i\t%u\t%o\t%x\t%X\n",k,k,k,k,k,k
+d17 1
+a17 1
+for (k = -3; k <= 3; ++k ) printf "%7d\t%7i\t%7u\t%7o\t%7x\t%7X\n",k,k,k,k,k,k
+d20 1
+a20 1
+for (k = -3; k <= 3; ++k ) printf "%-7d\t%-7i\t%-7u\t%-7o\t%-7x\t%-7X\n",k,k,k,k,k,k
+d29 1
+a29 1
+for (k = 0; k <= 100; k += 5) printf "PI^%03d = %16.5E\n", k, PI^k
+d32 1
+a32 1
+for (k = 0; k <= 100; k += 5) printf "PI^%03d = %16.5e\n", k, PI^k
+d36 1
+a36 1
+for (k = 0; k <= 100; k += 5) printf "PI^%03d = %16.5G\n", k, PI^k
+d39 1
+a39 1
+for (k = 0; k <= 100; k += 5) printf "PI^%03d = %16.5g\n", k, PI^k
+@

@@ -1,0 +1,587 @@
+### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.5.beta/locale/da/translations.hoc, Sat Jul 27 10:23:23 2002
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### /usr/local/src/hoc/hoc-7.0.1.beta/da/translations.hoc, Sat Jan  5 08:13:16 2002
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+### This file contains translations of output strings that are embedded
+### in hoc source code, and thus, less changeable than those in hoc
+### initialization files.
+###
+### A message translation block consists of the original complete string
+### in a comment, followed by an assignment statement for a reduced
+### variable name with the new string value on a separate line.
+###
+### The reduced variable names are constructed by the algorithm
+### embedded in ascii-to-msg.awk:msg_name() and symbol.c:msg_name().
+### The former can be run by "make translations.tmp" (but see the
+### coverage-problem note in the comments in the Makefile for that
+### target).  In English, the algorithm is: convert uppercase to
+### lowercase, remove leading and trailing space and punctuation,
+### replace characters other than letters and digits by underscore,
+### reduce runs of underscores to single underscores, remove leading
+### and trailing underscores, and finally, prefix the result with
+### "___msg_".
+###
+### Three leading underscores are intentional: they avoid collisions
+### with other system names, and provide a convenient prefix for
+### searching the symbol table, and are by default excluded from hoc's
+### who(prefix) command output.
+###
+### Translation variable assignments are sorted alphabetically by
+### variable name, and grouped alphabetically by source file name.
+###
+### If the assigned value is empty, then the variable serves only as a
+### placeholder: the original string will be used.  Otherwise, when the
+### assigned value is not empty, then any use of the original string at
+### run time will be replaced by the new value.
+###
+### To prepare a translation file for another locale, copy this file
+### into the locale directory, preserving the name translations.hoc, and
+### then simply type in message translations for each right-hand-side
+### empty string.  Any that are left empty will remain in English, so
+### you can do the translations a few at a time.
+###
+### [27-Jul-2002] -- update for hoc-7.0.5.beta
+### [05-Jan-2002]
+### ====================================================================
+
+### Translations of internal strings to Danish.  All have been
+### translated, but some further tuning is likely required, since
+### translations of technical words are problematic when English words
+### are so often used in place of native equivalents.
+
+### ====================================================================
+### From code.c:
+
+### "assignment from non-variable"
+___msg_assignment_from_non_variable = \
+	"overførsel fra ikke-variable"
+
+### "assignment to non-variable"
+___msg_assignment_to_non_variable = \
+	"overførsel til ikke-variable"
+
+### "attempt to evaluate nonstring variable"
+___msg_attempt_to_evaluate_nonstring_variable = \
+	"forsøg at evaluere en ikke-strengvariable"
+
+### "attempt to evaluate non-variable"
+___msg_attempt_to_evaluate_non_variable = \
+	"forsøg at evaluere en ikke-variable"
+
+### "call nested too deeply"
+___msg_call_nested_too_deeply = \
+	"kaldkæden for dyb"
+
+### "division by zero"
+___msg_division_by_zero = \
+	"division med nul"
+
+### "execution aborted:"
+___msg_execution_aborted = \
+	"eksekution standset"
+
+### "failed to convert to floating-point from string"
+___msg_failed_to_convert_to_floating_point_from_string = \
+	"fejl i konvertering til flydendepunkt fra streng"
+
+### "failed to convert to signed integer from string"
+___msg_failed_to_convert_to_signed_integer_from_string = \
+	"fejl i konvertering til fortegnede heltal fra streng"
+
+### "failed to convert to unsigned integer from string"
+___msg_failed_to_convert_to_unsigned_integer_from_string = \
+	"fejl i konvertering til ufortegnede heltal fra streng"
+
+### "(func) returns no value"
+___msg_func_returns_no_value = \
+	"(func) returnerer ingen værdi"
+
+### "illegal assignment of number to existing string variable"
+___msg_illegal_assignment_of_number_to_existing_string_variable = \
+	"ulovlig overførsel af nummer til eksisterende streng variable"
+
+### "illegal assignment of string to existing numeric variable"
+___msg_illegal_assignment_of_string_to_existing_numeric_variable = \
+	"ulovlig overførsel af streng til eksisterende numerisk variable"
+
+### "illegal outside loop body"
+___msg_illegal_outside_loop_body = \
+  	"ulovlig udenfor løkke sætning"
+
+### "illegal reassignment to immutable named constant"
+___msg_illegal_reassignment_to_immutable_named_constant = \
+	"ulovlig genoverførsel til uforanderlig nævnte konstant"
+
+### "internal type confusion in read() of"
+___msg_internal_type_confusion_in_read_of = \
+	"internt typeforvirring i read() af"
+
+### "invalid format item"
+___msg_invalid_format_item = \
+	"invalid format genstand"
+
+### "non-number read into"
+___msg_non_number_read_into = \
+	"ikkenummer læst ind i"
+
+### "not enough arguments"
+___msg_not_enough_arguments = \
+	"ikke argumenter nok"
+
+### "(proc) returns value"
+___msg_proc_returns_value = \
+	"(proc) returnerer en værdi"
+
+### "program too big"
+___msg_program_too_big = \
+	"program for stor"
+
+### "stack too deep"
+___msg_stack_too_deep = \
+	"»stack« for dyb"
+
+### "stack underflow"
+___msg_stack_underflow = \
+	"»stack« er tom"
+
+### "undefined variable"
+___msg_undefined_variable = \
+	"ikke-definerede variable"
+
+### ====================================================================
+### From hoc.y:
+
+### "and described in their book:\n\n"
+___msg_and_described_in_their_book = \
+	"og beskrevet i deres bog:\n\n"
+
+### "and GNU readline support were added by:\n\n"
+___msg_and_gnu_readline_support_were_added_by = \
+	"og støtte for GNU readline er indført af:\n\n"
+
+### "\tBrian W. Kernighan and Rob Pike\n\n"
+___msg_brian_w_kernighan_and_rob_pike = \
+	"\tBrian W. Kernighan og Rob Pike\n\n"
+
+### "deletion failed for symbol"
+___msg_deletion_failed_for_symbol = \
+	"slettelse fejlede for symbol"
+
+### "Extensions for IEEE 754 arithmetic, help, additional constants,\n"
+___msg_extensions_for_ieee_754_arithmetic_help_additional_constants = \
+	"Udvidelsen for IEEE 754 aritmetik, hjælp, ekstra konstanter,\n"
+
+### "floating point exception"
+___msg_floating_point_exception = \
+	"flydendepunkt undtagelse"
+
+### "For additional help, try "
+___msg_for_additional_help_try = \
+	"For ekstra hjælp, prøv "
+
+### "illegal symbol in definition"
+___msg_illegal_symbol_in_definition = \
+	"ulovlig symbol i definition"
+
+### "\t\tinput-file(s) [ -- ] more-input-file(s)\n\n"
+___msg_input_file_s_more_input_file_s = \
+	"\t\tinput-fil(er) [ -- ] flere-input-filer\n\n"
+
+### "missing quote"
+___msg_missing_quote = \
+	"anførelsestegn (\") mangler"
+
+### "name too long"
+___msg_name_too_long = \
+	"navn for lang"
+
+### " of "
+___msg_of = \
+	" af "
+
+### "Options may be prefixed with either one or two hyphens.\n"
+___msg_options_may_be_prefixed_with_either_one_or_two_hyphens = \
+	"Optioner kan forstaves af enten én eller to bindestreger.\n"
+
+### "Report bugs to "
+___msg_report_bugs_to = \
+	"Indsend fejlrapporter til "
+
+### "statements, and functions, initialization files, internationalization,\n"
+___msg_statements_and_functions_initialization_files_internationalization = \
+	"sætninger, og funktioner, start filer, internationalisering,\n"
+
+### "strange $..."
+___msg_strange = \
+	"mærkelig $..."
+
+### "string too long"
+___msg_string_too_long = \
+	"streng for lang"
+
+### "syntax error"
+___msg_syntax_error = \
+	"syntaksfejl"
+
+### "%s: can't open %s\n"
+___msg_s_can_t_open_s = \
+	"%s: kan ikke åbne %s\n"
+
+### "'s help() command, or in a shell,\n"
+___msg_s_help_command_or_in_a_shell = \
+	"s hjælp() kommando, eller i en UNIX »shell«,\n"
+
+### "The extended hoc master Internet source distribution site is at:\n\n"
+___msg_the_extended_hoc_master_internet_source_distribution_site_is_at = \
+	"Den officiale Internet arkiv for den udvidede hoc findes ved:\n\n"
+
+### "This is "
+___msg_this_is = \
+	"Dette er "
+
+### "unclosed quotation mark in command-line option"
+___msg_unclosed_quotation_mark_in_command_line_option = \
+	"ulukket anførelsestegn in kommando-linie option"
+
+### "unknown symbol in definition"
+___msg_unknown_symbol_in_definition = \
+	"ukendt symbol i definition"
+
+### "unrecognized number in definition"
+___msg_unrecognized_number_in_definition = \
+	"ukendt nummer i definition"
+
+### "Unrecognized option: [%s]\n"
+___msg_unrecognized_option_s = \
+	"Ukendt option: [%s]\n"
+
+### "unrecognized string in definition"
+___msg_unrecognized_string_in_definition = \
+	"ukendt streng i definition"
+
+### "Usage:\n"
+___msg_usage = \
+	"Anvendelse:\n"
+
+### "used outside definition"
+___msg_used_outside_definition = \
+	"brugt uden for definition"
+
+### "use the UNIX manual page command, man "
+___msg_use_the_unix_manual_page_command_man = \
+	"anvend UNIX håndbogsside kommandoen, man "
+
+### " version "
+___msg_version = \
+	" version "
+
+### " was written by\n\n"
+___msg_was_written_by = \
+	" er skrevet af\n\n"
+
+### "yacc stack overflow"
+___msg_yacc_stack_overflow = \
+	"yacc »stack« er tom"
+
+### ====================================================================
+### From ieee754.c:
+
+### "copysign(x,y) is not available on this system"
+___msg_copysign_x_y_is_not_available_on_this_system = \
+	"copysign(x,y) er ikke disponibel på dette system"
+
+### "fmod(x,y) is not available on this system"
+___msg_fmod_x_y_is_not_available_on_this_system = \
+	"fmod(x,y) er ikke disponibel på dette system"
+
+### "Infinity() is not available on this system"
+___msg_infinity_is_not_available_on_this_system = \
+	"Infinity() [uendelighed] er ikke disponibel på dette system"
+
+### "int(NaN) is undefined"
+___msg_int_nan_is_undefined = \
+	"int(NaN) er ikke defineret"
+
+### "internal error at "
+___msg_internal_error_at = \
+	"intern fejl ved"
+
+### "maximum normal number is not yet programmed in hoc for this system"
+___msg_the_maximum_normal_number_is_not_yet_programmed_in_hoc_for_this_system = \
+	"det største normalnummer er ikke endnu programmeret i hoc for dette system"
+
+### "nextafter(x,y) is not available on this system"
+___msg_nextafter_x_y_is_not_available_on_this_system = \
+	"nextafter(x,y) er ikke disponibel på dette system"
+
+### "remainder(x) is not available on this system"
+___msg_remainder_x_is_not_available_on_this_system = \
+	"remainder(x) er ikke disponibel på dette system"
+
+### "rint(x) is not available on this system"
+___msg_rint_x_is_not_available_on_this_system = \
+	"rint(x) er ikke disponibel på dette system"
+
+### ====================================================================
+### From init.c:
+
+### ====================================================================
+### From io.c:
+
+### "cd() command is disabled"
+___msg_cd_command_is_disabled = \
+	"cd() kommandoen kan ikke anvendes i dette job"
+
+### "### CreationDate:      %s\n"
+___msg_creationdate_s = \
+	"### CreationsDato:        %s\n"
+
+### "### Creator:           %s version %s [%s]\n"
+___msg_creator_s_version_s_s = \
+	"### Programmel:           %s version %s [%s]\n"
+
+### "DEBUG: open of"
+___msg_debug_open_of = \
+	"DEBUG: åben af"
+
+### "failed"
+___msg_failed = \
+	"fejlede"
+
+### "input"
+___msg_input = \
+	"input"
+
+### "load() command is disabled"
+___msg_load_command_is_disabled = \
+	"load() kommandoen kan ikke anvendes i dette job"
+
+### "load() open failed"
+___msg_load_open_failed = \
+	"load() åben fejlede"
+
+### "logfile() command is disabled"
+___msg_logfile_command_is_disabled = \
+	"logfile() kommandoen kan ikke anvendes i dette job"
+
+### "logfile() open failed"
+___msg_logfile_open_failed = \
+	"logfile() åben fejlede"
+
+### "logfile() will not overwrite existing file"
+___msg_logfile_will_not_overwrite_existing_file = \
+	"logfile() vil ikke overskreve eksisterende fil"
+
+### "okay"
+___msg_okay = \
+	"ok"
+
+### "output"
+___msg_output = \
+	"output"
+
+### "### PackageBugReports: %s\n"
+___msg_packagebugreports_s = \
+	"### ProgramFejlRapporter: %s\n"
+
+### "pwd() command is disabled"
+___msg_pwd_command_is_disabled = \
+	"pwd() kommandoen kan ikke anvendes i dette job"
+
+### "save() command is disabled"
+___msg_save_command_is_disabled = \
+	"save() kommandoen kan ikke anvendes i dette job"
+
+### "save() open failed"
+___msg_save_open_failed = \
+	"save() åben fejlede"
+
+### "save() will not overwrite existing file"
+___msg_save_will_not_overwrite_existing_file = \
+	"save() vil ikke overskreve eksisterende fil"
+
+### "### This is hoc save file %s\n"
+___msg_this_is_hoc_save_file_s = \
+	"### Denne er hoc gemmefil %s\n"
+
+### "### WARNING: This file contains only symbols matching \"%s\"\n"
+___msg_warning_this_file_contains_only_symbols_matching_s = \
+	"### ADVARSEL: Denne fil indeholder kun symboler som matcher \"%s\"\n"
+
+
+### ====================================================================
+### From math.c:
+
+### "acosh(x) is not available on this system"
+___msg_acosh_x_is_not_available_on_this_system = \
+	"acosh(x) er ikke disponibel på dette system"
+
+### "argument out of domain"
+___msg_argument_out_of_domain = \
+	"argument ud af domæn"
+
+### "asinh(x) is not available on this system"
+___msg_asinh_x_is_not_available_on_this_system = \
+	"asinh(x) er ikke disponibel på dette system"
+
+### "atanh(x) is not available on this system"
+___msg_atanh_x_is_not_available_on_this_system = \
+	"atanh(x) er ikke disponibel på dette system"
+
+### "attempt to concatenate nonstrings"
+___msg_attempt_to_concatenate_nonstrings = \
+	"forsøg at sammensætte ikke-strenge"
+
+### "erf(x) is not available on this system"
+___msg_erf_x_is_not_available_on_this_system = \
+	"erf(x) er ikke disponibel på dette system"
+
+### "erfc(x) is not available on this system"
+___msg_erfc_x_is_not_available_on_this_system = \
+	"erfc(x) er ikke disponibel på dette system"
+
+### "exponentiation"
+___msg_exponentiation = \
+	"exponering"
+
+### "gamma result out of range"
+___msg_gamma_result_out_of_range = \
+	"resultatet af gamma er ud af rang"
+
+### "interrupt"
+___msg_interrupt = \
+	"afbrydelse"
+
+### "J0(x) is not available on this system"
+___msg_j0_x_is_not_available_on_this_system = \
+	"J0(x) er ikke disponibel på dette system"
+
+### "J1(x) is not available on this system"
+___msg_j1_x_is_not_available_on_this_system = \
+	"J1(x) er ikke disponibel på dette system"
+
+### "Jn(n,x) is not available on this system"
+___msg_jn_n_x_is_not_available_on_this_system = \
+	"Jn(n,x) er ikke disponibel på dette system"
+
+### "lgamma(x) is not available on this system"
+___msg_lgamma_x_is_not_available_on_this_system = \
+	"lgamma(x) er ikke disponibel på dette system"
+
+### "result out of range"
+___msg_result_out_of_range = \
+	"resultat er ud af rang"
+
+### "Y0(x) is not available on this system"
+___msg_y0_x_is_not_available_on_this_system = \
+	"Y0(x) er ikke disponibel på dette system"
+
+### "Y1(x) is not available on this system"
+___msg_y1_x_is_not_available_on_this_system = \
+	"Y1(x) er ikke disponibel på dette system"
+
+### "Yn(n,x) is not available on this system"
+___msg_yn_n_x_is_not_available_on_this_system = \
+	"Yn(n,x) er ikke disponibel på dette system"
+
+### ====================================================================
+### From readline.c:
+
+### "input file stack underflow"
+___msg_input_file_stack_underflow = \
+	"input fil »stack« er tom"
+
+### "numeric token too long"
+___msg_numeric_token_too_long = \
+	"numerisk ord for lang"
+
+### "pushback buffer data lost in irl_pop_input()"
+___msg_pushback_buffer_data_lost_in_irl_pop_input = \
+	"umuligt indskubbede data tab i irl_pop_input()"
+
+### "too many input characters pushed back"
+___msg_too_many_input_characters_pushed_back = \
+	"for mange indskubbede input tegn"
+
+### ====================================================================
+### From string.c:
+
+### "strtold()->sscanf() failed"
+___msg_strtold_sscanf_failed = \
+	"strtold()->sscanf() fejlede"
+
+### ====================================================================
+### From symbol.c:
+
+### "\n\tBuilt-in numeric functions (one argument):\n"
+___msg_built_in_numeric_functions_one_argument = \
+	"\n\tIndbyggede numeriske funktioner (én argument):\n"
+
+### "\n\tBuilt-in numeric functions (two arguments):\n"
+___msg_built_in_numeric_functions_two_arguments = \
+	"\n\tIndbyggede numeriske funktioner (to argumenter):\n"
+
+### "\n\tBuilt-in numeric functions (zero arguments):\n"
+___msg_built_in_numeric_functions_zero_arguments = \
+	"\n\tIndbyggede numeriske funktioner (ingen argument):\n"
+
+### "\n\tBuilt-in string functions (one argument):\n"
+___msg_built_in_string_functions_one_argument = \
+	"\n\tIndbyggede streng funktioner (én argument):\n"
+
+### "\n\tBuilt-in string functions (two arguments):\n"
+___msg_built_in_string_functions_two_arguments = \
+	"\n\tIndbyggede streng funktioner (to argumenter):\n"
+
+### "\n\tBuilt-in string functions (zero arguments):\n"
+___msg_built_in_string_functions_zero_arguments = \
+	"\n\tIndbyggede streng funktioner (ingen argument):\n"
+
+### "\n\tMiscellaneous built-in functions:\n"
+___msg_miscellaneous_built_in_functions = \
+	"\n\tAndre indbyggede funktioner:\n"
+
+### "\n\tNumeric named constants:\n"
+___msg_numeric_named_constants = \
+	"\n\tNævnte numeriske konstanter:\n"
+
+### "\n\tNumeric variables:\n"
+___msg_numeric_variables = \
+	"\n\tNumeriske variabler:\n"
+
+### "out of memory"
+___msg_out_of_memory = \
+	"ud af hukommelse"
+
+### "\n\tString named constants:\n"
+___msg_string_named_constants = \
+	"\n\tNævnte streng konstanter:\n"
+
+### "\n\tString variables:\n"
+___msg_string_variables = \
+	"\n\tStreng variabler:\n"
+
+### "Symbols:\n"
+___msg_symbols = \
+	"Symboler:\n"
+
+### "Symbols matching "
+___msg_symbols_matching = \
+	"Symboler som matcher "
+
+### "\n\tUser-defined functions:\n"
+___msg_user_defined_functions = \
+	"\n\tBruger-definerede funktioner:\n"
+
+### "\n\tUser-defined procedures:\n"
+___msg_user_defined_procedures = \
+	"\n\tBruger-definerede procedurer:\n"
+
+### ====================================================================
+### From time.c:
+
+### "CPU time exceeded"
+___msg_cpu_time_exceeded = \
+        "CPU tidsgrænse overtrådt"

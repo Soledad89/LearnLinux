@@ -1,0 +1,58 @@
+*******************************************************************************
+*******************************************************************************
+** Demonstration of a simple one-time pad symmetric-key encryption algorithm **
+*******************************************************************************
+*******************************************************************************
+
+------------------------------------------------------------------------
+The encryption does not reveal message length, although it DOES reveal
+common plaintext prefixes:
+
+encrypt(123,"A")
+2b04aa0f ef15ce59 654a0dc6 ba409618 daef6924 5729580b af3af319 f579b0bc
+
+encrypt(123,"AB")
+2b47315b 22fdc9f1 b90d4fdb 1eb8302a 4944eddb e7dd1bff 8d0d1f10 1e46b93c
+
+encrypt(123,"ABC")
+2b47752c 286a4724 40bf188f c08caffa 1007d4cc 2c2495f9 cd999566 abfe0c2d
+
+encrypt(123,"ABCD")
+2b477571 f970b4a2 7346ca58 742e8379 e0ce97b3 1d69dc73 c7d921dc 018bc480
+
+------------------------------------------------------------------------
+The encryption does not reveal letter repetititions:
+
+encrypt(123,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+2b46736e 3b83cd28 777d88c8 ad1b12dc c28010ef 407d3513 e1ed75bc 5737fd71
+6e68fb7d 4ac31248 94f21f9f d009455f 6d299f
+
+------------------------------------------------------------------------
+Now encrypt a famous message from American revolutionary history:
+
+encrypt(123, "One if by land, two if by sea: Paul Revere's Ride, 16 April 1775")
+
+3973974d 63a8ac49 af5cb3e8 da3efdbb f5b63ece 68a21434 19cca7e0 7730dc80
+8e9c265c 5be7476c c51605d1 af1a6d82 9114c057 620da15b 0670bb1d 3c95c30b
+ed
+
+------------------------------------------------------------------------
+Attempt to decrypt the ciphertext with a nearby key.  Decryption DOES
+reveal the message length, although that flaw could easily be fixed:
+
+decrypt(122, ciphertext)
+?^?/?)?D?fN&???w??V???Gj5?????(????1???J???i?i)y?I?-G?????b?o??X?
+
+------------------------------------------------------------------------
+Attempt to decrypt the ciphertext with the correct key:
+
+decrypt(123, ciphertext)
+One if by land, two if by sea: Paul Revere's Ride, 16 April 1775
+
+------------------------------------------------------------------------
+Attempt to decrypt the ciphertext with a nearby key:
+
+decrypt(123, ciphertext)
+??$???W?????N????????!?Z?U???????Q??????3?B}`<?O ?P5%??VdNv??kS??
+
+------------------------------------------------------------------------

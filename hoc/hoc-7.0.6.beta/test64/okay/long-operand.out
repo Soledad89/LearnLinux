@@ -1,0 +1,4 @@
+This long expression should NOT overflow hoc's operand stack:
+Operand depth = 2559 
+This long expression SHOULD overflow hoc's operand stack:
+Operand depth = 2560 

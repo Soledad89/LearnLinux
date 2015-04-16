@@ -1,0 +1,17 @@
+### -*-hoc-*-
+
+logfile("logf02.dat")
+
+PREC                   	= 17
+e_inverse              	= 1/E
+two_pi                 	= 2*PI
+
+logoff()
+t_e_inverse            	= "e_inverse = 1/E"
+t_two_pi               	= "two_pi = 2*PI"
+logon()
+
+e_inverse              	*= e_inverse
+two_pi                 	/= two_pi
+
+logfile("logf02.dat")

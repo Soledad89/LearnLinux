@@ -1,0 +1,60 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.08.16.48.38;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the encrypt() and decrypt() functions with random alphabetic
+### strings and keys.
+### [08-Aug-2002]
+### ====================================================================
+
+load("decrypt.hoc")
+load("encrypt.hoc")
+
+func randstr(n) \
+{
+    s = ""
+    for (k = 1; k <= n; ++k) \
+	s = s char(randint(65,90))
+    return (s)
+}
+
+proc cryptotest(key) \
+{
+    global __TEST__
+    for (k = 1; k <= 20; ++k) \
+    {
+	plaintext = randstr(k)
+	ciphertext = encrypt(key,plaintext)
+	unciphertext = decrypt(key,ciphertext)
+	__TEST__ = ("decrypt(" key ",encrypt(" key ",\"" plaintext "\") == \"" unciphertext "\"")
+	__assert   (plaintext == unciphertext)
+    }
+}
+
+for (n = 0; n < 10; ++n) \
+{
+    cryptotest(randint(0,2^31 - 1))
+}
+@

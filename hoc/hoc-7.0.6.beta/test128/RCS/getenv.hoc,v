@@ -1,0 +1,40 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.43.01;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the getenv() and putenv() functions.
+### [20-Dec-2001]
+### ====================================================================
+
+### We need to initialize this loop body variable for now until a 
+### problem in the yacc grammar for hoc is resolved.
+
+old = ""
+for (k = 100; k < 1000; k += 100) \
+{
+	__TEST__ = "putenv(\"HOME\",(\"XXX\" k)) == getenv(\"HOME\")"
+	__assert   (putenv("HOME",("XXX" k)) == getenv("HOME"))
+}
+@

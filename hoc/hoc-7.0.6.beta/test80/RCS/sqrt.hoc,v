@@ -1,0 +1,301 @@
+head	1.3;
+access;
+symbols;
+locks
+	beebe:1.3; strict;
+comment	@# @;
+
+
+1.3
+date	2002.08.06.13.38.43;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2001.12.13.16.37.57;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.21.56;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.3
+log
+@Update to used named, rather than numbered, function/procedure
+arguments.
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test sqrt() with certain special arguments.
+###
+### The test functions will be cleaner and simpler when hoc is
+### extended to support function/procedure arguments of string type.
+### [10-Dec-2001]
+### ====================================================================
+
+### On Compaq/DEC Alpha, OSF/1 4.0 and OSF/1 5.0, pow(x,y) misbehaves:
+### 
+### 	% hoc
+### 	hoc> (-Infinity)^2
+### 	NaNQ
+### 	hoc> (-Infinity)*(-Infinity)
+### 	Inf
+### 
+### The correct answer, from all other systems, is
+### 
+### 	./hoc
+### 	hoc> (-Infinity)^2
+### 	Inf
+### 	hoc> (-Infinity)*(-Infinity)
+### 	Inf
+###
+### Thus, we use squaring, not powers, in the body of sqrt_pair()
+
+func sqrt_pair(x,y) return sqrt(x*x + y*y)
+
+func scaled_sqrt_check(x,y,z) \
+{
+	global __SCALE__
+	return (sqrt_pair(__SCALE__ * x, __SCALE__ * y) == __SCALE__ * z)
+}
+
+proc test_scaled_sqrt_pair(scale) \
+{
+	global __SCALE__, __TEST__
+	__SCALE__ = scale
+
+	## print "DEBUG:", scale
+
+	__TEST__ = "scaled_sqrt_check(3,4,5)"
+	__assert   (scaled_sqrt_check(3,4,5))
+
+	__TEST__ = "scaled_sqrt_check(5,12,13)"
+	__assert   (scaled_sqrt_check(5,12,13))
+
+	__TEST__ = "scaled_sqrt_check(20,21,29)"
+	__assert   (scaled_sqrt_check(20,21,29))
+
+	__SCALE__ = 1			# reset to default
+}
+
+proc test_scaled_sqrt_pair_two(scale) \
+{
+	### Make some tests that have only a few zero or one bits in the operands.
+
+	global __SCALE__, __TEST__
+
+	__SCALE__ = scale
+
+	n = -log2(macheps(1))
+	for (k = 0 ; k <= n; ++k) \
+	{
+		__TEST__ = "sqrt(1 + 2*2^(-k) + 2^(-2*k)) == 1 + 2^(-k)"
+		__assert   (sqrt(1 + 2*2^(-k) + 2^(-2*k)) == 1 + 2^(-k))
+		__TEST__ = "sqrt(1 - 2*2^(-k) + 2^(-2*k)) == 1 - 2^(-k)"
+		__assert   (sqrt(1 - 2*2^(-k) + 2^(-2*k)) == 1 - 2^(-k))
+	}
+	__SCALE__ = 1
+}
+
+__TEST__ = "isinf(sqrt_pair(Infinity,+NaN))"
+__assert   (isnan(sqrt_pair(Infinity,+NaN)))
+
+__TEST__ = "isnan(sqrt_pair(Infinity,-NaN))"
+__assert   (isnan(sqrt_pair(Infinity,-NaN)))
+
+__TEST__ = "isnan(sqrt_pair(+NaN,Infinity))"
+__assert   (isnan(sqrt_pair(+NaN,Infinity)))
+
+__TEST__ = "isnan(sqrt_pair(+NaN,-Infinity))"
+__assert   (isnan(sqrt_pair(+NaN,-Infinity)))
+
+__TEST__ = "isnan(sqrt_pair(-Infinity,+NaN))"
+__assert   (isnan(sqrt_pair(-Infinity,+NaN)))
+
+__TEST__ = "isnan(sqrt_pair(-Infinity,-NaN))"
+__assert   (isnan(sqrt_pair(-Infinity,-NaN)))
+
+__TEST__ = "isnan(sqrt_pair(-NaN,Infinity))"
+__assert   (isnan(sqrt_pair(-NaN,Infinity)))
+
+__TEST__ = "isnan(sqrt_pair(-NaN,-Infinity))"
+__assert   (isnan(sqrt_pair(-NaN,-Infinity)))
+
+
+__TEST__ = "isnan(sqrt_pair(+NaN,+NaN))"
+__assert   (isnan(sqrt_pair(+NaN,+NaN)))
+
+__TEST__ = "isnan(sqrt_pair(+NaN,-NaN))"
+__assert   (isnan(sqrt_pair(+NaN,-NaN)))
+
+__TEST__ = "isnan(sqrt_pair(-NaN,+NaN))"
+__assert   (isnan(sqrt_pair(-NaN,+NaN)))
+
+__TEST__ = "isnan(sqrt_pair(-NaN,-NaN))"
+__assert   (isnan(sqrt_pair(-NaN,-NaN)))
+
+
+__TEST__ = "isnan(sqrt_pair(NaN,1.0))"
+__assert   (isnan(sqrt_pair(NaN,1.0)))
+
+__TEST__ = "isnan(sqrt_pair(NaN,-1.0))"
+__assert   (isnan(sqrt_pair(NaN,-1.0)))
+
+
+__TEST__ = "sqrt_pair(Infinity,0) == Infinity"
+__assert   (sqrt_pair(Infinity,0) == Infinity)
+
+__TEST__ = "sqrt_pair(0,Infinity) == Infinity"
+__assert   (sqrt_pair(0,Infinity) == Infinity)
+
+
+__TEST__ = "sqrt_pair(Infinity,Infinity) == Infinity"
+__assert   (sqrt_pair(Infinity,Infinity) == Infinity)
+
+__TEST__ = "sqrt_pair(Infinity,Infinity) == Infinity"
+__assert   (sqrt_pair(Infinity,Infinity) == Infinity)
+
+
+__TEST__ = "sqrt_pair(Infinity,-Infinity) == Infinity"
+__assert   (sqrt_pair(Infinity,-Infinity) == Infinity)
+
+__TEST__ = "sqrt_pair(-Infinity,Infinity) == Infinity"
+__assert   (sqrt_pair(-Infinity,Infinity) == Infinity)
+
+
+__TEST__ = "sqrt_pair(0,0) == 0"
+__assert   (sqrt_pair(0,0) == 0)
+
+__TEST__ = "sqrt_pair(4,0) == 4"
+__assert   (sqrt_pair(4,0) == 4)
+
+
+__TEST__ = "sqrt_pair(+3,+4) == 5"
+__assert   (sqrt_pair(+3,+4) == 5)
+
+__TEST__ = "sqrt_pair(+5,+12) == 13"
+__assert   (sqrt_pair(+5,+12) == 13)
+
+__TEST__ = "sqrt_pair(+20,+21) == 29"
+__assert   (sqrt_pair(+20,+21) == 29)
+
+
+__TEST__ = "sqrt_pair(+3,-4) == 5"
+__assert   (sqrt_pair(+3,-4) == 5)
+
+__TEST__ = "sqrt_pair(+5,-12) == 13"
+__assert   (sqrt_pair(+5,-12) == 13)
+
+__TEST__ = "sqrt_pair(+20,-21) == 29"
+__assert   (sqrt_pair(+20,-21) == 29)
+
+
+__TEST__ = "sqrt_pair(-3,-4) == 5"
+__assert   (sqrt_pair(-3,-4) == 5)
+
+__TEST__ = "sqrt_pair(-5,-12) == 13"
+__assert   (sqrt_pair(-5,-12) == 13)
+
+__TEST__ = "sqrt_pair(-20,-21) == 29"
+__assert   (sqrt_pair(-20,-21) == 29)
+
+
+__TEST__ = "sqrt_pair(-3,+4) == 5"
+__assert   (sqrt_pair(-3,+4) == 5)
+
+__TEST__ = "sqrt_pair(-5,+12) == 13"
+__assert   (sqrt_pair(-5,+12) == 13)
+
+__TEST__ = "sqrt_pair(-20,+21) == 29"
+__assert   (sqrt_pair(-20,+21) == 29)
+
+if (__IEEE_754__) \
+{
+	### Since the absolute value of the largest argument to
+	### sqrt_pair() in the tests above is less than 2^5 == 32,
+	### and we require a sum of two of them, as long as the scale
+	### factor does not get within 2*2^5 == 2^6 == 64 of the
+	### overflow limit, we cannot get overflow
+
+	### Test large numbers close to, but below, the IEEE 754
+	### 64-bit overflow limit
+	test_scaled_sqrt_pair((1 - 2^(-53))*2^(506))
+
+	### Test small numbers close to, but above, the IEEE 754
+	### 64-bit underflow limit for x^2
+	test_scaled_sqrt_pair(2^(-511))
+
+	### Test small numbers close to, but below, the IEEE 754
+	### 64-bit underflow limit for normalized x^2
+	test_scaled_sqrt_pair(2^(-513))
+
+	### Test values that should cause underflow, even with
+	### subnormal numbers:
+	test_scaled_sqrt_pair(2^(507))
+}
+
+test_scaled_sqrt_pair_two((1 - 2^(-53))*2^(506))
+test_scaled_sqrt_pair_two(2^(-511))
+test_scaled_sqrt_pair_two(2^(-513))
+test_scaled_sqrt_pair_two(2^(507))
+@
+
+
+1.2
+log
+@Change definition of sqrt_pair() to avoid problem of pow(-Inf,2) -> NaN on
+Compaq/DEC Alpha systems.
+@
+text
+@d28 1
+a28 1
+func sqrt_pair() return sqrt($1*$1 + $2*$2)
+d30 5
+a34 1
+func scaled_sqrt_check() return (sqrt_pair(__SCALE__ * $1, __SCALE__ * $2) == __SCALE__ * $3)
+d36 1
+a36 1
+proc test_scaled_sqrt_pair() \
+d38 2
+a39 1
+	__SCALE__ = $1
+d41 1
+a41 1
+	## print "DEBUG: ", scale
+d55 1
+a55 1
+proc test_scaled_sqrt_pair_two() \
+d59 3
+a61 1
+	__SCALE__ = $1
+d63 2
+a64 2
+	__n = -log2(macheps(1))
+	for (__k = 0 ; __k <= __n; ++__k) \
+d66 4
+a69 4
+		__TEST = "sqrt(1 + 2*2^(-__k) + 2^(-2*__k)) == 1 + 2^(-__k)"
+		__assert (sqrt(1 + 2*2^(-__k) + 2^(-2*__k)) == 1 + 2^(-__k))
+		__TEST = "sqrt(1 - 2*2^(-__k) + 2^(-2*__k)) == 1 - 2^(-__k)"
+		__assert (sqrt(1 - 2*2^(-__k) + 2^(-2*__k)) == 1 - 2^(-__k))
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d10 19
+a28 1
+func sqrt_pair() return sqrt($1^2 + $2^2)
+@

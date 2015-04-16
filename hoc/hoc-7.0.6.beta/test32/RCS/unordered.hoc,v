@@ -1,0 +1,62 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.36;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test unordered and the <> binary operator().
+### [25-Jan-2002]
+### ====================================================================
+
+__TEST__ = "unordered(0,NaN)"
+__assert   (unordered(0,NaN))
+__TEST__ = "unordered(NaN,0)"
+__assert   (unordered(NaN,0))
+
+__TEST__ = "unordered(Inf,NaN)"
+__assert   (unordered(Inf,NaN))
+__TEST__ = "unordered(NaN,Inf)"
+__assert   (unordered(NaN,Inf))
+
+__TEST__ = "unordered(NaN,NaN)"
+__assert   (unordered(NaN,NaN))
+
+__TEST__ = "!unordered(0,Inf)"
+__assert   (!unordered(0,Inf))
+__TEST__ = "!unordered(Inf,0)"
+__assert   (!unordered(Inf,0))
+
+__TEST__ = "!unordered(Inf,Inf)"
+__assert   (!unordered(Inf,Inf))
+__TEST__ = "!unordered(Inf,Inf)"
+__assert   (!unordered(Inf,Inf))
+
+__TEST__ = "!unordered(Inf,Inf)"
+__assert   (!unordered(Inf,Inf))
+__TEST__ = "!unordered(1,1)"
+__assert   (!unordered(1,1))
+__TEST__ = "!unordered(1,2)"
+__assert   (!unordered(1,2))
+__TEST__ = "!unordered(2,1)"
+__assert   (!unordered(2,1))
+@

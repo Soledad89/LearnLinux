@@ -1,0 +1,42 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.59;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the continue statement.
+### [26-Jul-2002]
+### ====================================================================
+
+for (k = 1; k <= 10; ++k) { print k, ""; if (k == 5) continue; println k }
+println ""
+
+k = 10;
+while (k-- > 0) { print k, ""; if (k == 5) continue; println k }
+println ""
+
+for (k = 1; k < 5; ++k) \
+	for (m = 1; m <= 5; ++m) \
+		{ n = k*m; print n, ""; if (n % 2) continue; println n }
+println ""
+@

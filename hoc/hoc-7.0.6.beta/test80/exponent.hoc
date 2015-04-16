@@ -1,0 +1,74 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the exponent() function, without requiring significand() to
+### work properly.
+### [25-Jan-2002]
+### ====================================================================
+
+mult = 32				# to shorten test time
+
+for (x = MINSUBNORMAL; x <= MINNORMAL; x *= mult) \
+{
+	__TEST__ = "x == (2^(exponent(x) + 52) * 2^(-52))"
+	__assert   (x == (2^(exponent(x) + 52) * 2^(-52)))
+}
+
+for (x = MINNORMAL; x <= MAXNORMAL; x *= mult) \
+{
+	__TEST__ = "x == 2^exponent(x)"
+	__assert   (x == 2^exponent(x))
+}
+
+for (x = MINNORMAL; x <= MAXNORMAL / 2; x *= mult) \
+{
+	__TEST__ = "exponent(x) == -exponent(1/x)"
+	__assert   (exponent(x) == -exponent(1/x))
+}
+
+for (x = MINNORMAL; x <= MAXNORMAL / 4; x *= mult) \
+{
+	__TEST__ = "(1 + exponent(4*x/3)) == -exponent(1/(4*x/3))"
+	__assert   ((1 + exponent(4*x/3)) == -exponent(1/(4*x/3)))
+}
+
+__TEST__ = "exponent(NaN) == exponent(Inf)"
+__assert   (exponent(NaN) == exponent(Inf))
+
+__TEST__ = "exponent(SNaN) == exponent(Inf)"
+__assert   (exponent(SNaN) == exponent(Inf))
+
+__TEST__ = "exponent(QNaN) == exponent(Inf)"
+__assert   (exponent(QNaN) == exponent(Inf))
+
+__TEST__ = "exponent(NaN) == exponent(-Inf)"
+__assert   (exponent(NaN) == exponent(-Inf))
+
+__TEST__ = "exponent(SNaN) == exponent(-Inf)"
+__assert   (exponent(SNaN) == exponent(-Inf))
+
+__TEST__ = "exponent(QNaN) == exponent(-Inf)"
+__assert   (exponent(QNaN) == exponent(-Inf))
+
+__TEST__ = "exponent(-NaN) == exponent(Inf)"
+__assert   (exponent(-NaN) == exponent(Inf))
+
+__TEST__ = "exponent(-SNaN) == exponent(Inf)"
+__assert   (exponent(-SNaN) == exponent(Inf))
+
+__TEST__ = "exponent(-QNaN) == exponent(Inf)"
+__assert   (exponent(-QNaN) == exponent(-Inf))
+
+__TEST__ = "exponent(-NaN) == exponent(-Inf)"
+__assert   (exponent(-NaN) == exponent(-Inf))
+
+__TEST__ = "exponent(-SNaN) == exponent(-Inf)"
+__assert   (exponent(-SNaN) == exponent(-Inf))
+
+__TEST__ = "exponent(-QNaN) == exponent(-Inf)"
+__assert   (exponent(-QNaN) == exponent(-Inf))
+
+__TEST__ = "exponent(NaN) == (1 + exponent(MAXNORMAL))"
+__assert   (exponent(NaN) == (1 + exponent(MAXNORMAL)))
+
+__TEST__ = "exponent(Inf) == (1 + exponent(MAXNORMAL))"
+__assert   (exponent(Inf) == (1 + exponent(MAXNORMAL)))

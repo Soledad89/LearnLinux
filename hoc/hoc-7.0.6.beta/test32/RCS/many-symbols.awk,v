@@ -1,0 +1,36 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2001.12.19.14.34.14;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original veresion.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@BEGIN {
+	for (k = 1; k <= 1000; ++k)
+	{
+		printf("x_%05d = %5d\n", k, k)
+		if ((k % 200) == 0)
+		{
+			printf("\nprint \"Reached %5d symbols: x_%05d = \", x_%05d, \"\\n\"\n\n", k, k, k)
+			print "who()\n"
+		}
+	}
+}
+@

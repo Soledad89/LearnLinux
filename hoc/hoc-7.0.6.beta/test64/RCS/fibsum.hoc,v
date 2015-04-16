@@ -1,0 +1,78 @@
+head	1.3;
+access;
+symbols;
+locks
+	beebe:1.3; strict;
+comment	@# @;
+
+
+1.3
+date	2002.08.06.13.43.36;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2001.12.19.14.31.53;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.21.56;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.3
+log
+@Development snapshot.
+@
+text
+@proc fib(){
+	a=1
+	b=1
+	c=2
+	d=3
+	sum = a+b+c+d
+	while(d<$1){
+		e=d+c
+		print e, ""
+		a=b
+		b=c
+		c=d
+		d=e
+		sum=sum+e
+	}
+	print sum
+	print "\n"
+}
+
+fib(1000)
+@
+
+
+1.2
+log
+@Add final newline to test output.
+@
+text
+@d9 1
+a9 1
+		print(e)
+d16 1
+a16 1
+	print(sum)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d17 1
+@

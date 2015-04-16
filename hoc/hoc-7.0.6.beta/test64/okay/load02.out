@@ -1,0 +1,25 @@
+Entering load02.hoc
+DEBUG: x = "this is x in load02.hoc"
+DEBUG: y = "this is y in load02.hoc"
+__FILE__ = "load02.hoc"
+Recursive entry into load03.hoc
+Entering load03.hoc
+DEBUG: x = "this is x in load03.hoc"
+DEBUG: y = "this is y in load03.hoc"
+__FILE__ = "load03.hoc"
+Recursive entry into load04.hoc
+Entering load04.hoc
+DEBUG: x = "this is x in load04.hoc"
+DEBUG: y = "this is y in load04.hoc"
+__FILE__ = "load04.hoc"
+Leaving load04.hoc
+Recursive return from load04.hoc
+DEBUG: x = "this is x in load04.hoc"
+DEBUG: y = "this is y in load04.hoc"
+__FILE__ = "load03.hoc"
+Leaving load03.hoc
+Recursive return from load03.hoc
+DEBUG: x = "this is x in load04.hoc"
+DEBUG: y = "this is y in load04.hoc"
+__FILE__ = "load02.hoc"
+Leaving load02.hoc

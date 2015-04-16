@@ -1,0 +1,17 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the break statement.
+### [26-Jul-2002]
+### ====================================================================
+
+for (k = 1; k <= 10; ++k) { print k; if (k == 5) break; println "",k }
+println ""
+
+k = 10;
+while (k-- > 0) { print k; if (k == 5) break; println "",k }
+println ""
+
+for (k = 1; k < 5; ++k) \
+	for (m = 1; m <= 5; ++m) \
+		{ n = k*m; print n, ""; if (n % 2) break; println n }
+println ""

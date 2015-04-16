@@ -1,0 +1,83 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.08.06.13.43.36;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.21.56;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.2
+log
+@Development snapshot.
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Check certain relations for exp() that can only be satisfied by
+### the exponential function, without requiring explicit
+### high-precision numerical values.
+### [11-Dec-2001]
+### ====================================================================
+
+__MAXULPS = 2			# allow 1 bit (2^1 ULPs) of error
+
+__TEST__ = "exp(-Inf) == 0"
+__assert   (exp(-Inf) == 0)
+
+__TEST__ = "isinf(exp(Inf))"
+__assert   (isinf(exp(Inf)))
+
+__TEST__ = "isnan(exp(NaN))"
+__assert   (isnan(exp(NaN)))
+
+__TEST__ = "isnan(exp(-NaN))"
+__assert   (isnan(exp(-NaN)))
+
+for (k = -52; k <= 8; ++k) \
+{
+	__TEST__ = "exp(2*(1 + 2^k)) == exp(1 + 2^k)^2"
+	__match    (exp(2*(1 + 2^k)),   exp(1 + 2^k)^2)
+}
+
+
+for (k = -52; k <= 8; ++k) \
+{
+	__TEST__ = "exp(2*(1 - 2^k)) == exp(1 - 2^k)^2"
+	__match    (exp(2*(1 - 2^k)),   exp(1 - 2^k)^2)
+}
+
+
+for (k = -52; k <= 8; ++k) \
+{
+	## print "DEBUG:", __NTEST__, k, 1 - 2^k, exp(1 - 2^k), exp(-(1 - 2^k)), "\n"
+	__TEST__ = "exp(1 - 2^k) == 1/exp(-(1 - 2^k))"
+	__match    (exp(1 - 2^k),   1/exp(-(1 - 2^k)))
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d39 1
+a39 1
+	## print "DEBUG: ", __NTEST__, k, 1 - 2^k, exp(1 - 2^k), exp(-(1 - 2^k)), "\n"
+@

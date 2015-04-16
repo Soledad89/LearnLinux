@@ -1,0 +1,5177 @@
+head	1.27;
+access;
+symbols;
+locks
+	beebe:1.27; strict;
+comment	@ * @;
+
+
+1.27
+date	2002.08.08.22.18.37;	author beebe;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	2002.08.08.01.21.50;	author beebe;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	2002.08.05.11.20.22;	author beebe;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	2002.08.01.16.33.11;	author beebe;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	2002.08.01.12.20.28;	author beebe;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	2002.07.31.17.23.53;	author beebe;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	2002.07.30.18.25.53;	author beebe;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2002.07.28.18.36.36;	author beebe;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2002.07.28.01.36.45;	author beebe;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2002.07.27.03.48.53;	author beebe;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2002.07.26.14.30.02;	author beebe;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2002.07.24.14.45.35;	author beebe;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2002.07.20.22.59.03;	author beebe;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2002.06.22.23.10.54;	author beebe;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2002.06.20.13.48.13;	author beebe;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2002.06.15.22.39.31;	author beebe;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2002.02.19.00.59.55;	author beebe;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2002.01.30.16.24.28;	author beebe;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2002.01.27.18.00.30;	author beebe;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2002.01.16.18.44.50;	author beebe;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.01.11.02.10.00;	author beebe;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.01.05.14.40.12;	author beebe;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.01.04.17.45.22;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.01.02.15.04.46;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.01.01.14.47.20;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2001.12.12.01.23.01;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.11.25.23.03.06;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.27
+log
+@Add support for functions that return strings.  Add ensurenum() and
+ensurestr() macros to simplify coding.
+@
+text
+@#include "hoc.h"
+#include "xtab.h"
+
+#if defined(HAVE_CTYPE_H)
+#include <ctype.h>
+#endif
+
+#if defined(HAVE_STDIO_H)
+#include <stdio.h>
+#endif
+
+#if defined(HAVE_STRING_H)
+#include <string.h>
+#endif
+
+#include "readline.h"
+#undef getc
+#define getc(fpin)			irl_getchar(fpin)
+#undef ungetc
+#define ungetc(c,fpin)			irl_unget_char(c)
+#undef fscanf
+#define fscanf(fpin,format,pdata)	irl_fscanf(fpin,format,pdata)
+
+#undef MAX			/* because some systems define this already */
+#define MAX(a,b)	(((a) > (b)) ? (a) : (b))
+
+/* Access functions (macros) for Datum variables to conceal representation */
+/* [27-Jul-2002] In setdatum{num,str,sym}(), zero the other union
+   member so that when the member sizes differ, all bits are initially
+   zero.  Otherwise, when sizeof(void*) > sizeof(fp_t), garbage bits
+   can be left and later interpreted as part of a memory
+   address. Also, because setdatum{num,str,sym}() can be called with
+   input and output arguments that refer to the same Datum, we need to
+   be careful to save the RHS value in a temporary, before clearing
+   the LHS and then doing the assignment. */
+
+static const char *	__tmp_str;
+static Symbol *		__tmp_sym;
+static fp_t		__tmp_val;
+static Datum		*__tmp_dp;
+
+/* NB: Critical design constraint: getxxx() and setxxx() may reference
+   their arguments only once, so that they may contain side
+   effects. */
+
+#define ensurenum(d) do {if (getdatumtype(d) == STRVAR) setdatumnum(d, StoF(getdatumstr(d)));} while (0)
+#define ensurestr(d) do {if (getdatumtype(d) == VAR)    setdatumstr(d, FtoS(getdatumnum(d)));} while (0)
+
+#define getdatumtype(d)			((d).type)
+#define setdatumtype(d,t)		((d).type = t)
+
+#define getdatumnum(d)			((d).u.val)
+#define setdatumnum(d,v)		(__tmp_val = v, __tmp_dp = &d, \
+					__tmp_dp->u.str = (const char*)NULL, \
+					__tmp_dp->u.val = __tmp_val, \
+					setdatumtype(*__tmp_dp,VAR))
+
+#define getdatumstr(d)			((d).u.str)
+#define setdatumstr(d,s)		(__tmp_str = s, __tmp_dp = &d, \
+					__tmp_dp->u.val = FP(0.0), \
+					 __tmp_dp->u.str = __tmp_str, \
+					setdatumtype(*__tmp_dp,STRVAR))
+
+#define getdatumsym(d)			((d).u.sym)
+#define setdatumsym(d,s)		(__tmp_sym = s, __tmp_dp = &d, \
+					__tmp_dp->u.val = FP(0.0), \
+					__tmp_dp->u.sym = __tmp_sym, \
+					__tmp_dp->type = __tmp_dp->u.sym->type)
+
+#define getdatumsymimmutable(d)		(getdatumsym(d)->immutable)
+#define setdatumsymimmutable(d,v)	(getdatumsym(d)->immutable = v)
+
+#define getdatumsymname(d)		(getdatumsym(d)->name)
+#define setdatumsymname(d,s)		(getdatumsym(d)->name = s)
+
+#define getdatumsymstr(d)		(getdatumsym(d)->u.str)
+#define setdatumsymstr(d,s)		(getdatumsym(d)->u.str = s)
+
+#define getdatumsymtype(d)		(getdatumsym(d)->type)
+#define setdatumsymtype(d,t)		(__tmp_dp = &d, \
+					getdatumsym(*__tmp_dp)->type = t, \
+					setdatumtype(*__tmp_dp, t))
+
+#define getdatumsymval(d)		(getdatumsym(d)->u.val)
+#define setdatumsymval(d,v)		(getdatumsym(d)->u.val = v)
+
+#define getframesp(fp)			(fp->sp)
+#define setframesp(fp,v)		(fp->sp = v)
+
+#define getframenargs(fp)		(fp->nargs)
+#define setframenargs(fp,v)		(fp->nargs = v)
+
+#define getframeretpc(fp)		(fp->retpc)
+#define setframeretpc(fp,v)		(fp->retpc = v)
+
+#define getframeargn(fp,i)		(fp->argn[i])
+#define setframeargn(fp,v)		(fp->argn = v)
+
+#define getsymdefn(s)			(s->u.defn)
+#define setsymdefn(s,t)			(s->u.defn = t)
+#define getsymname(s)			(s->name)
+
+#define getsymnum(s)			(s->u.val)
+#define setsymnum(s,t)			(s->u.val = t)
+
+#define getsymstr(s)			(s->u.str)
+#define setsymstr(s,t)			(s->u.str = t)
+
+#define getsymtype(s)			(s->type)
+#define setsymtype(s,t)			(s->type = t)
+
+Datum *stack = (Datum*)NULL;	/* the stack */
+static size_t max_stack = 0;		/* current size of stack[] */
+Datum *stackp;			/* next free spot on stack */
+
+Inst	*prog = (Inst *)NULL;		/* the machine */
+size_t	max_prog = 0;			/* current size of prog[] */
+Inst	*progp;		/* next free spot for code generation */
+static Inst	*pc;		/* program counter during execution */
+Inst	*progbase = (Inst *)NULL; /* start of current subprogram */
+static int	returning;	/* 1 if return stmt seen */
+static int	breaking;	/* 1 if break stmt seen */
+static int	continuing;	/* 1 if continue stmt seen */
+
+#if defined(DEBUG_CODE)
+extern const char *code_argname;	/* defined in hoc.y */
+#define MAX_CODE_NAME_TABLE	1000
+static const char *code_name_table[MAX_CODE_NAME_TABLE];
+extern int	debug_code;	/* defined in hoc.y */
+#endif
+
+extern int	indef;		/* 1 if parsing a func or proc */
+extern int	inloop;		/* 1 if parsing loop body */
+extern FILE *fin;
+extern FILE *fplog;
+extern int logfile_enabled;		/* defined in hoc.y */
+extern const char *	yygetstr ARGS((void));
+extern Symbol *		yygetid ARGS((void));
+
+typedef struct Frame {	/* proc/func call stack frame */
+	Symbol	*sp;	/* symbol table entry */
+	Inst	*retpc;	/* where to resume after return */
+	Datum	*argn;	/* n-th argument on stack */
+	long	nargs;	/* number of arguments */
+} Frame;
+
+static Datum pop ARGS((void));
+static Datum popstr ARGS((void));
+static Datum popnum ARGS((void));
+static void prchar ARGS((FILE *, int, const char *, int *));
+static void pronechar ARGS((FILE *, int, int *));
+static void prtext3 ARGS((FILE *, const char *, int, const char *, int *));
+static void push ARGS((Datum));
+static void pushnum ARGS((fp_t));
+static void pushstr ARGS((const char *));
+static void sprfnum ARGS((fp_t));
+static void sprftext ARGS((const char *));
+static void sprnum ARGS((fp_t));
+static void sprtext ARGS((const char *));
+static void verify ARGS((Symbol*));
+
+#define MAX_ITEM_WIDTH 10240
+
+/* 1999 Standard C defines a long long data type with format length
+ * modifier ll for d, i, o, u, x, and X descriptors, and a long double
+ * data type with format length modifier L for e, E, f, g, and G
+ * descriptors.  Older C implementations may also support long long,
+ * but some use a modifier L instead of ll, and others (e.g.,
+ * Compaq/DEC OSF/1 4.0) partially support it, but restrict results to
+ * long.  We therefore have three variations to deal with in our
+ * support of printf with signed and unsigned integer format
+ * descriptors.
+ */
+#if defined(HAVE_LONG_LONG_FORMAT_LL)
+#define FMT_L	"ll"
+#define LONG_LONG_DATA	long long
+#elif defined(HAVE_LONG_LONG_FORMAT_L)
+#define FMT_L	"L"
+#define LONG_LONG_DATA	long long
+#else
+#define FMT_L	"l"
+#define LONG_LONG_DATA	long
+#endif
+
+typedef enum {
+	FMT_CHARACTER,
+	FMT_FLOAT,
+	FMT_SIGNED_INTEGER,
+	FMT_UNSIGNED_INTEGER,
+	FMT_STRING,
+	FMT_UNKNOWN
+} fmt_kind;
+
+typedef struct fmt
+{
+	const char *str;
+	fmt_kind kind;
+} fmt_t;
+
+static fmt_t *fmts = (fmt_t *)NULL;
+static size_t maxfmts = 0;
+static size_t nfmt = 0;
+static size_t this_fmt = 0;
+
+static size_t	max_frame = 0;		/* current size of frame[] */
+Frame *		frame = (Frame *)NULL;
+Frame *		fp;			/* frame pointer */
+
+static void
+add_fmt_item(const char *s, fmt_kind kind)
+{
+	if (nfmt >= maxfmts)
+		fmts = (fmt_t*)egrow(fmts, &maxfmts, sizeof(fmt_t));
+	fmts[nfmt].str = dupstr(s);
+	fmts[nfmt].kind = kind;
+	nfmt++;
+}
+
+static void
+discard_string(Datum d)
+{
+	efree((void*)getdatumstr(d));
+}
+
+static void
+fmt_free_nth(size_t n)
+{
+	efree((void*)fmts[n].str);
+	fmts[n].str = (const char *)NULL;
+	fmts[n].kind = FMT_UNKNOWN;
+}
+
+static void
+fmt_free(void)
+{
+	size_t n;
+
+	for (n = 0; n < nfmt; ++n)
+		fmt_free_nth(n);
+
+	this_fmt = 0;
+	nfmt = 0;
+}
+
+static void
+make_fmt_strings(const char *fmtstr)
+{					/* s is modified temporarily, but restored on return */
+	char csave;
+	char *original_s;
+	char *p;
+	char *s;
+	fmt_kind kind;
+
+	if (fmtstr == (const char*)NULL)
+		execerror("internal error: NULL printf format",(const char*)NULL);
+
+	original_s = s = (char*)dupstr(fmtstr);
+	nfmt = 0;
+	this_fmt = 0;
+	kind = FMT_UNKNOWN;
+
+	for (p = s; *s; ++s)
+	{
+		if (s[0] == '%')
+		{
+			if (s[1] == '%')
+				++s;
+			else
+				break;
+		}
+	}
+
+	csave = *s;
+	*s = '\0';
+	add_fmt_item(p, FMT_UNKNOWN);
+	*s = csave;
+
+	p = s;
+	while (*s == '%')
+	{
+		char *tmpstr;
+		size_t n;
+
+		/* match %[-+0 ]?[0-9]*([.][0-9]*)?[cdeEfgGiosuxX] */
+
+		++s;			/* skip over percent */
+		if (strchr("-+0 ", (int)(*s)) != (char *)NULL) /* match  [-+0 ]? */
+			++s;
+		while (isdigit(*s))	/* match [0-9]* */
+			++s;
+		if (*s == '.')		/* match [.][0-9]* */
+		{
+			++s;
+			while (isdigit(*s))	/* match [0-9]* */
+				++s;
+		}
+		if (strchr("cdeEfgGiosuxX", (int)*s) == (char *)NULL)
+		{
+			s[1] = '\0';
+			execerror("invalid format item", p);
+		}
+
+		tmpstr = (char*)concat2(p,"  "); /* extra space for possible length modifier */
+		n = (int)(s - p);
+		if (strchr("c", (int)*s) != (char*)NULL)
+			kind = FMT_CHARACTER;
+		else if (strchr("eEfgG", (int)*s) != (char*)NULL)
+		{
+			kind = FMT_FLOAT;
+#if defined(HAVE_FP_T_QUADRUPLE)
+			tmpstr[n++] = 'L';
+#endif
+		}
+		else if (strchr("di", (int)*s) != (char*)NULL)
+		{
+			kind = FMT_SIGNED_INTEGER;
+			(void)strlcpy(&tmpstr[n], FMT_L, strlen(tmpstr)-(size_t)n);
+			n += (int)strlen(FMT_L);
+		}
+		else if (strchr("ouxX", (int)*s) != (char*)NULL)
+		{
+			kind = FMT_UNSIGNED_INTEGER;
+			(void)strlcpy(&tmpstr[n], FMT_L, strlen(tmpstr)-(size_t)n);
+			n += (int)strlen(FMT_L);
+		}
+		else if (strchr("s", (int)*s) != (char*)NULL)
+			kind = FMT_STRING;
+		else
+		{
+			s[1] = '\0';
+			execerror("invalid format item", p);
+		}
+		tmpstr[n++] = *s;
+
+		for (++s; *s; ++s)	/* include trailing non-format-item text */
+		{
+			if (s[0] == '%')
+			{
+				if (s[1] == '%')
+				{
+					tmpstr[n++] = '%';
+					++s;
+				}
+				else
+					break;
+			}
+			tmpstr[n++] = *s;
+		}
+		tmpstr[n] = '\0';
+		add_fmt_item(tmpstr, kind);
+		efree((void*)tmpstr);
+		p = s;
+	}
+	efree((void*)original_s);
+}
+
+static void
+prfnum(fp_t value)
+{
+	char buffer[MAX_ITEM_WIDTH];
+
+	switch (fmts[this_fmt].kind)
+	{
+	case FMT_CHARACTER:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, (int)value);
+		prtext(buffer);
+		break;
+
+	case FMT_FLOAT:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, value);
+		prtext(buffer);
+		break;
+
+	case FMT_SIGNED_INTEGER:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str,
+			  (LONG_LONG_DATA)value);
+		prtext(buffer);
+		break;
+
+	case FMT_STRING: /* useful extension: allow numeric output on %s formats! */
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, fmtnum(value));
+		prtext(buffer);
+		break;
+
+	case FMT_UNSIGNED_INTEGER:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str,
+			  (unsigned LONG_LONG_DATA)value);
+		prtext(buffer);
+		break;
+
+	default:
+		{
+			const char *t;
+
+			t = dupstr(fmts[this_fmt].str);
+			fmt_free();
+			execerror("value datatype does not match format", t); /* memory leak at t! */
+		}
+	}
+	fmt_free_nth(this_fmt++);
+}
+
+static void
+prftext(const char *s)
+{
+	char buffer[MAX_ITEM_WIDTH];
+	char *endptr;
+	fp_t value;
+
+	switch (fmts[this_fmt].kind)
+	{
+	case FMT_FLOAT:
+		value = strton(s, &endptr);
+		if (*endptr == '\0')
+		{
+			SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, value);
+			prtext(buffer);
+		}
+		else
+			execerror("failed to convert to floating-point from string", s);
+		break;
+
+	case FMT_SIGNED_INTEGER:
+		value = strton(s, &endptr);
+		if (*endptr == '\0')
+		{
+			SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, (LONG_LONG)value);
+			prtext(buffer);
+		}
+		else
+			execerror("failed to convert to signed integer from string", s);
+		break;
+
+	case FMT_STRING:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, s);
+		prtext(buffer);
+		break;
+
+	case FMT_UNSIGNED_INTEGER:
+		value = strton(s, &endptr);
+		if (*endptr == '\0')
+		{
+			SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str,
+				  (UNSIGNED_LONG_LONG)(LONG_LONG)value);
+			prtext(buffer);
+		}
+		else
+			execerror("failed to convert to unsigned integer from string", s);
+		break;
+
+	default:
+		{
+			const char *t;
+
+			t = dupstr(fmts[this_fmt].str);
+			fmt_free();
+			execerror("value datatype does not match format", t); /* memory leak at t! */
+		}
+	}
+	fmt_free_nth(this_fmt++);
+}
+
+void
+breakstmt(void) 	/* break from a loop */
+{
+	breaking = 1;
+}
+
+void
+continuestmt(void) 	/* continue from a loop */
+{
+	continuing = 1;
+}
+
+fp_t
+Defined(Symbol *s)
+{
+	return ((fp_t)(s->type != UNDEF)); /* return 1 if s is defined, else 0 */
+}
+
+fp_t
+Delete(Symbol *s)
+{
+	return (delete_symbol(s));	/* return 1 if delete succeeded, else 0 */
+}
+
+const char *
+Evalcommands(const char *commands)
+{
+	if (commands != (const char *)NULL)
+	{
+		const char *last;
+
+		(void)fflush(stdout);		/* force out any buffered data */
+		(void)fflush(stderr);
+		if (is_debug("__DEBUG_EVAL__"))
+		{
+			const char *p = Protect(commands);
+
+			(void)fprintf(stderr,"DEBUG: eval(\"%s\")\n", p);
+			efree((void*)p);
+		}
+		last = strchr(commands,'\0');
+		(void)ungetc((int)';', fin); /* semicolon, not newline, to preserve linenumber */
+		while (--last >= commands) /* NB: Needs DEEP pushback buffer */
+			(void)ungetc((int)*last, fin);
+	}
+	return (dupstr(""));
+}
+
+const char *
+fmtnum(fp_t x)
+{	/* Return a decimal representation of x in a static buffer
+	that will be overwritten on the next call.  Because of
+	variations in the handling of Inf and NaN by printf()
+	implementations, we must handle them specially. */
+
+	static char buffer[sizeof("+0.123456789012345678901234567890123456789e+9999")];
+			/* big enough for 128-bit precision (NB: this
+			relies on get_precision() returning a value in
+			0..39) */
+
+	if (IsInf(x))
+		SNPRINTF4(buffer, sizeof(buffer), "%s", Inf_string(x));
+	else if (IsNaN(x))
+		SNPRINTF4(buffer, sizeof(buffer), "%s", NaN_string(x));
+	else
+	{
+		if (x == FP(0.0))
+		{
+			/* [fs][n]printf() on several systems fails to handle
+			   signed zero properly, so we do it here. */
+			if (Copysign(FP(1.0),x) == FP(-1.0))
+				(void)strlcpy(buffer, "-0", sizeof(buffer));
+			else
+				(void)strlcpy(buffer, "0", sizeof(buffer));
+		}
+		else
+		{
+#if defined(HAVE_FP_T_QUADRUPLE)
+			if (sizeof(fp_t) == sizeof(double)) /* long double masquerading as double */
+				SNPRINTF5(buffer, sizeof(buffer), "%.*g", get_precision(), (double)x);
+			else
+				SNPRINTF5(buffer, sizeof(buffer), "%.*Lg", get_precision(), (fp_t)x);
+#else
+			SNPRINTF5(buffer, sizeof(buffer), "%.*g", get_precision(), (double)x);
+#endif
+		}
+	}
+
+	return ((const char*)&buffer[0]);
+}
+
+void
+initcode(void)
+{
+	progp = progbase;
+	stackp = stack;
+	fp = frame;
+	breaking = 0;
+	continuing = 0;
+	returning = 0;
+	indef = 0;
+	inloop = 0;
+}
+
+static void
+push(Datum d)
+{
+	if ((stack == (Datum*)NULL) || (stackp >= &stack[max_stack])) /* then time to grow stack[] */
+	{
+		size_t old_max_stack;
+
+		old_max_stack = max_stack;
+		stack = (Datum *)egrow((void *)stack, &max_stack, sizeof(stack[0]));
+		(void)update_const_number("__MAX_STACK__", (fp_t)max_stack);
+		stackp = &stack[old_max_stack];
+	}
+	*stackp++ = d;
+
+#if defined(DEBUG_POP)
+	{
+		Datum d;
+		size_t depth;
+
+		d = stackp[-1];
+
+		depth = (size_t)(stackp - stack);
+		(void)fflush(stdout);		/* force out any buffered data */
+		(void)fflush(stderr);
+		(void)fprintf(stderr,"------------------------------------------------------------\n");
+		if (getdatumtype(d) == VAR)
+			(void)fprintf(stderr, "push(): stack depth %lu top = [%g @@ 0x%08x]\n",
+				      (unsigned long)depth, getdatumnum(d), getdatumsym(d));
+		else if (getdatumtype(d) == STRVAR)
+			(void)fprintf(stderr, "push(): stack depth %lu top = [\"%.39s\" @@ 0x%08x]\n",
+				      (unsigned long)depth, getdatumstr(d), getdatumsym(d));
+		else
+			(void)fprintf(stderr, "push(): stack depth %lu top = [type = %d @@ 0x%08x]\n",
+				      (unsigned long)depth, getdatumtype(d), getdatumsym(d));
+
+		(void)fflush(stderr);
+	}
+#endif
+}
+
+static void
+pushnum(fp_t x)
+{				/* push a Datum with x */
+	Datum d;
+
+	setdatumnum(d, x);
+	push(d);
+}
+
+static void
+pushstr(const char *s)
+{				/* push a Datum with a COPY of s */
+	Datum d;
+
+	setdatumstr(d, dupstr(s));
+	push(d);
+}
+
+static Datum
+pop(void)
+{
+#if defined(DEBUG_POP)
+	Datum d;
+
+	if (stackp > stack)
+	{
+		size_t depth;
+
+		d = stackp[-1];
+
+		depth = (size_t)(stackp - stack);
+		(void)fflush(stdout);		/* force out any buffered data */
+		(void)fflush(stderr);
+		if (getdatumtype(d) == VAR)
+			(void)fprintf(stderr, "pop():  stack depth %lu top = [%g @@ 0x%08x]\n",
+				      (unsigned long)depth, getdatumnum(d), getdatumsym(d));
+		else if (getdatumtype(d) == STRVAR)
+			(void)fprintf(stderr, "pop():  stack depth %lu top = [\"%.39s\" @@ 0x%08x]\n",
+				      (unsigned long)depth, getdatumstr(d), getdatumsym(d));
+		else
+			(void)fprintf(stderr, "pop():  stack depth %lu top = [type = %d @@ 0x%08x]\n",
+				      (unsigned long)depth, getdatumtype(d), getdatumsym(d));
+
+		(void)fflush(stderr);
+	}
+#endif
+	if (stackp == stack)
+		execerror("stack underflow", (const char*)NULL);
+	return *--stackp;
+}
+
+static Datum
+popstr(void)
+{
+	Datum d;
+
+	d = pop();
+	ensurestr(d);
+	return (d);
+}
+
+static Datum
+popnum(void)
+{
+	Datum d;
+
+	d = pop();
+	ensurenum(d);
+	return (d);
+}
+
+void
+xpop(void)	/* for when no value is wanted */
+{
+	Datum d;
+
+	d = pop();
+#if 0
+	/* Since every string Datum on the stack is supposed to be
+	   dynamically allocated, it should be possible to free that
+	   memory when one is discarded.  However, when this code is
+	   enabled, encrypt() fails badly because memory is freed that
+	   is still in use.  I have yet to track down that problem, so
+	   for now, this code is disabled.
+
+	   With the free here, there is a bad memory leak here from
+	   hoc code like this:
+
+		for (k = 0; k < 100; ++k) "foo"
+
+	   Each "foo" is pushed onto the stack, and then discarded here. */
+
+	if (getdatumtype(d) == STRVAR)
+		discard_string(d);
+#endif
+}
+
+void
+constpush(void)
+{
+	Symbol *s;
+	s = (Symbol *)*pc++;
+	if (getsymtype(s) == STRVAR)
+		pushstr(getsymstr(s));
+	else
+		pushnum(getsymnum(s));
+}
+
+void
+varpush(void)
+{
+	Datum d;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	push(d);
+}
+
+void
+whilecode(void)
+{
+	Datum d;
+	Inst *savepc = pc;
+
+	execute(savepc+2);	/* condition */
+	d = pop();
+	while (getdatumnum(d)) {
+		execute(*((Inst **)(savepc)));	/* body */
+		if (returning)
+			break;
+		else if (breaking)
+			break;
+		continuing = 0;		/* ensure that condition is evaluated */
+		execute(savepc+2);	/* condition */
+		d = pop();
+	}
+	breaking = 0;
+	continuing = 0;
+	if (!returning)
+		pc = *((Inst **)(savepc+1)); /* next stmt */
+}
+
+void
+forcode(void)
+{
+	Datum d;
+	Inst *savepc = pc;
+
+	execute(savepc+4);		/* precharge */
+	xpop();
+	execute(*((Inst **)(savepc)));	/* condition */
+	d = pop();
+	while (getdatumnum(d)) {
+		execute(*((Inst **)(savepc+2)));	/* body */
+		if (returning)
+			break;
+		else if (breaking)
+			break;
+		continuing = 0; /* ensure that postloop and condition are evaluated */
+		execute(*((Inst **)(savepc+1)));	/* post loop */
+		xpop();
+		execute(*((Inst **)(savepc)));	/* condition */
+		d = pop();
+	}
+	breaking = 0;
+	continuing = 0;
+	if (!returning)
+		pc = *((Inst **)(savepc+3)); /* next stmt */
+}
+
+void
+ifcode(void)
+{
+	Datum d;
+	Inst *savepc = pc;	/* then part */
+
+	execute(savepc+3);	/* condition */
+	d = pop();
+	if (getdatumnum(d))
+		execute(*((Inst **)(savepc)));
+	else if (*((Inst **)(savepc+1))) /* else part? */
+		execute(*((Inst **)(savepc+1)));
+	if (!returning)
+		pc = *((Inst **)(savepc+2)); /* next stmt */
+}
+
+void
+define(Symbol* sp)	/* put func/proc in symbol table */
+{
+	setsymdefn(sp, progbase);	/* start of code */
+	progbase = progp;	/* next code starts here */
+}
+
+void
+call(void) 		/* call a function */
+{
+	Symbol *sp = (Symbol *)pc[0]; /* symbol table entry */
+				      /* for function */
+	if ((frame == (Frame *)NULL) || (fp >= &frame[max_frame - 1]))
+	{			       /* then time to grow frame[] */
+		size_t nframe;
+
+		nframe = (fp == (Frame*)NULL) ? 0 : (size_t)(fp - &frame[0]);
+		frame = (Frame *)egrow((void *)frame, &max_frame, sizeof(frame[0]));
+		(void)update_const_number("__MAX_FRAME__", (fp_t)max_frame);
+		fp = &frame[nframe];
+	}
+	fp++;
+	setframesp(fp, sp);
+	setframenargs(fp, (long)pc[1]);
+	setframeretpc(fp, pc + 2);
+	setframeargn(fp, stackp - 1);	/* last argument */
+	execute(getsymdefn(sp));
+	returning = 0;
+}
+
+static void
+ret(void) 		/* common return from func or proc */
+{
+	int i;
+	for (i = 0; i < getframenargs(fp); i++)
+		xpop();	/* pop arguments */
+	pc = (Inst *)getframeretpc(fp);
+	--fp;
+	returning = 1;
+}
+
+void
+funcret(void) 	/* return from a function */
+{
+	Datum d;
+
+	if (getsymtype(getframesp(fp)) == PROCEDURE)
+		execerror(getsymname(getframesp(fp)), "(proc) returns value");
+	d = pop();	/* preserve function return value */
+	ret();
+	push(d);
+}
+
+void
+procret(void) 	/* return from a procedure */
+{
+	if (getsymtype(getframesp(fp)) == FUNCTION)
+		execerror(getsymname(getframesp(fp)),
+			"(func) returns no value");
+	ret();
+}
+
+static fp_t*
+getargnum(void) 	/* return pointer to argument and advance pc */
+{
+	long nargs = (long) *pc++;
+	if (nargs > getframenargs(fp))
+		execerror(getsymname(getframesp(fp)), "not enough arguments");
+	return &getdatumnum(getframeargn(fp, nargs - getframenargs(fp)));
+}
+
+static const char *
+getargstr(void) 	/* return pointer to argument and advance pc */
+{
+	long nargs = (long) *pc++;
+	if (nargs > getframenargs(fp))
+		execerror(getsymname(getframesp(fp)), "not enough arguments");
+	return getdatumstr(getframeargn(fp, nargs - getframenargs(fp)));
+}
+
+static long
+getargtype(void) 	/* return pointer to argument type, WITHOUT advancing pc */
+{
+	long nargs = (long) *pc;
+	if (nargs > getframenargs(fp))
+		execerror(getsymname(getframesp(fp)), "not enough arguments");
+	return getdatumtype(getframeargn(fp, nargs - getframenargs(fp)));
+}
+
+void
+arg(void) 	/* push argument onto stack */
+{
+	long type;
+
+	type = getargtype();
+	if (type == VAR)
+		pushnum(*getargnum());
+	else if (type == STRVAR)
+		pushstr(getargstr());	/* TO-DO: track down memory leak from pushed string arguments */
+	else
+	{
+#if 0
+		execerror("invalid function/procedure argument type", (const char*)NULL);
+#else
+		pushnum(*getargnum());
+#endif
+	}
+}
+
+void
+argassign(void) 	/* store top of stack in argument */
+{
+	Datum d;
+
+	d = pop();
+	push(d);	/* leave value on stack */
+	*getargnum() = getdatumnum(d);
+}
+
+void
+argaddeq(void) 	/* store top of stack in argument */
+{
+	pushnum(*getargnum() += getdatumnum(pop()));	/* leave value on stack */
+}
+
+void
+argsubeq(void) 	/* store top of stack in argument */
+{
+	pushnum(*getargnum() -= getdatumnum(pop()));	/* leave value on stack */
+}
+
+void
+argmuleq(void) 	/* store top of stack in argument */
+{
+	pushnum(*getargnum() *= getdatumnum(pop()));	/* leave value on stack */
+}
+
+void
+argdiveq(void) 	/* store top of stack in argument */
+{
+	pushnum(*getargnum() /= getdatumnum(pop()));	/* leave value on stack */
+}
+
+void
+argmodeq(void) 	/* store top of stack in argument */
+{
+	Datum d;
+	fp_t *x;
+	long y;
+
+	d = popnum();
+	/* setdatumnum(d, *getargnum() %= getdatumnum(d)); */
+	x = getargnum();
+	y = (long)*x;
+	pushnum(*x = y % (long) getdatumnum(d)); /* leave value on stack */
+}
+
+void
+bltin0(void)
+{
+	pushnum(((F0_t)*pc++)());
+}
+
+void
+bltin1(void)
+{
+	pushnum(((F1_t)*pc++)(getdatumnum(popnum())));
+}
+
+void
+bltin1i(void)
+{
+	pushnum(((F1i_t)pc[0])((Symbol *)(pc[1])));
+	pc += 2;
+}
+
+void
+bltin1s(void)
+{
+	Datum d;
+
+	d = popstr();
+	pushnum(((F1s_t)*pc++)(getdatumstr(d)));
+	discard_string(d);
+}
+
+void
+bltin2(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum(((F2_t)*pc++)(getdatumnum(d1), getdatumnum(d2)));
+}
+
+void
+bltin2s(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+	pushnum(((F2s_t)*pc++)(getdatumstr(d1), getdatumstr(d2)));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+add(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum(getdatumnum(d1) + getdatumnum(d2));
+}
+
+void
+sub(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum(getdatumnum(d1) - getdatumnum(d2));
+}
+
+void
+mul(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum(getdatumnum(d1) * getdatumnum(d2));
+}
+
+void
+divop(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+#if defined(HAVE_IEEE_754)
+	/* zero divide silently produces Inf or NaN */
+#else
+	if (getdatumnum(d2) == FP(0.0))
+		execerror("division by zero", (const char*)NULL);
+#endif
+	d1 = popnum();
+	pushnum(getdatumnum(d1) / getdatumnum(d2));
+}
+
+void
+mod(void)
+{
+	Datum d1, d2;
+	LONG_LONG x;
+
+	d2 = popnum();
+	if (getdatumnum(d2) == FP(0.0))
+		execerror("division by zero", (const char*)NULL);
+	d1 = popnum();
+	/* d1.val %= getdatumnum(d2); */
+	x = (LONG_LONG)getdatumnum(d1);
+	x %= (LONG_LONG)getdatumnum(d2);
+	pushnum((fp_t)x);
+}
+
+void
+negate(void)
+{
+	pushnum(-getdatumnum(popnum()));
+}
+
+void
+noop(void)
+{
+}
+
+static void
+verify(Symbol* s)
+{
+	if (getsymtype(s) != VAR && getsymtype(s) != UNDEF)
+		execerror("attempt to evaluate non-variable", getsymname(s));
+	if (getsymtype(s) == UNDEF)
+		execerror("undefined variable", getsymname(s));
+}
+
+void
+eval(void)		/* evaluate variable on stack */
+{
+	Datum d;
+
+	(void)fflush(stdout);		/* force out any buffered data */
+	(void)fflush(stderr);
+	d = pop();
+#if 0
+	verify(getdatumsym(d));
+	pushnum(getdatumsymval(d));
+#else
+	if (getdatumsymtype(d) == STRVAR)
+		pushstr(getdatumsymstr(d));
+	else
+		pushnum(getdatumsymval(d));
+#endif
+}
+
+void
+preinc(void)
+{
+	Datum d;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	verify(getdatumsym(d));
+	pushnum(setdatumsymval(d, getdatumsymval(d) + FP(1.0)));
+}
+
+void
+predec(void)
+{
+	Datum d;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	verify(getdatumsym(d));
+	pushnum(setdatumsymval(d, getdatumsymval(d) - FP(1.0)));
+}
+
+void
+postinc(void)
+{
+	Datum d;
+	fp_t v;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	verify(getdatumsym(d));
+	v = getdatumsymval(d);
+	setdatumsymval(d, getdatumsymval(d) + FP(1.0));
+	pushnum(v);
+}
+
+void
+postdec(void)
+{
+	Datum d;
+	fp_t v;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	verify(getdatumsym(d));
+	v = getdatumsymval(d);
+	setdatumsymval(d, getdatumsymval(d) - FP(1.0));
+	pushnum(v);
+}
+
+void
+gt(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_gt();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(0.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)(getdatumnum(d1) > getdatumnum(d2)));
+}
+
+void
+lt(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_lt();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(0.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)(getdatumnum(d1) < getdatumnum(d2)));
+}
+
+void
+ltgt(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_ne();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(0.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)( (getdatumnum(d1) < getdatumnum(d2)) ||
+			(getdatumnum(d1) > getdatumnum(d2)) ));
+}
+
+void
+ge(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_ge();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(0.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)(getdatumnum(d1) >= getdatumnum(d2)));
+}
+
+void
+le(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_le();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(0.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)(getdatumnum(d1) <= getdatumnum(d2)));
+}
+
+void
+eq(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_eq();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(0.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)(getdatumnum(d1) == getdatumnum(d2)));
+}
+
+void
+ne(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+
+	if ( (getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR) )
+	{
+		push(d2);
+		push(d1);
+		str_ne();
+		return;
+	}
+
+	ensurenum(d1);
+	ensurenum(d2);
+
+#if defined(HAVE_NAN_BOTCH)
+	if (IsNaN(getdatumnum(d1)) || IsNaN(getdatumnum(d2)))
+	{
+		pushnum(FP(1.0));
+		return;
+	}
+#endif
+
+	pushnum((fp_t)(getdatumnum(d1) != getdatumnum(d2)));
+}
+
+void
+And(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum((fp_t)(getdatumnum(d1) != FP(0.0) && getdatumnum(d2) != FP(0.0)));
+}
+
+void
+Or(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum((fp_t)(getdatumnum(d1) != FP(0.0) || getdatumnum(d2) != FP(0.0)));
+}
+
+void
+Not(void)
+{
+	pushnum((fp_t)(getdatumnum(popnum()) == FP(0.0)));
+}
+
+void
+power(void)
+{
+	Datum d1, d2;
+
+	d2 = popnum();
+	d1 = popnum();
+	pushnum(Pow(getdatumnum(d1), getdatumnum(d2)));
+}
+
+void
+assign(void)
+{
+	Datum d1, d2;
+
+	d1 = pop();			/* lhs variable */
+	d2 = pop();			/* rhs value */
+
+	/* Until some grammar issues are worked out, convert an
+	   assignment of a string value to a string assignment. */
+	if (getdatumtype(d2) == STRVAR)
+	{
+		push(d2);
+		push(d1);
+		str_assign();
+		return;
+	}
+
+	if ((getdatumsymtype(d1) != STRVAR) &&
+	    (getdatumsymtype(d1) != VAR) &&
+	    (getdatumsymtype(d1) != UNDEF))
+		execerror("assignment to non-variable", getdatumsymname(d1));
+	if (getdatumsymimmutable(d1))
+		execerror("illegal reassignment to immutable named constant",
+			  getdatumsymname(d1));
+	setdatumsymval(d1, getdatumnum(d2));
+	setdatumsymtype(d1, VAR);
+	push(d2);
+}
+
+void
+addeq(void)
+{
+	Datum d1, d2;
+
+	d1 = pop();
+	d2 = popnum();
+	if (getdatumsymtype(d1) != VAR && getdatumsymtype(d1) != UNDEF)
+		execerror("assignment to non-variable",
+			getdatumsymname(d1));
+	setdatumnum(d2, setdatumsymval(d1, getdatumsymval(d1) + getdatumnum(d2)));
+	setdatumsymtype(d1, VAR);
+	push(d2);
+}
+
+void
+subeq(void)
+{
+	Datum d1, d2;
+
+	d1 = pop();
+	d2 = popnum();
+	if (getdatumsymtype(d1) != VAR && getdatumsymtype(d1) != UNDEF)
+		execerror("assignment to non-variable",
+			getdatumsymname(d1));
+	setdatumnum(d2, setdatumsymval(d1, getdatumsymval(d1) - getdatumnum(d2)));
+	setdatumsymtype(d1, VAR);
+	push(d2);
+}
+
+void
+muleq(void)
+{
+	Datum d1, d2;
+
+	d1 = pop();
+	d2 = popnum();
+	if (getdatumsymtype(d1) != VAR && getdatumsymtype(d1) != UNDEF)
+		execerror("assignment to non-variable",
+			getdatumsymname(d1));
+	setdatumnum(d2, setdatumsymval(d1, getdatumsymval(d1) * getdatumnum(d2)));
+	setdatumsymtype(d1, VAR);
+	push(d2);
+}
+
+void
+diveq(void)
+{
+	Datum d1, d2;
+
+	d1 = pop();
+	d2 = popnum();
+	if (getdatumsymtype(d1) != VAR && getdatumsymtype(d1) != UNDEF)
+		execerror("assignment to non-variable",
+			getdatumsymname(d1));
+	setdatumnum(d2, setdatumsymval(d1, getdatumsymval(d1) / getdatumnum(d2)));
+	setdatumsymtype(d1, VAR);
+	push(d2);
+}
+
+void
+modeq(void)
+{
+	Datum d1, d2;
+	long x;
+
+	d1 = pop();
+	d2 = popnum();
+	if (getdatumsymtype(d1) != VAR && getdatumsymtype(d1) != UNDEF)
+		execerror("assignment to non-variable",
+			getdatumsymname(d1));
+#if 0
+	setdatumnum(d2, setdatumsymval(d1, getdatumsymval(d1) % getdatumnum(d2)));
+#else
+	x = (long)getdatumsymval(d1);
+	x %= (long) getdatumnum(d2);
+	setdatumnum(d2, setdatumsymval(d1, x));
+#endif
+	setdatumsymtype(d1, VAR);
+	push(d2);
+}
+
+static void
+prchar(FILE *fpout, int c, const char *indent, int *pcolumn)
+{
+	if (*pcolumn == 0)		/* output indent string at start of line */
+	{
+		while (*indent)
+			pronechar(fpout, *indent++, pcolumn);
+	}
+	pronechar(fpout, c, pcolumn);
+}
+
+void
+printtop(void)	/* pop top value from stack, print it */
+{
+	Datum d;
+	static Symbol *s;	/* last value computed */
+
+	d = pop();
+
+	/* Until I solve a grammar problem, this function can be
+	   called with string data as well as numeric data, so divert
+	   to printtopstring() if necessary. */
+	if (getdatumtype(d) == STRVAR)
+	{
+		push(d);
+		printtopstring();
+		return;
+	}
+
+	if (s == (Symbol*)NULL)		/* first time only */
+		s = update_const_number("_", FP(0.0));
+	prnum(getdatumnum(d));
+	prnl();
+	setsymnum(s, getdatumnum(d));
+}
+
+void
+printtopstring(void)	/* pop top string value from stack, print it */
+{
+	Datum d;
+	static Symbol *s;		/* last value computed */
+	const char *p;
+
+	if (s == (Symbol*)NULL)		/* first time only */
+		s = update_const_string("__", "");
+	d = popstr();
+	p = getdatumstr(d);
+	if ((p != (const char*)NULL) && (*p != '\0'))
+	{				/* print only nonempty strings from string expressions */
+		prtext(p);
+		prnl();
+	}
+	(void)set_string(s, p);
+	discard_string(d);
+}
+
+void
+prexpr(void)	/* print numeric value */
+{
+	Datum d;
+
+	d = pop();
+
+	/* Until I solve a grammar problem, this function can be
+	   called with string data as well as numeric data, so divert
+	   to prstr() if necessary. */
+	if (getdatumtype(d) == STRVAR)
+	{
+		push(d);
+		prstr();
+	}
+	else
+	{
+		if (this_fmt < nfmt)
+			prfnum(getdatumnum(d));
+		else
+			prnum(getdatumnum(d));
+	}
+}
+
+void
+prfmt(void)			/* parse printf format string */
+{
+	Datum d;
+
+	 /* The extended hoc statement (see hoc.y)
+	  *
+	  *	 *printf "format", item1, item2, ...,
+	  *
+	  * generates a list of code entries containing
+	  *
+	  *	prfmt (prexpr|prstr)*
+	  *
+	  * The hoc print and println statements generate similar code
+	  * lists, but without the leading prfmt item.
+	  *
+	  * We handle this by having prfmt() call make_fmt_strings() to
+	  * parse the format string into an array of format objects, one
+	  * for each item.  The format objects contain an snprintf()
+	  * format directive, and a corresponding data type code.
+	  *
+	  * Each format object contains text from the beginning of the
+	  * format directive, plus any following non-directive text.
+	  * The first, possibly empty, format object contains any text
+	  * that precedes the first format directive; that object is
+	  * handled here.
+	  *
+	  * Later executions of prexpr and prstr test whether there is a
+	  * format available for the value, and if so, snprintf() is
+	  * called to do the conversion.  Otherwise, they fall back to
+	  * printing with a default format.
+	  *
+	  * The format data type codes are checked for compatibility
+	  * with the item to be printed, to prevent calling snprintf()
+	  * with illegal arguments.
+	  *
+	  * The advantage of this approach is that almost the full power
+	  * of snprintf() is available for formatting numeric data (only
+	  * the asterisk for field width and precision, and length
+	  * modifiers, are not supported), without actually having to
+	  * reimplement snprintf(), and that excess data items are
+	  * handled with default formatting, without losing them (as
+	  * most C printf() implementations do), and without causing any
+	  * aberrant behavior.
+	  *
+	  * Except for the somewhat complicated code in
+	  * make_fmt_strings(), this gives a reasonably clean way to
+	  * implement hoc's printf, at the small cost of a single test
+	  * over the original code that implemented print and println.
+	  */
+
+	d = popstr();
+	make_fmt_strings(getdatumstr(d));
+	discard_string(d);
+
+#if defined(DEBUG_PRFMT)
+	{
+		size_t k;
+		for (k = 0; k < nfmt; ++k)
+		{
+			prtext("k = ");
+			prnum((fp_t)k);
+			prtext(" ");
+			prnum((fp_t)k);
+			prtext(" type = ");
+			prnum((fp_t)fmts[k].kind);
+			prtext(" fmt = [");
+			prtext(fmts[k].str);
+			prtext("]");
+			prnl();
+		}
+	}
+#endif
+
+	prtext(fmts[this_fmt].str);	/* print leading non-directive text */
+	fmt_free_nth(this_fmt++);
+}
+
+void
+prnl(void)
+{
+	prtext("\n");
+}
+
+void
+prnum(fp_t x)
+{
+	prtext(fmtnum(x));
+}
+
+static void
+pronechar(FILE *fpout, int c, int *pcolumn)
+{
+	(void)fputc(c, fpout);
+	if (c == '\n')
+		*pcolumn = 0;
+	else
+		(*pcolumn)++;
+}
+
+void
+prsep(void)		/* print output field separator */
+{
+	prtext(lookup("__OFS__")->u.str);
+}
+
+void
+prstr(void)		/* print string value */
+{
+	Datum d;
+
+	d = popstr();
+	if (this_fmt < nfmt)
+		prftext(getdatumstr(d));
+	else
+		prtext(getdatumstr(d));
+	discard_string(d);
+}
+
+void
+prtext(const char *s)
+{	/* print s to stdout, and optionally, to fplog */
+	prtext2(s,0);
+}
+
+void
+prtext2(const char *s, int min_width)
+{	/* print s to stdout, and optionally, to fplog, left-adjusted in a
+	   field of minimum width min_width */
+
+	const char *indent = lookup("__INDENT__")->u.str;
+	int nblanks;
+	static const char *log_indent = "#-> ";
+	static int log_col = 0;
+	static int out_col = 0;
+
+	nblanks = MAX(0, min_width - (int)strlen(s));
+
+	prtext3(stdout, s, nblanks, indent, &out_col);
+
+	if (logfile_enabled && (fplog != (FILE*)NULL))
+		prtext3(fplog, s, nblanks, log_indent, &log_col);
+}
+
+static void
+prtext3(FILE *fpout, const char *s, int nblanks, const char *indent, int *pcolumn)
+{
+	const char *t;
+	int k;
+
+	for (t = s; *t; ++t)
+		prchar(fpout, (int)*t, indent, pcolumn);
+
+	for (k = 0; k < nblanks; ++k)
+		prchar(fpout, (int)' ', indent, pcolumn);
+}
+
+void
+varread(void)	/* read into variable */
+{
+	Datum d;
+	Symbol *var = (Symbol *) *pc++;
+	int c;
+
+	/* Lookahead past space to see whether we have a string or a number */
+	for (c = getc(fin); isspace(c); c = getc(fin))
+		/* NO-OP */;
+	(void)ungetc(c,fin);
+
+	if (c == '"')			/* expect "quoted string" */
+	{
+		if (getsymtype(var) == VAR)	/* perhaps we will rescind this restriction in the future */
+			execerror("illegal assignment of string to existing numeric variable", getsymname(var));
+		if (getsymtype(var) != STRVAR && getsymtype(var) != UNDEF)
+			execerror("assignment to non-variable", getsymname(var));
+
+		(void)getc(fin);	/* discard the opening quote */
+		clearerr(fin);		/* needed to clear eof flag! */
+		(void)update_string(getsymname(var), yygetstr());
+		setdatumnum(d, (fp_t)(!feof(fin)));
+	}
+	else if (IsIdStart(c))			/* expect variable */
+	{
+		Symbol *s;
+
+		s = yygetid();
+
+		if (getsymtype(var) != STRVAR && getsymtype(var) != VAR && getsymtype(var) != UNDEF)
+			execerror("assignment to non-variable", getsymname(var));
+
+		if (getsymtype(s) != STRVAR && getsymtype(s) != VAR)
+			execerror("assignment from non-variable", getsymname(s));
+
+		if (getsymtype(var) == UNDEF)		/* creating new symbol */
+			setsymtype(var, getsymtype(s));
+
+		/* perhaps we will rescind this restriction in the future */
+		if (getsymtype(var) == VAR && getsymtype(s) == STRVAR)
+			execerror("illegal assignment of string to existing numeric variable", getsymname(var));
+		else if (getsymtype(var) == STRVAR && getsymtype(s) == VAR)
+			execerror("illegal assignment of number to existing string variable", getsymname(var));
+
+		if (getsymtype(var) == VAR)
+			(void)update_number(getsymname(var), getsymnum(s));
+		else if (getsymtype(var) == STRVAR)
+			(void)update_string(getsymname(var), getsymstr(s));
+		else
+			execerror("internal type confusion in read() of", getsymname(var));
+		setdatumnum(d, (fp_t)(!feof(fin)));
+	}
+	else				/* expect number */
+	{
+		fp_t v;
+		if (getsymtype(var) == STRVAR)	/* perhaps we will rescind this restriction in the future */
+			execerror("illegal assignment of number to existing string variable", getsymname(var));
+		if (getsymtype(var) != VAR && getsymtype(var) != UNDEF)
+			execerror("assignment to non-variable", getsymname(var));
+
+	  Again:
+		switch (fscanf(fin, "%lf", &v)) { /* NB: this is really irl_fscanf(), which handles long double case correctly */
+		case EOF:
+			if (moreinput())
+				goto Again;
+			setdatumnum(d, v = FP(0.0));
+			break;
+		case 0:
+			execerror("non-number read into", getsymname(var));
+			break;
+		default:
+			setdatumnum(d, FP(1.0));
+			break;
+		}
+		(void)update_number(getsymname(var), v);
+	}
+	push(d);
+}
+
+Inst*
+code(Inst f)	/* install one instruction or operand */
+{
+	Inst *oprogp = progp;
+	if ((prog == (Inst *)NULL) || (progp >= &prog[max_prog]))
+	{
+#if 1
+		execerror("program too big", (const char*)NULL);
+#else  /* code disabled until external pointer issues resolves */
+
+		size_t old_max_prog;
+		size_t old_pc_offset;
+
+		if (pc != (Inst*)NULL)
+			old_pc_offset = (size_t)(pc - &prog[0]);
+		old_max_prog = max_prog;
+		progbase = prog = (Inst *)egrow((Inst *)prog, &max_prog, sizeof(prog[0]));
+		(void)update_const_number("__MAX_PROG__", (fp_t)max_prog);
+		oprogp = progp = &prog[old_max_prog];
+		if (pc != (Inst*)NULL)
+			pc = &prog[old_pc_offset];
+#endif
+	}
+
+#if defined(DEBUG_CODE)
+	if (debug_code)
+	{
+		size_t n;
+
+		n = (size_t)(progp - progbase);
+		(void)fprintf(stderr,"code[%03u] = %16p [%s]\n",
+			      n, f, code_argname);
+		if (n < MAX_CODE_NAME_TABLE)
+			code_name_table[n] = code_argname;
+	}
+#endif
+
+	*progp++ = f;
+	return oprogp;
+}
+
+void
+const_assign(void)
+{
+	Datum d;
+
+	d = pop();
+	push(d);
+	assign();
+	make_immutable(getdatumsym(d));	    /* to prevent user reassignment */
+}
+
+void
+execute(Inst* p)
+{
+	for (pc = p; (pc != (Inst*)NULL) &&
+		     (*pc != STOP) &&
+		     !(returning || breaking || continuing); )
+	{
+
+#if defined(DEBUG_CODE)
+		if (debug_code)
+		{
+			size_t n;
+
+			n = (size_t)(pc - progbase);
+			fprintf(stderr,"exec[%03u] = %16p [%s]\n",
+				n, *pc,
+				(n < MAX_CODE_NAME_TABLE) ? code_name_table[n] : "????");
+		}
+#endif
+
+		(*((++pc)[-1]))();
+	}
+}
+
+void
+const_str_push(void)
+{
+	pushstr(getsymstr(((Symbol *)*pc++)));
+}
+
+void
+const_str_assign(void)
+{
+	Datum d;
+
+	d = pop();
+	push(d);
+	str_assign();
+	make_immutable(getdatumsym(d));	    /* to prevent user reassignment */
+}
+
+void
+sprexpr(void)	/* sprintf numeric value */
+{
+	Datum d;
+
+	d = pop();
+
+	/* Until I solve a grammar problem, this function can be
+	   called with string data as well as numeric data, so divert
+	   to sprstr() if necessary. */
+	if (getdatumtype(d) == STRVAR)
+	{
+		push(d);
+		sprstr();
+	}
+	else
+	{
+		if (this_fmt < nfmt)
+			sprfnum(getdatumnum(d));
+		else
+			sprnum(getdatumnum(d));
+	}
+}
+
+void
+sprfmt(void)			/* parse sprintf format string */
+{
+	prfmt();
+	pushstr("");			/* need for sprjoin() */
+}
+
+static void
+sprfnum(fp_t value)
+{
+	char buffer[MAX_ITEM_WIDTH];
+
+	switch (fmts[this_fmt].kind)
+	{
+	case FMT_CHARACTER:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, (int)value);
+		sprtext(buffer);
+		break;
+
+	case FMT_FLOAT:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, value);
+		sprtext(buffer);
+		break;
+
+	case FMT_SIGNED_INTEGER:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str,
+			  (LONG_LONG_DATA)value);
+		sprtext(buffer);
+		break;
+
+	case FMT_STRING: /* useful extension: allow numeric output on %s formats! */
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, fmtnum(value));
+		sprtext(buffer);
+		break;
+
+	case FMT_UNSIGNED_INTEGER:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str,
+			  (unsigned LONG_LONG_DATA)value);
+		sprtext(buffer);
+		break;
+
+	default:
+		{
+			const char *t;
+
+			t = dupstr(fmts[this_fmt].str);
+			fmt_free();
+			execerror("value datatype does not match format", t); /* memory leak at t! */
+		}
+	}
+	fmt_free_nth(this_fmt++);
+}
+
+static void
+sprftext(const char *s)
+{
+	char buffer[MAX_ITEM_WIDTH];
+	char *endptr;
+	fp_t value;
+
+	switch (fmts[this_fmt].kind)
+	{
+	case FMT_FLOAT:
+		value = strton(s, &endptr);
+		if (*endptr == '\0')
+		{
+			SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, value);
+			sprtext(buffer);
+		}
+		else
+			execerror("failed to convert to floating-point from string", s);
+		break;
+
+	case FMT_SIGNED_INTEGER:
+		value = strton(s, &endptr);
+		if (*endptr == '\0')
+		{
+			SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, (LONG_LONG)value);
+			sprtext(buffer);
+		}
+		else
+			execerror("failed to convert to signed integer from string", s);
+		break;
+
+	case FMT_STRING:
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, s);
+		sprtext(buffer);
+		break;
+
+	case FMT_UNSIGNED_INTEGER:
+		value = strton(s, &endptr);
+		if (*endptr == '\0')
+		{
+			SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str,
+				  (UNSIGNED_LONG_LONG)(LONG_LONG)value);
+			sprtext(buffer);
+		}
+		else
+			execerror("failed to convert to unsigned integer from string", s);
+		break;
+
+	default:
+		{
+			const char *t;
+
+			t = dupstr(fmts[this_fmt].str);
+			fmt_free();
+			execerror("value datatype does not match format", t); /* memory leak at t! */
+		}
+	}
+	fmt_free_nth(this_fmt++);
+}
+
+void
+sprjoin(void)
+{
+	Datum d1, d2;
+
+	d2 = pop();
+	d1 = pop();
+	if ((getdatumtype(d1) == STRVAR) && (getdatumtype(d2) == STRVAR))
+	{
+		const char *p;
+		p = concat2(getdatumstr(d1), getdatumstr(d2));
+		pushstr(p);
+		efree((void*)p);
+		discard_string(d1);
+		discard_string(d2);
+	}
+	else
+		execerror("internal error: expected two strings on stack",
+			  (const char*)NULL);
+}
+
+static void
+sprnum(fp_t x)
+{
+	sprtext(fmtnum(x));
+}
+
+void
+sprstr(void)		/* sprintf string value */
+{
+	Datum d;
+
+	d = popstr();
+	if (this_fmt < nfmt)
+		sprftext(getdatumstr(d));
+	else
+		sprtext(getdatumstr(d));
+	discard_string(d);
+}
+
+void
+sprtext(const char *s)
+{
+	pushstr(s);
+}
+
+void
+str_assign(void)
+{
+	Datum d1, d2;
+
+	d1 = pop();			/* STRVAR or STRARG or VAR */
+	d2 = pop();			/* strexpr */
+	if ((getdatumsymtype(d1) != VAR) &&
+	    (getdatumsymtype(d1) != STRVAR) &&
+	    (getdatumsymtype(d1) != UNDEF))
+		execerror("assignment to non-variable", getdatumsymname(d1));
+	if (getdatumsymimmutable(d1))
+		execerror("illegal reassignment to immutable named constant",
+			  getdatumsymname(d1));
+	if (getdatumsymtype(d1) != STRVAR)	/* change nonstring variable to string variable */
+		setdatumsymstr(d1,dupstr(""));
+	setdatumsymtype(d1,STRVAR);	/* force to string variable */
+	(void)set_string(getdatumsym(d1), getdatumstr(d2));
+	pushstr(getdatumstr(d2));
+	discard_string(d2);
+ 	/* NB: No call here to discard_string(d1): d1 is a symbol, not a string! */
+}
+
+void
+str_concat(void)		/* concatenate number/string objects on stack */
+{
+	Datum d1, d2;
+	const char *p;
+
+	d2 = pop();
+	d1 = pop();
+
+	ensurestr(d1);
+	ensurestr(d2);
+
+	p = concat2(getdatumstr(d1), getdatumstr(d2));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+str_eq(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+
+	pushnum((fp_t)(STREQUAL(getdatumstr(d1),getdatumstr(d2))));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+str_ge(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+
+	pushnum((fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) >= 0));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+str_gt(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+
+	pushnum((fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) > 0));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+str_le(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+
+	pushnum((fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) <= 0));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+str_lt(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+
+	pushnum((fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) < 0));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+str_ne(void)
+{
+	Datum d1, d2;
+
+	d2 = popstr();
+	d1 = popstr();
+
+	pushnum((fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) != 0));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+strarg(void) 	/* push string argument onto stack */
+{
+	arg();
+}
+
+void
+strbltin0(void)
+{
+	const char *p;
+
+	p = ((SF0_t)*pc++)();
+	pushstr(p);
+	efree((void*)p);
+}
+
+void
+strbltin1(void)
+{
+	Datum d;
+	const char *p;
+
+	d = popstr();
+	p = ((SF1_t)*pc++)(getdatumstr(d));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d);
+}
+
+void
+strbltin1n(void)
+{
+	Datum d;
+	const char *p;
+
+	d = popnum();
+	p = ((SF1n_t)*pc++)(getdatumnum(d));
+	pushstr(p);
+	efree((void*)p);
+}
+
+void
+strbltin2(void)
+{
+	Datum d1, d2;
+	const char *p;
+
+	d2 = popstr();
+	d1 = popstr();
+	p = ((SF2_t)*pc++)(getdatumstr(d1), getdatumstr(d2));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+strbltin2sn(void)
+{
+	Datum d1, d2;
+	const char *p;
+
+	d2 = popnum();
+	d1 = popstr();
+	p = ((SF2sn_t)*pc++)(getdatumstr(d1), getdatumnum(d2));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d1);
+}
+
+void
+strbltin3snn(void)
+{
+	Datum d1, d2, d3;
+	const char *p;
+
+	d3 = popnum();
+	d2 = popnum();
+	d1 = popstr();
+	p = ((SF3snn_t)*pc++)(getdatumstr(d1), getdatumnum(d2), getdatumnum(d3));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d1);
+}
+
+void
+streval(void)		/* evaluate string variable on stack */
+{
+	Datum d;
+
+	d = pop();
+	if (getdatumsymtype(d) != STRVAR)
+		execerror("attempt to evaluate nonstring variable", getdatumsymname(d));
+	pushstr(getdatumsymstr(d));
+}
+
+fp_t
+SymtoN(const char *s)
+{
+	Symbol *sp;
+
+	sp = lookup(s);
+	if (sp == (Symbol*)NULL)
+	{
+		execerror("variable not found", s);
+		return (FP(0.0)); /* NOT REACHED */
+	}
+	else if (getsymtype(sp) == VAR)
+		return (getsymnum(sp));
+	else if (getsymtype(sp) == STRVAR)
+		return (strton(getsymstr(sp), (char**)NULL));
+	else				/* cannot happen */
+	{
+		execerror("illegal object in string-to-numeric-symbol conversion",
+			  (const char*)NULL);
+		return (FP(0.0)); /* NOT REACHED */
+	}
+}
+
+const char *
+SymtoS(const char *s)
+{
+	Symbol *sp;
+
+	sp = lookup(s);
+	if (sp == (Symbol*)NULL)
+	{
+		execerror("variable not found", s);
+		return (dupstr("")); /* NOT REACHED */
+	}
+	else if (getsymtype(sp) == VAR)
+		return (FtoS(getsymnum(sp)));
+	else if (getsymtype(sp) == STRVAR)
+		return (dupstr(getsymstr(sp)));
+	else				/* cannot happen */
+	{
+		execerror("illegal object in string-to-string-symbol conversion",
+			  (const char*)NULL);
+		return (dupstr("")); /* NOT REACHED */
+	}
+}
+
+const char *
+Who(const char *prefix)
+{
+	dump_syms(prefix);
+	return (dupstr(""));
+}
+@
+
+
+1.26
+log
+@Add new functions popnum() and popstr() and use them in many places to
+support dynamic number<->string conversion.  Update constpush() and
+eval() for dynamic type conversion.  Update assign() and str_assign()
+to eliminate the restriction on type conversion of existing variables.
+Replace the four str_concat_[ns][ns]() functions with a single one,
+str_concat().  Eliminate the no-longer-used str_to_symnum() and
+str_to_symstr(); their jobs are now handled by the new SymtoN() and
+SymtoS() functions, since the hoc symnum() and symstr() functions are
+now in function tables in init.c, instead of in the hoc grammar.
+@
+text
+@d46 3
+a232 1
+
+a244 1
+
+d664 1
+a664 2
+	if (getdatumtype(d) == VAR)
+		setdatumstr(d, FtoS(getdatumnum(d)));
+d674 1
+a674 2
+	if (getdatumtype(d) == STRVAR)
+		setdatumnum(d, StoN(getdatumstr(d)));
+d681 21
+a701 1
+	(void)pop();
+d890 1
+a890 1
+		pushstr(getargstr());
+d1152 13
+a1164 2
+	d2 = popnum();
+	d1 = popnum();
+d1182 13
+a1194 2
+	d2 = popnum();
+	d1 = popnum();
+d1212 13
+a1224 2
+	d2 = popnum();
+	d1 = popnum();
+d1243 13
+a1255 2
+	d2 = popnum();
+	d1 = popnum();
+d1273 13
+a1285 2
+	d2 = popnum();
+	d1 = popnum();
+d1303 13
+a1315 2
+	d2 = popnum();
+	d1 = popnum();
+d1333 13
+a1345 2
+	d2 = popnum();
+	d1 = popnum();
+d1403 2
+a1404 4
+	   assignment of a string value to an untyped name to a string
+	   assignment. */
+	if (((getdatumsymtype(d1) == UNDEF) && (getdatumtype(d2) == STRVAR)) ||
+	    ((getdatumsymtype(d1) == VAR) && (getdatumtype(d2) == STRVAR)))
+d1523 12
+a1536 1
+	d = popnum();
+d1559 1
+a1559 1
+	efree((void*)p);
+d2117 3
+a2119 1
+	push(d2); 	/* NB: No following call to discard_string(d1): d1 is a symbol, not a string! */
+d2131 3
+a2133 4
+	if (getdatumtype(d1) == VAR)
+		setdatumstr(d1,dupstr(fmtnum(getdatumnum(d1))));
+	if (getdatumtype(d2) == VAR)
+		setdatumstr(d2,dupstr(fmtnum(getdatumnum(d2))));
+d2322 1
+d2324 2
+d2331 1
+d2334 2
+d2345 1
+d2347 2
+d2350 1
+a2350 1
+		return (dupstr(fmtnum(getsymnum(sp))));
+d2354 1
+d2357 2
+@
+
+
+1.25
+log
+@Remove indent_pending, which is no longer needed since the rewrite of
+prtext2().  Remove erroneous call to discard_string() in str_assign():
+it caused a nasty bug from memory freed while in use elsewhere.
+@
+text
+@d145 2
+d657 22
+d688 6
+a693 1
+	pushnum(getsymnum(((Symbol *)*pc++)));
+d923 1
+a923 1
+	d = pop();
+d939 1
+a939 1
+	pushnum(((F1_t)*pc++)(getdatumnum(pop())));
+d954 1
+a954 1
+	d = pop();
+d964 2
+a965 2
+	d2 = pop();
+	d1 = pop();
+d974 2
+a975 2
+	d2 = pop();
+	d1 = pop();
+d986 2
+a987 2
+	d2 = pop();
+	d1 = pop();
+d996 2
+a997 2
+	d2 = pop();
+	d1 = pop();
+d1006 2
+a1007 2
+	d2 = pop();
+	d1 = pop();
+d1016 1
+a1016 1
+	d2 = pop();
+d1023 1
+a1023 1
+	d1 = pop();
+d1033 1
+a1033 1
+	d2 = pop();
+d1036 1
+a1036 1
+	d1 = pop();
+d1046 1
+a1046 1
+	pushnum(-getdatumnum(pop()));
+d1071 1
+d1074 6
+d1133 2
+a1134 2
+	d2 = pop();
+	d1 = pop();
+d1152 2
+a1153 2
+	d2 = pop();
+	d1 = pop();
+d1171 2
+a1172 2
+	d2 = pop();
+	d1 = pop();
+d1191 2
+a1192 2
+	d2 = pop();
+	d1 = pop();
+d1210 2
+a1211 2
+	d2 = pop();
+	d1 = pop();
+d1229 2
+a1230 2
+	d2 = pop();
+	d1 = pop();
+d1248 2
+a1249 2
+	d2 = pop();
+	d1 = pop();
+d1267 2
+a1268 2
+	d2 = pop();
+	d1 = pop();
+d1277 2
+a1278 2
+	d2 = pop();
+	d1 = pop();
+d1285 1
+a1285 1
+	pushnum((fp_t)(getdatumnum(pop()) == FP(0.0)));
+d1293 2
+a1294 2
+	d2 = pop();
+	d1 = pop();
+d1303 18
+a1320 5
+	d1 = pop();
+	d2 = pop();
+	if (getdatumsymtype(d1) == STRVAR)	/* perhaps we will rescind this restriction in the future */
+		execerror("illegal assignment of number to existing string variable", getdatumsymname(d1));
+	if (getdatumsymtype(d1) != VAR && getdatumsymtype(d1) != UNDEF)
+d1336 1
+a1336 1
+	d2 = pop();
+d1351 1
+a1351 1
+	d2 = pop();
+d1366 1
+a1366 1
+	d2 = pop();
+d1381 1
+a1381 1
+	d2 = pop();
+d1397 1
+a1397 1
+	d2 = pop();
+d1431 1
+a1431 1
+	d = pop();
+d1446 1
+a1446 1
+	d = pop();
+d1532 1
+a1532 1
+	d = pop();
+d1592 1
+a1592 1
+	d = pop();
+a1964 3
+	{
+		discard_string(d1);
+		discard_string(d2);
+a1966 1
+	}
+d1980 1
+a1980 1
+	d = pop();
+d2001 3
+a2003 3
+	if (getdatumsymtype(d1) == VAR)	/* perhaps we will rescind this restriction in the future */
+		execerror("illegal assignment of string to existing numeric variable", getdatumsymname(d1));
+	if (getdatumsymtype(d1) != STRVAR && getdatumsymtype(d1) != UNDEF)
+d2008 3
+a2011 1
+	setdatumsymtype(d1, STRVAR);
+d2016 1
+a2016 49
+str_concat_nn(void)		/* concatenate two numbers (as strings) */
+{
+	Datum d1, d2;
+	char nbuf1[50];			/* large enough for quad precision result */
+	char nbuf2[50];			/* large enough for quad precision result */
+	const char *p;
+
+	d2 = pop();
+	d1 = pop();
+
+	(void)strlcpy(nbuf1, fmtnum(getdatumnum(d1)), sizeof(nbuf1));
+	(void)strlcpy(nbuf2, fmtnum(getdatumnum(d2)), sizeof(nbuf2));
+
+	p = concat2(nbuf1,nbuf2);
+	pushstr(p);
+	efree((void*)p);
+}
+
+void
+str_concat_ns(void)		/* concatenate number (as string) and strings on stack */
+{
+	Datum d1, d2;
+	const char *p;
+
+	d2 = pop();
+	d1 = pop();
+
+	p = concat2(fmtnum(getdatumnum(d1)), getdatumstr(d2));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d2);
+}
+
+void
+str_concat_sn(void)		/* concatenate string and number (as string) on stack */
+{
+	Datum d1, d2;
+	const char *p;
+
+	d2 = pop();
+	d1 = pop();
+	p = concat2(getdatumstr(d1), fmtnum(getdatumnum(d2)));
+	pushstr(p);
+	efree((void*)p);
+	discard_string(d1);
+}
+
+void
+str_concat_ss(void)		/* concatenate strings on stack */
+d2024 4
+a2027 5
+#if 0
+	if ((getdatumsymtype(d1) != STRING) && (getdatumsymtype(d2) != STRING))
+		execerror("attempt to concatenate nonstrings", (const char*)NULL);
+#endif
+
+d2040 2
+a2041 2
+	d2 = pop();
+	d1 = pop();
+d2053 2
+a2054 2
+	d2 = pop();
+	d1 = pop();
+d2066 2
+a2067 2
+	d2 = pop();
+	d1 = pop();
+d2079 2
+a2080 2
+	d2 = pop();
+	d1 = pop();
+d2092 2
+a2093 2
+	d2 = pop();
+	d1 = pop();
+d2105 2
+a2106 2
+	d2 = pop();
+	d1 = pop();
+a2113 40
+str_to_symnum(void)
+{
+	Datum d;
+	Symbol *sp;
+
+	d = pop();			/* source string */
+
+	sp = lookup(getdatumstr(d));
+	if (sp == (Symbol*)NULL)
+		execerror("variable not found", getdatumstr(d));
+	else if (getsymtype(sp) == VAR)
+		pushnum(getsymnum(sp));
+	else if (getsymtype(sp) == STRVAR)
+		pushnum(strton(getsymstr(sp), (char**)NULL));
+	else				/* cannot happen */
+		execerror("illegal object in string-to-numeric-symbol conversion", (const char*)NULL);
+	discard_string(d);
+}
+
+void
+str_to_symstr(void)
+{
+	Datum d;
+	Symbol *sp;
+
+	d = pop();			/* source string */
+
+	sp = lookup(getdatumstr(d));
+	if (sp == (Symbol*)NULL)
+		execerror("variable not found", getdatumstr(d));
+	else if (getsymtype(sp) == VAR)
+		pushstr(fmtnum(getsymnum(sp)));
+	else if (getsymtype(sp) == STRVAR)
+		pushstr(getsymstr(sp));
+	else				/* cannot happen */
+		execerror("illegal object in string-to-string-symbol conversion", (const char*)NULL);
+	discard_string(d);
+}
+
+void
+d2135 1
+a2135 1
+	d = pop();
+d2148 1
+a2148 1
+	d = pop();
+d2160 2
+a2161 2
+	d2 = pop();
+	d1 = pop();
+d2175 2
+a2176 2
+	d2 = pop();
+	d1 = pop();
+d2189 3
+a2191 3
+	d3 = pop();
+	d2 = pop();
+	d1 = pop();
+d2209 34
+@
+
+
+1.24
+log
+@Add new functions prchar(), pronechar(), and prtext3(), and replace
+body of prtext2().  All output from hoc print, printf, and println
+statements now ultimately goes through pronechar(), which ensures that
+any required indentation is supplied at the start of a new line,
+completing full support for the __INDENT__ variable.
+@
+text
+@a202 1
+static int	indent_pending = 1;
+a1513 1
+	indent_pending = 1;
+d1954 2
+a1955 2
+	d1 = pop();
+	d2 = pop();
+d1965 1
+a1965 4
+	if (STREQUAL(getdatumsymname(d1), "__INDENT__"))
+		indent_pending = 1;
+	push(d2);
+	discard_string(d2);
+@
+
+
+1.23
+log
+@Add code in fmtnum() to print negative zero properly, since
+printf() on several systems fails to do this.
+@
+text
+@d24 3
+d145 3
+d1364 11
+d1524 10
+d1562 7
+a1568 1
+	field of minimum width min_width */
+d1570 1
+a1570 1
+	static int prefix_pending = 1;
+d1572 14
+a1585 7
+	if (s != (const char*)NULL)
+	{
+		if (indent_pending)
+		{
+			(void)printf("%s", lookup("__INDENT__")->u.str);
+			indent_pending = 0;
+		}
+d1587 2
+a1588 8
+		(void)printf("%-*s", min_width, s);
+		if (logfile_enabled && (fplog != (FILE*)NULL))
+		{
+			(void)fprintf(fplog, "%s%-*s",
+				      (prefix_pending ? "#-> " : ""), min_width, s);
+			prefix_pending = (strchr(s,'\0')[-1] == '\n');
+		}
+	}
+@
+
+
+1.22
+log
+@Delete abort_user(), hex(), hexfp(), hexint(), numtostr(),
+str_index(), str_length(), str_strftime(), str_substr(), str_to_num().
+Rewrite Defined() and Delete().  Add bltin1i(), bltin2s(),
+strbltin2sn(), and strbltin3snn().
+@
+text
+@d521 11
+d533 5
+a537 1
+		if (sizeof(fp_t) == sizeof(double)) /* long double masquerading as double */
+a538 4
+		else
+			SNPRINTF5(buffer, sizeof(buffer), "%.*Lg", get_precision(), (fp_t)x);
+#else
+		SNPRINTF5(buffer, sizeof(buffer), "%.*g", get_precision(), (double)x);
+d540 1
+@
+
+
+1.21
+log
+@Major update to deal with problem of memory leaks.  Previously, some
+string Datum values pushed were dynamic strings, and others were
+static or strings in use elsewhere.  This produced memory leaks during
+handling of string expressions that could not be eliminated until all
+pushed strings were made dynamic, so they can be freed after they have
+been popped and used.  All builtin functions now return dynamic
+strings, so they too can be discarded after use.  The getxxx() and
+getxxx() macros have been revised to ensure that their arguments are
+referenced only once, since that guarantee simplifies code in many
+functions in this file.  Add function discard_string() to free the
+popped Datum strings.  Change protect() to Protect().  Add new
+pushstr() and pushnum() functions to simplify the code in 70+ places,
+replacing two or more lines with one in each instance, and eliminating
+many local Datum variables.
+@
+text
+@a455 9
+abort_user(void)			/* abort with message */
+{
+	Datum d;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	execerror("execution aborted:", getdatumsymstr(d));
+}
+
+void
+d467 2
+a468 2
+void
+Defined(void)
+d470 1
+a470 4
+	Datum d;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	pushnum((fp_t)(getdatumsymtype(d) != UNDEF));
+d473 2
+a474 2
+void
+Delete(void)
+d476 1
+a476 4
+	Datum d;
+
+	setdatumsym(d, (Symbol *)(*pc++));
+	pushnum(delete_symbol(getdatumsym(d)));	/* return 1 if delete succeeded, else 0 */
+a534 56
+hex(void)
+{
+	char buffer[sizeof("0xhhhhhhhh_hhhhhhhh_hhhhhhhh_hhhhhhhh")];
+	Datum v;
+	FP_Parts d;
+	int big_endian = IsBigEndian();
+
+	v = pop();
+	d.v = getdatumnum(v);
+
+#if defined(HAVE_FP_T_DOUBLE)
+	SNPRINTF5(buffer, sizeof(buffer), "0x%08x_%08x", d.i[1 - big_endian], d.i[big_endian]);
+#endif
+
+#if defined(HAVE_FP_T_QUADRUPLE)
+	if (sizeof(d) == sizeof(d.v)) /* 128-bit */
+	{
+		if (big_endian)		/* 128-bit big endian */
+			SNPRINTF7(buffer, sizeof(buffer), "0x%08x_%08x_%08x_%08x",
+				  d.i[0], d.i[1], d.i[2], d.i[3]);
+		else			/* 128-bit little endian */
+			SNPRINTF7(buffer, sizeof(buffer), "0x%08x_%08x_%08x_%08x",
+				  d.i[3], d.i[2], d.i[1], d.i[0]);
+	}
+	else if (sizeof(fp_t) == sizeof(double)) /* long double masquerading as double */
+		SNPRINTF5(buffer, sizeof(buffer), "0x%08x_%08x",
+			  d.i[1 - big_endian], d.i[big_endian]);
+	else				/* 80-bit little endian */
+		SNPRINTF6(buffer, sizeof(buffer), "0x%04x_%08x_%08x",
+			  (0xffff & d.i[2]), d.i[1], d.i[0]);
+#endif
+
+#if defined(HAVE_FP_T_SINGLE)
+	SNPRINTF4(buffer, sizeof(buffer), "0x%08x", d.i[0]);
+#endif
+
+	prtext(buffer);
+	prtext(" == ");
+	prtext(xfptos(d.v));
+	prtext(" ");
+	push(v);
+}
+
+void
+hexfp(void)
+{
+	pushstr(xfptos(getdatumnum(pop())));
+}
+
+void
+hexint(void)
+{
+	pushstr(xinttos(getdatumnum(pop())));
+}
+
+void
+a546 6
+void
+numtostr(void)
+{
+	pushstr(fmtnum(getdatumnum(pop())));
+}
+
+d897 7
+d924 12
+a2035 14
+str_index(void)
+{	/* return 1-based index of substring in string, or 0 if not found */
+	Datum d1, d2;
+	const char *p;
+
+	d2 = pop();			/* substring */
+	d1 = pop();			/* source string */
+	p = (const char*)strstr(getdatumstr(d1), getdatumstr(d2));
+	pushnum((fp_t)((p == (const char*)NULL) ? 0 : ((p - getdatumstr(d1)) + 1)));
+	discard_string(d1);
+	discard_string(d2);
+}
+
+void
+a2048 10
+str_length(void)
+{
+	Datum d;
+
+	d = pop();
+	pushnum((fp_t)strlen(getdatumstr(d)));
+	discard_string(d);
+}
+
+void
+a2074 59
+str_strftime(void)	/* convert fmt,time on stack to formatted time string */
+{
+	Datum d1, d2;
+
+	d2 = pop();			/* time in seconds */
+	d1 = pop();			/* format */
+	pushstr(Strftime(getdatumstr(d1), getdatumnum(d2)));
+	discard_string(d1);
+}
+
+void
+str_substr(void)
+{		/* extract (string,first,length) to new substring, with 1-based indexing */
+	Datum d1, d2, d3;
+	size_t first;
+	size_t len_sub;
+	size_t len_str;
+
+	d3 = pop();			/* final index */
+	d2 = pop();			/* initial index */
+	d1 = pop();			/* source string */
+
+	len_str = strlen(getdatumstr(d1));
+	len_sub = (getdatumnum(d3) <= FP(0.0)) ? (size_t)0 : (size_t)getdatumnum(d3);
+
+	first = ((getdatumnum(d2) <= FP(1.0)) ? 1 : (size_t)getdatumnum(d2)) - (size_t)1; /* C/C++ 0-based index */
+
+	if (first > len_str)
+		first = len_str;	/* index of final NUL */
+
+	if ((first + len_sub) > len_str)
+		len_sub = len_str - first;
+
+	if (len_str > 0)
+	{
+		char *p;
+
+		p = (char*)emalloc((len_sub + 1)*sizeof(char));
+		(void)strlcpy(p,&getdatumstr(d1)[first],len_sub + 1);
+		p[len_sub] = '\0';
+		pushstr((const char*)p);
+		efree((void*)p);
+	}
+	else
+		pushstr("");
+	discard_string(d1);
+}
+
+void
+str_to_num(void)
+{
+	Datum d;
+
+	d = pop();
+	pushnum(strton(getdatumstr(d), (char**)NULL));
+	discard_string(d);
+}
+
+void
+d2171 29
+@
+
+
+1.20
+log
+@Add new functions sprexpr(), sprfmt(), sprfnum(), sprftext(),
+sprjoin(), sprnum(), sprstr(), and sprtext() to support the sprintf
+statement.  Most of the support code for printf and sprintf should be
+shared, but for now, I wanted to make minimal perturbations on the
+existing code. In str_assign(), free the d2 string memory, plugging a
+memory leak.
+@
+text
+@d37 1
+d39 24
+a62 14
+#define getdatumtype(d)			(d.type)
+#define setdatumtype(d,t)		(d.type = t)
+
+#define getdatumnum(d)			(d.u.val)
+#define setdatumnum(d,v)		(__tmp_val = v, d.u.str = (const char*)NULL, \
+					d.u.val = __tmp_val, setdatumtype(d,VAR))
+
+#define getdatumstr(d)			(d.u.str)
+#define setdatumstr(d,s)		(__tmp_str = s, d.u.val = FP(0.0), \
+					 d.u.str = __tmp_str, setdatumtype(d,STRVAR))
+
+#define getdatumsym(d)			(d.u.sym)
+#define setdatumsym(d,s)		(__tmp_sym = s, d.u.val = FP(0.0), \
+					 d.u.sym = __tmp_sym, d.type = d.u.sym->type)
+d74 3
+a76 1
+#define setdatumsymtype(d,t)		(getdatumsym(d)->type = t, setdatumtype(d, t))
+d143 2
+d210 6
+d479 1
+a479 1
+	Datum d1, d2;
+d481 2
+a482 3
+	setdatumsym(d1, (Symbol *)(*pc++));
+	setdatumnum(d2, (fp_t)(getdatumsymtype(d1) != UNDEF));
+	push(d2);
+d488 1
+a488 1
+	Datum d1, d2;
+d490 2
+a491 3
+	setdatumsym(d1, (Symbol *)(*pc++));
+	setdatumnum(d2, delete_symbol(getdatumsym(d1)));	/* return 1 if delete succeeded, else 0 */
+	push(d2);
+d504 6
+a509 1
+			(void)fprintf(stderr,"DEBUG: eval(\"%s\")\n", protect(commands));
+d515 1
+a515 1
+	return ("");
+d596 1
+a596 5
+	Datum d1, d2;
+
+	d1 = pop();
+	setdatumstr(d2, dupstr(xfptos(getdatumnum(d1))));
+	push(d2);
+d602 1
+a602 5
+	Datum d1, d2;
+
+	d1 = pop();
+	setdatumstr(d2, dupstr(xinttos(getdatumnum(d1))));
+	push(d2);
+d621 1
+a621 5
+	Datum d1, d2;
+
+	d1 = pop();
+	setdatumstr(d2, dupstr(fmtnum(getdatumnum(d1))));
+	push(d2);
+d664 18
+d724 1
+a724 4
+	Datum d;
+
+	setdatumnum(d, getsymnum(((Symbol *)*pc++)));
+	push(d);
+a895 1
+	Datum d;
+d900 1
+a900 1
+		setdatumnum(d, *getargnum());
+d902 1
+a902 1
+		setdatumstr(d, getargstr());
+d904 1
+d908 1
+a908 1
+		setdatumnum(d, *getargnum());
+d910 1
+a910 1
+	push(d);
+d926 1
+a926 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, *getargnum() += getdatumnum(d));
+	push(d);	/* leave value on stack */
+d932 1
+a932 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, *getargnum() -= getdatumnum(d));
+	push(d);	/* leave value on stack */
+d938 1
+a938 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, *getargnum() *= getdatumnum(d));
+	push(d);	/* leave value on stack */
+d944 1
+a944 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, *getargnum() /= getdatumnum(d));
+	push(d);	/* leave value on stack */
+d958 1
+a958 2
+	setdatumnum(d, *x = y % (long) getdatumnum(d));
+	push(d);	/* leave value on stack */
+d964 1
+a964 4
+	Datum d;
+
+	setdatumnum(d, ((F0_t)*pc++)());
+	push(d);
+d970 1
+a970 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, ((F1_t)*pc++)(getdatumnum(d)));
+	push(d);
+d979 2
+a980 2
+	setdatumnum(d, ((F1s_t)*pc++)(getdatumstr(d)));
+	push(d);
+d990 1
+a990 2
+	setdatumnum(d1, ((F2_t)*pc++)(getdatumnum(d1), getdatumnum(d2)));
+	push(d1);
+d1000 1
+a1000 2
+	setdatumnum(d1, getdatumnum(d1) + getdatumnum(d2));
+	push(d1);
+d1010 1
+a1010 2
+	setdatumnum(d1, getdatumnum(d1) - getdatumnum(d2));
+	push(d1);
+d1020 1
+a1020 2
+	setdatumnum(d1, getdatumnum(d1) * getdatumnum(d2));
+	push(d1);
+d1036 1
+a1036 2
+	setdatumnum(d1, getdatumnum(d1) / getdatumnum(d2));
+	push(d1);
+d1052 1
+a1052 2
+	setdatumnum(d1, (fp_t)x);
+	push(d1);
+d1058 1
+a1058 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, -getdatumnum(d));
+	push(d);
+d1084 1
+a1084 2
+	setdatumnum(d, getdatumsymval(d));
+	push(d);
+d1094 1
+a1094 2
+	setdatumnum(d, setdatumsymval(d, getdatumsymval(d) + FP(1.0)));
+	push(d);
+d1104 1
+a1104 2
+	setdatumnum(d, setdatumsymval(d, getdatumsymval(d) - FP(1.0)));
+	push(d);
+d1117 1
+a1117 2
+	setdatumnum(d, v);
+	push(d);
+d1130 1
+a1130 2
+	setdatumnum(d, v);
+	push(d);
+d1144 1
+a1144 2
+		setdatumnum(d1, FP(0.0));
+		push(d1);
+d1149 1
+a1149 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) > getdatumnum(d2)));
+	push(d1);
+d1163 1
+a1163 2
+		setdatumnum(d1, FP(0.0));
+		push(d1);
+d1168 1
+a1168 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) < getdatumnum(d2)));
+	push(d1);
+d1182 1
+a1182 2
+		setdatumnum(d1, FP(0.0));
+		push(d1);
+d1187 2
+a1188 3
+	setdatumnum(d1, (fp_t)( (getdatumnum(d1) < getdatumnum(d2)) ||
+				(getdatumnum(d1) > getdatumnum(d2)) ));
+	push(d1);
+d1202 1
+a1202 2
+		setdatumnum(d1, FP(0.0));
+		push(d1);
+d1207 1
+a1207 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) >= getdatumnum(d2)));
+	push(d1);
+d1221 1
+a1221 2
+		setdatumnum(d1, FP(0.0));
+		push(d1);
+d1226 1
+a1226 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) <= getdatumnum(d2)));
+	push(d1);
+d1240 1
+a1240 2
+		setdatumnum(d1, FP(0.0));
+		push(d1);
+d1245 1
+a1245 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) == getdatumnum(d2)));
+	push(d1);
+d1259 1
+a1259 2
+		setdatumnum(d1, FP(1.0));
+		push(d1);
+d1264 1
+a1264 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) != getdatumnum(d2)));
+	push(d1);
+d1274 1
+a1274 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) != FP(0.0) && getdatumnum(d2) != FP(0.0)));
+	push(d1);
+d1284 1
+a1284 2
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) != FP(0.0) || getdatumnum(d2) != FP(0.0)));
+	push(d1);
+d1290 1
+a1290 5
+	Datum d;
+
+	d = pop();
+	setdatumnum(d, (fp_t)(getdatumnum(d) == FP(0.0)));
+	push(d);
+d1300 1
+a1300 2
+	setdatumnum(d1, Pow(getdatumnum(d1), getdatumnum(d2)));
+	push(d1);
+d1435 1
+d1515 1
+d1569 1
+d1762 1
+a1762 4
+	Datum d;
+
+	setdatumstr(d, getsymstr(((Symbol *)*pc++)));
+	push(d);
+a1802 2
+	Datum d;
+
+d1804 1
+a1804 2
+	setdatumstr(d, dupstr(""));	/* need for sprjoin() */
+	push(d);
+d1916 1
+a1916 1
+	Datum d1, d2, d3;
+d1922 6
+a1927 4
+		setdatumstr(d3, concat2(getdatumstr(d1), getdatumstr(d2)));
+		efree((void*)getdatumstr(d1));
+		efree((void*)getdatumstr(d2));
+		push(d3);
+d1931 2
+a1932 2
+		efree((void*)getdatumstr(d1));
+		efree((void*)getdatumstr(d2));
+d1954 1
+d1960 1
+a1960 4
+	Datum d;
+
+	setdatumstr(d, dupstr(s));
+	push(d);
+a1977 1
+	efree((void*)getdatumstr(d2));
+d1979 1
+a1979 1
+	if (strcmp(getdatumsymname(d1), "__INDENT__") == 0)
+d1982 1
+d1988 1
+a1988 1
+	Datum d1, d2, d3;
+d1991 1
+d1999 3
+a2001 2
+	setdatumstr(d3, concat2(nbuf1,nbuf2));
+	push(d3);
+d2007 2
+a2008 1
+	Datum d1, d2, d3;
+d2012 5
+a2016 2
+	setdatumstr(d3, concat2(fmtnum(getdatumnum(d1)), getdatumstr(d2)));
+	push(d3);
+d2022 2
+a2023 1
+	Datum d1, d2, d3;
+d2027 4
+a2030 2
+	setdatumstr(d3, concat2(getdatumstr(d1), fmtnum(getdatumnum(d2))));
+	push(d3);
+d2036 2
+a2037 1
+	Datum d1, d2, d3;
+d2047 5
+a2051 2
+	setdatumstr(d3, concat2(getdatumstr(d1), getdatumstr(d2)));
+	push(d3);
+d2062 3
+a2064 2
+	setdatumnum(d1, (fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) == 0));
+	push(d1);
+d2075 3
+a2077 2
+	setdatumnum(d1, (fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) >= 0));
+	push(d1);
+d2088 3
+a2090 2
+	setdatumnum(d1, (fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) > 0));
+	push(d1);
+d2096 1
+a2096 1
+	Datum d1, d2, d3;
+d2102 3
+a2104 2
+	setdatumnum(d3, (fp_t)((p == (const char*)NULL) ? 0 : ((p - getdatumstr(d1)) + 1)));
+	push(d3);
+d2115 3
+a2117 2
+	setdatumnum(d1, (fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) <= 0));
+	push(d1);
+d2123 1
+a2123 1
+	Datum d1, d2;
+d2125 3
+a2127 4
+	d1 = pop();			/* source string */
+
+	setdatumnum(d2, (fp_t)strlen(getdatumstr(d1)));
+	push(d2);
+d2138 3
+a2140 2
+	setdatumnum(d1, (fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) < 0));
+	push(d1);
+d2151 3
+a2153 2
+	setdatumnum(d1, (fp_t)(strcmp(getdatumstr(d1),getdatumstr(d2)) != 0));
+	push(d1);
+d2159 1
+a2159 1
+	Datum d1, d2, d3;
+d2163 2
+a2164 2
+	setdatumstr(d3, dupstr(Strftime(getdatumstr(d1), getdatumnum(d2))));
+	push(d3);
+d2197 2
+a2198 1
+		setdatumstr(d3, (const char*)p);
+d2201 2
+a2202 2
+		setdatumstr(d3, dupstr(""));
+	push(d3);
+d2208 1
+a2208 1
+	Datum d1, d2;
+d2210 3
+a2212 4
+	d1 = pop();			/* source string */
+	setdatumnum(d2, strton(getdatumstr(d1), (char**)NULL));
+
+	push(d2);
+d2218 1
+a2218 1
+	Datum d1, d2;
+d2221 1
+a2221 1
+	d1 = pop();			/* source string */
+d2223 1
+a2223 1
+	sp = lookup(getdatumstr(d1));
+d2225 1
+a2225 1
+		execerror("variable not found", getdatumstr(d1));
+d2227 1
+a2227 1
+		setdatumnum(d2, getsymnum(sp));
+d2229 1
+a2229 1
+		setdatumnum(d2, strton(getsymstr(sp), (char**)NULL));
+d2232 1
+a2232 1
+	push(d2);
+d2238 1
+a2238 1
+	Datum d1, d2;
+d2241 1
+a2241 1
+	d1 = pop();			/* source string */
+d2243 1
+a2243 1
+	sp = lookup(getdatumstr(d1));
+d2245 1
+a2245 1
+		execerror("variable not found", getdatumstr(d1));
+d2247 1
+a2247 1
+		setdatumstr(d2, fmtnum(getsymnum(sp)));
+d2249 1
+a2249 1
+		setdatumstr(d2, getsymstr(sp));
+d2252 1
+a2252 1
+	push(d2);
+d2264 1
+a2264 1
+	Datum d;
+d2266 3
+a2268 2
+	setdatumstr(d, ((SF0_t)*pc++)());
+	push(d);
+d2275 1
+d2278 4
+a2281 2
+	setdatumstr(d, ((SF1_t)*pc++)(getdatumstr(d)));
+	push(d);
+d2288 1
+d2291 3
+a2293 2
+	setdatumstr(d, ((SF1n_t)*pc++)(getdatumnum(d)));
+	push(d);
+d2300 1
+d2304 5
+a2308 2
+	setdatumstr(d1, ((SF2_t)*pc++)(getdatumstr(d1), getdatumstr(d2)));
+	push(d1);
+d2319 1
+a2319 2
+	setdatumstr(d, getdatumsymstr(d));
+	push(d);
+d2326 1
+a2326 1
+	return ("");
+@
+
+
+1.19
+log
+@Revise setdatum{num,str,sym}() to save the RHS in a temporary
+variable, zero the Datum union, and do the assignment, preventing
+later reference to garbage bits on systems where sizeof(void*) >
+sizeof(fp_t).
+@
+text
+@d130 4
+d1810 190
+d2014 1
+@
+
+
+1.18
+log
+@Reset breaking and continuing after leaving code bodies.
+@
+text
+@d25 12
+d42 2
+a43 1
+#define setdatumnum(d,v)		(d.u.val = v, setdatumtype(d,VAR))
+d46 2
+a47 1
+#define setdatumstr(d,s)		(d.u.str = s, setdatumtype(d,STRVAR))
+d50 2
+a51 1
+#define setdatumsym(d,s)		(d.u.sym = s, d.type = d.u.sym->type)
+d342 1
+a342 1
+		SNPRINTF4(buffer, sizeof(buffer), fmts[this_fmt].str, 
+a949 1
+
+a958 1
+
+a968 1
+
+a978 1
+
+a2085 1
+
+a2094 1
+
+a2104 1
+
+a2114 1
+
+@
+
+
+1.17
+log
+@Add declarations of breaking, continuing, and inloop flags.  Add
+declarations of code_argname, code_name_table[], and debug_code that
+are enabled only when the preprocessor symbol DEBUG_CODE is defined.
+Add new functions breakstmt() and continuestmt().  Initialize breaking
+and continuing in initcode().  Add code in forcode() and whilecode()
+to support the new break and continue statements.  In execute(), test
+breaking and continuing in the loop condition, and add debug tracing
+in the loop body (enabled when DEBUG_CODE is defined).
+@
+text
+@d708 2
+d736 2
+@
+
+
+1.16
+log
+@Add support for %c format item.  Add new functions bltin1s() and
+strbltin1n().
+@
+text
+@d85 1
+a85 1
+Inst	*pc;		/* program counter during execution */
+d87 13
+a99 2
+int	returning;	/* 1 if return stmt seen */
+extern int	indef;	/* 1 if parsing a func or proc */
+d425 12
+d576 2
+d580 1
+d702 3
+d726 3
+d1717 14
+d1749 17
+a1765 1
+	for (pc = p; (pc != (Inst*)NULL) && (*pc != STOP) && !returning; )
+d1767 1
+@
+
+
+1.15
+log
+@Complete full support for the hoc printf statement: add new functions
+add_fmt_item(), fmt_free(), fmt_free_nth(), make_fmt_strings(),
+prfmt(), prfnum(), and prftext(), along with associated private
+variables.
+
+Eliminate trailing space output by prexpr(), and add new function
+prsep() to output the current value of __OFS__ (see below).
+
+Add support for new global variable __INDENT__.
+@
+text
+@d130 1
+d225 1
+a225 1
+		/* match %[-+0 ]?[0-9]*([.][0-9]*)?[deEfgGiosuxX] */
+d238 1
+a238 1
+		if (strchr("deEfgGiosuxX", (int)*s) == (char *)NULL)
+d246 3
+a248 1
+		if (strchr("eEfgG", (int)*s) != (char*)NULL)
+d305 5
+d918 11
+d2027 11
+@
+
+
+1.14
+log
+@Remove (void) cast on SNPRINTFn() calls, since they now expand into
+do {...} while (0).
+@
+text
+@a66 1
+
+d106 42
+d151 244
+d400 1
+d409 1
+d419 1
+d495 1
+a495 1
+				      d.i[0], d.i[1], d.i[2], d.i[3]);
+d498 1
+a498 1
+				      d.i[3], d.i[2], d.i[1], d.i[0]);
+d502 1
+a502 1
+				d.i[1 - big_endian], d.i[big_endian]);
+d505 1
+a505 1
+			      (0xffff & d.i[2]), d.i[1], d.i[0]);
+d572 1
+d604 1
+d642 1
+d651 1
+d759 1
+d781 1
+a781 1
+	    execerror(getsymname(getframesp(fp)), "not enough arguments");
+d790 1
+a790 1
+	    execerror(getsymname(getframesp(fp)), "not enough arguments");
+d799 1
+a799 1
+	    execerror(getsymname(getframesp(fp)), "not enough arguments");
+d827 1
+d837 1
+d847 1
+d857 1
+d867 1
+d879 1
+d893 1
+d903 1
+d914 1
+d925 1
+d936 1
+d947 1
+d958 1
+d976 1
+d992 1
+d1016 1
+d1029 1
+d1040 1
+d1052 1
+d1066 1
+d1079 1
+d1100 1
+d1121 1
+d1143 1
+d1164 1
+d1185 1
+d1206 1
+d1227 1
+d1238 1
+d1249 1
+d1259 1
+d1270 1
+d1289 1
+d1304 1
+d1319 1
+d1334 1
+d1350 1
+d1377 1
+a1377 1
+	prtext("\n");
+d1395 1
+a1395 1
+		prtext("\n");
+d1401 1
+a1401 1
+prexpr(void)	/* print numeric value (with following space) */
+d1404 1
+d1417 4
+a1420 2
+		prnum(getdatumnum(d));
+		prtext(" ");
+d1425 77
+d1505 1
+d1515 6
+d1524 1
+d1526 4
+a1529 1
+	prtext(getdatumstr(d));
+d1547 6
+d1692 1
+d1712 1
+d1724 2
+d1789 1
+d1801 1
+d1813 1
+d1838 1
+d1861 1
+d1873 1
+d1885 1
+d1917 1
+a1917 1
+	    	char *p;
+d1991 1
+d2001 1
+d2012 1
+d2023 1
+@
+
+
+1.13
+log
+@Add NULL pointer test in the loop in execute(); such a pointer
+can be found there if erroneous source code is input.
+@
+text
+@d169 1
+a169 1
+		(void)SNPRINTF4(buffer, sizeof(buffer), "%s", Inf_string(x));
+d171 1
+a171 1
+		(void)SNPRINTF4(buffer, sizeof(buffer), "%s", NaN_string(x));
+d176 1
+a176 1
+			(void)SNPRINTF5(buffer, sizeof(buffer), "%.*g", get_precision(), (double)x);
+d178 1
+a178 1
+			(void)SNPRINTF5(buffer, sizeof(buffer), "%.*Lg", get_precision(), (fp_t)x);
+d180 1
+a180 1
+		(void)SNPRINTF5(buffer, sizeof(buffer), "%.*g", get_precision(), (double)x);
+d199 1
+a199 1
+	(void)SNPRINTF5(buffer, sizeof(buffer), "0x%08x_%08x", d.i[1 - big_endian], d.i[big_endian]);
+d206 1
+a206 1
+			(void)SNPRINTF7(buffer, sizeof(buffer), "0x%08x_%08x_%08x_%08x",
+d209 1
+a209 1
+			(void)SNPRINTF7(buffer, sizeof(buffer), "0x%08x_%08x_%08x_%08x",
+d213 1
+a213 1
+		(void)SNPRINTF5(buffer, sizeof(buffer), "0x%08x_%08x",
+d216 1
+a216 1
+		(void)SNPRINTF6(buffer, sizeof(buffer), "0x%04x_%08x_%08x",
+d221 1
+a221 1
+	(void)SNPRINTF4(buffer, sizeof(buffer), "0x%08x", d.i[0]);
+@
+
+
+1.12
+log
+@Add comment at call to fscanf() to show that no changes are
+needed for quadruple precision.
+@
+text
+@d1257 1
+a1257 1
+	for (pc = p; *pc != STOP && !returning; )
+@
+
+
+1.11
+log
+@Change sprintf() references to SNPRINTFn().
+Use safe string routines, strlcat() and strlcpy().
+@
+text
+@d1198 1
+a1198 1
+		switch (fscanf(fin, "%lf", &v)) {
+@
+
+
+1.10
+log
+@Add code to handle the case of long double masquerading as double.
+@
+text
+@d169 1
+a169 1
+		(void)sprintf(buffer, "%s", Inf_string(x));
+d171 1
+a171 1
+		(void)sprintf(buffer, "%s", NaN_string(x));
+d176 1
+a176 1
+			(void)sprintf(buffer, "%.*g", get_precision(), (double)x);
+d178 1
+a178 1
+			(void)sprintf(buffer, "%.*Lg", get_precision(), (fp_t)x);
+d180 1
+a180 1
+		(void)sprintf(buffer, "%.*g", get_precision(), (double)x);
+d199 1
+a199 1
+	(void)sprintf(buffer, "0x%08x_%08x", d.i[1 - big_endian], d.i[big_endian]);
+d206 1
+a206 1
+			(void)sprintf(buffer, "0x%08x_%08x_%08x_%08x",
+d209 1
+a209 1
+			(void)sprintf(buffer, "0x%08x_%08x_%08x_%08x",
+d213 2
+a214 1
+		(void)sprintf(buffer, "0x%08x_%08x", d.i[1 - big_endian], d.i[big_endian]);
+d216 1
+a216 1
+		(void)sprintf(buffer, "0x%04x_%08x_%08x",
+d221 1
+a221 1
+	(void)sprintf(buffer, "0x%08x", d.i[0]);
+d1308 2
+a1309 2
+	(void)strcpy(nbuf1, fmtnum(getdatumnum(d1)));
+	(void)strcpy(nbuf2, fmtnum(getdatumnum(d2)));
+d1482 1
+a1482 1
+		(void)strncpy(p,&getdatumstr(d1)[first],len_sub);
+@
+
+
+1.9
+log
+@Add ltgt() function for support of the new <> binary operator.  Update
+for support of three precisions.
+@
+text
+@d173 1
+d175 4
+a178 1
+		(void)sprintf(buffer, "%.*Lg", get_precision(), (fp_t)x);
+d182 1
+d203 11
+a213 6
+	if (big_endian)			/* 128-bit big endiaan */
+		(void)sprintf(buffer, "0x%08x_%08x_%08x_%08x",
+			      d.i[0], d.i[1], d.i[2], d.i[3]);
+	else if (sizeof(d) == sizeof(d.v)) /* 128-bit little endian */
+		(void)sprintf(buffer, "0x%08x_%08x_%08x_%08x",
+			      d.i[3], d.i[2], d.i[1], d.i[0]);
+@
+
+
+1.8
+log
+@Simplify code for setting _ and __ result variables.
+@
+text
+@d166 1
+a166 1
+			0..35) */
+d173 3
+d177 1
+d185 1
+a185 1
+	char buffer[sizeof("0xhhhhhhhh_hhhhhhhh")];
+d187 1
+a187 1
+	DoubleParts d;
+d192 2
+d195 18
+d215 1
+a215 1
+	prtext(xdbltos(d.v));
+d226 1
+a226 1
+	setdatumstr(d2, dupstr(xdbltos(getdatumnum(d1))));
+d646 1
+a646 1
+	if (getdatumnum(d2) == 0.0)
+d660 1
+a660 1
+	if (getdatumnum(d2) == 0.0)
+d711 1
+a711 1
+	setdatumnum(d, setdatumsymval(d, getdatumsymval(d) + 1.0));
+d721 1
+a721 1
+	setdatumnum(d, setdatumsymval(d, getdatumsymval(d) - 1.0));
+d733 1
+a733 1
+	setdatumsymval(d, getdatumsymval(d) + 1.0);
+d746 1
+a746 1
+	setdatumsymval(d, getdatumsymval(d) - 1.0);
+d761 1
+a761 1
+		setdatumnum(d1, 0.0);
+d781 1
+a781 1
+		setdatumnum(d1, 0.0);
+d792 21
+d822 1
+a822 1
+		setdatumnum(d1, 0.0);
+d842 1
+a842 1
+		setdatumnum(d1, 0.0);
+d862 1
+a862 1
+		setdatumnum(d1, 0.0);
+d882 1
+a882 1
+		setdatumnum(d1, 1.0);
+d898 1
+a898 1
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) != 0.0 && getdatumnum(d2) != 0.0));
+d908 1
+a908 1
+	setdatumnum(d1, (fp_t)(getdatumnum(d1) != 0.0 || getdatumnum(d2) != 0.0));
+d917 1
+a917 1
+	setdatumnum(d, (fp_t)(getdatumnum(d) == 0.0));
+d1033 1
+a1033 1
+		s = update_const_number("_", 0.0);
+d1191 1
+a1191 1
+			setdatumnum(d, v = 0.0);
+d1197 1
+a1197 1
+			setdatumnum(d, 1.0);
+d1456 1
+a1456 1
+	len_sub = (getdatumnum(d3) <= 0.0) ? (size_t)0 : (size_t)getdatumnum(d3);
+d1458 1
+a1458 1
+	first = ((getdatumnum(d2) <= 1.0) ? 1 : (size_t)getdatumnum(d2)) - (size_t)1; /* C/C++ 0-based index */
+d1498 1
+a1498 1
+	
+d1518 1
+a1518 1
+	
+@
+
+
+1.7
+log
+@Major revision to hide access to Symbol and Datum structures
+via getxxx() and setxxx() access macros.  This change involved
+hundreds of lines, but the result is that the representation
+of those two structures can now be easily changed.  This was
+precipated by the need to extend the Datum structure with a type
+flag to handle character data: that would have required changing
+almost 200 instances of structure references.
+
+Remove the definition of MAX_STACK, since the stack[] array
+is now dynamically resized.
+
+Remove the definition of MAX_PROG, since the prog[] array
+is now dynamically resized.
+
+Remove the definition of MAX_FRAME, since the frame[] array
+is now dynamically resized.
+
+Add __DEBUG_EVAL__ support.
+
+Add new functions: getargnum(), getargstr(), getargtype(),
+str_to_symnum(), str_to_symstr(), and strarg().
+@
+text
+@d988 1
+a988 5
+	{
+		s = install("_", VAR, 0.0);
+		setsymtype(s, VAR);
+		make_immutable(s);  /* to prevent user reassignment */
+	}
+d1003 1
+a1003 5
+	{
+		s = install("__", VAR, 0.0);
+		setsymtype(s, STRVAR);
+		make_immutable(s);  /* to prevent user reassignment */
+	}
+@
+
+
+1.6
+log
+@Add new Delete() function to support hoc delete() function.
+@
+text
+@d2 1
+a2 1
+#include "y.tab.h"
+d24 51
+a74 3
+#if !defined(MAX_STACK)
+#define	MAX_STACK	2560
+#endif
+d76 2
+a77 2
+static Datum stack[MAX_STACK];	/* the stack */
+static Datum *stackp;		/* next free spot on stack */
+d79 3
+a81 3
+#if !defined(MAX_PROG)
+#define	MAX_PROG	32767
+#endif
+d83 2
+a84 1
+Inst	prog[MAX_PROG];	/* the machine */
+d87 1
+a87 1
+Inst	*progbase = prog; /* start of current subprogram */
+d107 3
+a109 6
+#if !defined(MAX_FRAME)
+#define	MAX_FRAME	1024
+#endif
+
+Frame	frame[MAX_FRAME];
+Frame	*fp;		/* frame pointer */
+d115 2
+a116 2
+	d.sym = (Symbol *)(*pc++);
+	execerror("execution aborted:", d.sym->u.str);
+d123 2
+a124 2
+	d1.sym = (Symbol *)(*pc++);
+	d2.val = (fp_t)(d1.sym->type != UNDEF);
+d132 2
+a133 2
+	d1.sym = (Symbol *)(*pc++);
+	d2.val = delete_symbol(d1.sym);	/* return 1 if delete succeeded, else 0 */
+d143 5
+d187 1
+a187 1
+	d.v = v.val;
+d202 1
+a202 1
+	d2.str = dupstr(xdbltos(d1.val));
+d212 1
+a212 1
+	d2.str = dupstr(xinttos(d1.val));
+d232 1
+a232 1
+	d2.str = dupstr(fmtnum(d1.val));
+d239 9
+a247 2
+	if (stackp >= &stack[MAX_STACK])
+		execerror("stack too deep", (const char*)NULL);
+d260 10
+a269 7
+#if 0
+		(void)fprintf(stderr, "push(): stack depth %lu top = [%g \"%.39s\" 0x%08x]\n",
+			      (unsigned long)depth, d.val, d.str, d.sym);
+#else
+		(void)fprintf(stderr, "push(): stack depth %lu top = [%g 0x%08x]\n",
+			      (unsigned long)depth, d.val, d.sym);
+#endif
+d289 10
+a298 7
+#if 0
+		(void)fprintf(stderr, "pop():  stack depth %lu top = [%g \"%.39s\" 0x%08x]\n",
+			      (unsigned long)depth, d.val, d.str, d.sym);
+#else
+		(void)fprintf(stderr, "pop():  stack depth %lu top = [%g 0x%08x]\n",
+			      (unsigned long)depth, d.val, d.sym);
+#endif
+d317 1
+a317 1
+	d.val = ((Symbol *)*pc++)->u.val;
+d325 1
+a325 1
+	d.sym = (Symbol *)(*pc++);
+d337 1
+a337 1
+	while (d.val) {
+d358 1
+a358 1
+	while (d.val) {
+d379 1
+a379 1
+	if (d.val)
+d390 1
+a390 1
+	sp->u.defn = progbase;	/* start of code */
+d399 15
+a413 7
+	if (fp++ >= &frame[MAX_FRAME-1])
+		execerror(sp->name, "call nested too deeply");
+	fp->sp = sp;
+	fp->nargs = (long)pc[1];
+	fp->retpc = pc + 2;
+	fp->argn = stackp - 1;	/* last argument */
+	execute(sp->u.defn);
+d421 1
+a421 1
+	for (i = 0; i < fp->nargs; i++)
+d423 1
+a423 1
+	pc = (Inst *)fp->retpc;
+d432 2
+a433 2
+	if (fp->sp->type == PROCEDURE)
+		execerror(fp->sp->name, "(proc) returns value");
+d442 2
+a443 2
+	if (fp->sp->type == FUNCTION)
+		execerror(fp->sp->name,
+d449 1
+a449 1
+getarg(void) 	/* return pointer to argument */
+d452 21
+a472 3
+	if (nargs > fp->nargs)
+	    execerror(fp->sp->name, "not enough arguments");
+	return &fp->argn[nargs - fp->nargs].val;
+d479 13
+a491 1
+	d.val = *getarg();
+d501 1
+a501 1
+	*getarg() = d.val;
+d509 1
+a509 1
+	d.val = *getarg() += d.val;
+d518 1
+a518 1
+	d.val = *getarg() -= d.val;
+d527 1
+a527 1
+	d.val = *getarg() *= d.val;
+d536 1
+a536 1
+	d.val = *getarg() /= d.val;
+d547 2
+a548 2
+	/* d.val = *getarg() %= d.val; */
+	x = getarg();
+d550 1
+a550 1
+	d.val = *x = y % (long) d.val;
+d559 1
+a559 1
+	d.val = ((F0_t)*pc++)();
+d569 1
+a569 1
+	d.val = ((F1_t)*pc++)(d.val);
+d580 1
+a580 1
+	d1.val = ((F2_t)*pc++)(d1.val, d2.val);
+d590 1
+a590 1
+	d1.val += d2.val;
+d600 1
+a600 1
+	d1.val -= d2.val;
+d610 1
+a610 1
+	d1.val *= d2.val;
+d622 1
+a622 1
+	if (d2.val == 0.0)
+d626 1
+a626 1
+	d1.val /= d2.val;
+d636 1
+a636 1
+	if (d2.val == 0.0)
+d639 4
+a642 4
+	/* d1.val %= d2.val; */
+	x = (LONG_LONG)d1.val;
+	x %= (LONG_LONG)d2.val;
+	d1.val = (fp_t)x;
+d651 1
+a651 1
+	d.val = -d.val;
+d663 4
+a666 4
+	if (s->type != VAR && s->type != UNDEF)
+		execerror("attempt to evaluate non-variable", s->name);
+	if (s->type == UNDEF)
+		execerror("undefined variable", s->name);
+d673 2
+d676 2
+a677 2
+	verify(d.sym);
+	d.val = d.sym->u.val;
+d685 3
+a687 3
+	d.sym = (Symbol *)(*pc++);
+	verify(d.sym);
+	d.val = d.sym->u.val += 1.0;
+d695 3
+a697 3
+	d.sym = (Symbol *)(*pc++);
+	verify(d.sym);
+	d.val = d.sym->u.val -= 1.0;
+d706 5
+a710 5
+	d.sym = (Symbol *)(*pc++);
+	verify(d.sym);
+	v = d.sym->u.val;
+	d.sym->u.val += 1.0;
+	d.val = v;
+d719 5
+a723 5
+	d.sym = (Symbol *)(*pc++);
+	verify(d.sym);
+	v = d.sym->u.val;
+	d.sym->u.val -= 1.0;
+	d.val = v;
+d735 1
+a735 1
+	if (IsNaN(d1.val) || IsNaN(d2.val))
+d737 1
+a737 1
+		d1.val = 0.0;
+d743 1
+a743 1
+	d1.val = (fp_t)(d1.val > d2.val);
+d755 1
+a755 1
+	if (IsNaN(d1.val) || IsNaN(d2.val))
+d757 1
+a757 1
+		d1.val = 0.0;
+d763 1
+a763 1
+	d1.val = (fp_t)(d1.val < d2.val);
+d775 1
+a775 1
+	if (IsNaN(d1.val) || IsNaN(d2.val))
+d777 1
+a777 1
+		d1.val = 0.0;
+d783 1
+a783 1
+	d1.val = (fp_t)(d1.val >= d2.val);
+d795 1
+a795 1
+	if (IsNaN(d1.val) || IsNaN(d2.val))
+d797 1
+a797 1
+		d1.val = 0.0;
+d803 1
+a803 1
+	d1.val = (fp_t)(d1.val <= d2.val);
+d815 1
+a815 1
+	if (IsNaN(d1.val) || IsNaN(d2.val))
+d817 1
+a817 1
+		d1.val = 0.0;
+d823 1
+a823 1
+	d1.val = (fp_t)(d1.val == d2.val);
+d835 1
+a835 1
+	if (IsNaN(d1.val) || IsNaN(d2.val))
+d837 1
+a837 1
+		d1.val = 1.0;
+d843 1
+a843 1
+	d1.val = (fp_t)(d1.val != d2.val);
+d853 1
+a853 1
+	d1.val = (fp_t)(d1.val != 0.0 && d2.val != 0.0);
+d863 1
+a863 1
+	d1.val = (fp_t)(d1.val != 0.0 || d2.val != 0.0);
+d872 1
+a872 1
+	d.val = (fp_t)(d.val == 0.0);
+d882 1
+a882 1
+	d1.val = Pow(d1.val, d2.val);
+d892 5
+a896 5
+	if (d1.sym->type == STRVAR)	/* perhaps we will rescind this restriction in the future */
+		execerror("illegal assignment of number to existing string variable", d1.sym->name);
+	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
+		execerror("assignment to non-variable", d1.sym->name);
+	if (d1.sym->immutable)
+d898 3
+a900 3
+			  d1.sym->name);
+	d1.sym->u.val = d2.val;
+	d1.sym->type = VAR;
+d910 1
+a910 1
+	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
+d912 3
+a914 3
+			d1.sym->name);
+	d2.val = d1.sym->u.val += d2.val;
+	d1.sym->type = VAR;
+d924 1
+a924 1
+	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
+d926 3
+a928 3
+			d1.sym->name);
+	d2.val = d1.sym->u.val -= d2.val;
+	d1.sym->type = VAR;
+d938 1
+a938 1
+	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
+d940 3
+a942 3
+			d1.sym->name);
+	d2.val = d1.sym->u.val *= d2.val;
+	d1.sym->type = VAR;
+d952 1
+a952 1
+	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
+d954 3
+a956 3
+			d1.sym->name);
+	d2.val = d1.sym->u.val /= d2.val;
+	d1.sym->type = VAR;
+d967 1
+a967 1
+	if (d1.sym->type != VAR && d1.sym->type != UNDEF)
+d969 9
+a977 6
+			d1.sym->name);
+	/* d2.val = d1.sym->u.val %= d2.val; */
+	x = (long)d1.sym->u.val;
+	x %= (long) d2.val;
+	d2.val = d1.sym->u.val = x;
+	d1.sym->type = VAR;
+d990 1
+a990 1
+		s->type = VAR;
+d994 1
+a994 1
+	prnum(d.val);
+d996 1
+a996 1
+	s->u.val = d.val;
+d1004 2
+d1009 1
+a1009 1
+		s->type = STRVAR;
+d1013 7
+a1019 3
+	prtext(d.str);
+	prtext("\n");
+	(void)set_string(s, d.str);
+d1027 14
+a1040 2
+	prnum(d.val);
+	prtext(" ");
+d1060 1
+a1060 1
+	prtext(d.str);
+d1102 4
+a1105 4
+		if (var->type == VAR)	/* perhaps we will rescind this restriction in the future */
+			execerror("illegal assignment of string to existing numeric variable", var->name);
+		if (var->type != STRVAR && var->type != UNDEF)
+			execerror("assignment to non-variable", var->name);
+d1109 2
+a1110 2
+		(void)update_string(var->name, yygetstr());
+		d.val = (fp_t)(!feof(fin));
+d1118 2
+a1119 2
+		if (var->type != STRVAR && var->type != VAR && var->type != UNDEF)
+			execerror("assignment to non-variable", var->name);
+d1121 2
+a1122 2
+		if (s->type != STRVAR && s->type != VAR)
+			execerror("assignment from non-variable", s->name);
+d1124 2
+a1125 2
+		if (var->type == UNDEF)		/* creating new symbol */
+			var->type = s->type;
+d1128 9
+a1136 9
+		if (var->type == VAR && s->type == STRVAR)
+			execerror("illegal assignment of string to existing numeric variable", var->name);
+		else if (var->type == STRVAR && s->type == VAR)
+			execerror("illegal assignment of number to existing string variable", var->name);
+
+		if (var->type == VAR)
+			(void)update_number(var->name, s->u.val);
+		else if (var->type == STRVAR)
+			(void)update_string(var->name, s->u.str);
+d1138 2
+a1139 2
+			execerror("internal type confusion in read() of", var->name);
+		d.val = (fp_t)(!feof(fin));
+d1144 4
+a1147 4
+		if (var->type == STRVAR)	/* perhaps we will rescind this restriction in the future */
+			execerror("illegal assignment of number to existing string variable", var->name);
+		if (var->type != VAR && var->type != UNDEF)
+			execerror("assignment to non-variable", var->name);
+d1154 1
+a1154 1
+			d.val = v = 0.0;
+d1157 1
+a1157 1
+			execerror("non-number read into", var->name);
+d1160 1
+a1160 1
+			d.val = 1.0;
+d1163 1
+a1163 1
+		(void)update_number(var->name, v);
+d1172 3
+a1174 1
+	if (progp >= &prog[MAX_PROG])
+d1176 15
+d1203 1
+a1203 1
+	make_immutable(d.sym);	    /* to prevent user reassignment */
+d1217 1
+a1217 1
+	d.str = ((Symbol *)*pc++)->u.str;
+d1229 1
+a1229 1
+	make_immutable(d.sym);	    /* to prevent user reassignment */
+d1238 5
+a1242 5
+	if (d1.sym->type == VAR)	/* perhaps we will rescind this restriction in the future */
+		execerror("illegal assignment of string to existing numeric variable", d1.sym->name);
+	if (d1.sym->type != STRVAR && d1.sym->type != UNDEF)
+		execerror("assignment to non-variable", d1.sym->name);
+	if (d1.sym->immutable)
+d1244 3
+a1246 3
+			  d1.sym->name);
+	(void)set_string(d1.sym, d2.str);
+	d1.sym->type = STRVAR;
+d1260 2
+a1261 2
+	(void)strcpy(nbuf1, fmtnum(d1.val));
+	(void)strcpy(nbuf2, fmtnum(d2.val));
+d1263 1
+a1263 1
+	d3.str = concat2(nbuf1,nbuf2);
+d1274 1
+a1274 1
+	d3.str = concat2(fmtnum(d1.val), d2.str);
+d1285 1
+a1285 1
+	d3.str = concat2(d1.str, fmtnum(d2.val));
+d1298 1
+a1298 1
+	if ((d1.sym->type != STRING) && (d2.sym->type != STRING))
+d1302 1
+a1302 1
+	d3.str = concat2(d1.str, d2.str);
+d1313 1
+a1313 1
+	d1.val = (fp_t)(strcmp(d1.str,d2.str) == 0);
+d1324 1
+a1324 1
+	d1.val = (fp_t)(strcmp(d1.str,d2.str) >= 0);
+d1335 1
+a1335 1
+	d1.val = (fp_t)(strcmp(d1.str,d2.str) > 0);
+d1347 2
+a1348 2
+	p = (const char*)strstr(d1.str, d2.str);
+	d3.val = (fp_t)((p == (const char*)NULL) ? 0 : ((p - d1.str) + 1));
+d1359 1
+a1359 1
+	d1.val = (fp_t)(strcmp(d1.str,d2.str) <= 0);
+d1370 1
+a1370 1
+	d2.val = (fp_t)strlen(d1.str);
+d1381 1
+a1381 1
+	d1.val = (fp_t)(strcmp(d1.str,d2.str) < 0);
+d1392 1
+a1392 1
+	d1.val = (fp_t)(strcmp(d1.str,d2.str) != 0);
+d1402 1
+a1402 1
+	d3.str = dupstr(Strftime(d1.str, d2.val));
+d1418 2
+a1419 2
+	len_str = strlen(d1.str);
+	len_sub = (d3.val <= 0.0) ? (size_t)0 : (size_t)d3.val;
+d1421 1
+a1421 1
+	first = ((d2.val <= 1.0) ? 1 : (size_t)d2.val) - (size_t)1; /* C/C++ 0-based index */
+d1434 1
+a1434 1
+		(void)strncpy(p,&d1.str[first],len_sub);
+d1436 1
+a1436 1
+		d3.str = (const char*)p;
+d1439 1
+a1439 1
+		d3.str = dupstr("");
+d1449 32
+a1480 1
+	d2.val = strton(d1.str, (char**)NULL);
+d1482 9
+d1495 6
+d1505 1
+a1505 1
+	d.str = ((SF0_t)*pc++)();
+d1515 1
+a1515 1
+	d.str = ((SF1_t)*pc++)(d.str);
+d1526 1
+a1526 1
+	d1.str = ((SF2_t)*pc++)(d1.str, d2.str);
+d1535 3
+a1537 3
+	if (d.sym->type != STRVAR)
+		execerror("attempt to evaluate nonstring variable", d.sym->name);
+	d.str = d.sym->u.str;
+@
+
+
+1.5
+log
+@Add new Defined() function, needed for the hoc defined() function.
+@
+text
+@d82 9
+@
+
+
+1.4
+log
+@Move most of body of str_to_num() into new function, strton() in
+string.c, and call strton() instead.
+
+In varread(), do not accept a newly-created name of type UNDEF
+as an acceptable input variable whose value is to be used for
+the read().
+@
+text
+@d73 9
+@
+
+
+1.3
+log
+@Major update, with many new functions for string support, and
+change of type double to type fp_t.
+@
+text
+@d978 1
+a978 1
+		if (s->type != STRVAR && s->type != VAR && s->type != UNDEF)
+a1286 3
+	const char *s;
+	const char *t;
+	int sign;
+d1289 2
+a1290 50
+
+	s = d1.str;
+
+	while (isspace(*s))		/* skip leading space */
+		++s;
+
+	if (*s == '-')
+	{
+		s++;
+		sign = -1;
+	}
+	else if (*s == '+')
+	{
+		s++;
+		sign = 1;
+	}
+	else
+		sign = 1;
+
+	t = Tolower(s);
+
+	/* C99 allows "NAN(n-char-sequence)" (and SGI IRIX already
+	produces this in C89), but we don't check for a close
+	parenthesis: C99 leaves it implementation dependent whether
+	the parentheses are balanced. */
+
+	if ((strcmp(t,"nan") == 0) || (strncmp(t,"nan(",4) == 0))
+		d2.val = NaN();
+	else if ((strcmp(t,"qnan") == 0) || (strncmp(t,"qnan(",5) == 0))
+		d2.val = QNaN();
+	else if ((strcmp(t,"snan") == 0) || (strncmp(t,"snan(",5) == 0))
+		d2.val = SNaN();
+	else if ((strcmp(t,"inf") == 0) || (strcmp(t,"infinity") == 0))
+		d2.val = Infinity();
+	else
+	{
+		char *endptr;
+
+		/* Try the hexadecimal form first, and if that fails, use
+		   whatever native strtod() returns */
+		d2.val = xstrtod(t, &endptr);
+
+		if (*endptr != '\0')
+			d2.val = (fp_t)strtod(t, &endptr);
+	}
+	efree((void*)t);
+
+	if (sign < 0)
+		d2.val = -d2.val;
+
+@
+
+
+1.2
+log
+@There are many changes in this file.
+
+All code now conforms to strict 1989 and 1999 ISO Standard C, and 1998
+ISO Standard C++.  This means explicit typing of all functions, renaming
+of the private functions and(), not(), and or(), to And(), Not(), and
+Or() to avoid conflicts with C++ reserved words, extensive use of the
+const type modifier, and use of explicit casts on data and pointer
+conversions.  While the original terse writing of "p = 0" is shorter
+than "p = (const char*)NULL", the latter makes explicit that there is a
+pointer data conversion.  Such casts are recommended practice in modern
+programming, and required practice in C++ (at least for integer
+constants other than 0 being converted to pointers).
+
+New functions:
+        abort_user(),
+        bltin0(),
+        bltin1() [the original bltin(), with a new name
+        reflecting the function argument count],
+        bltin2(),
+        const_assign(),
+        const_str_assign(),
+        const_str_push(),
+        hex(),
+        noop(),
+        printtopstring(),
+        prstr(),
+        str_assign(),
+        str_concat(),
+        streval(), and
+        who().
+
+Add GNU readline support.
+
+Protect header file inclusion with feature-test conditionals.
+
+Make array dimensions changeable at compile time, and increase them,
+since we now handle considerably larger hoc programs since the old
+PDP-11 days.
+
+Change nargs from int to long to remove some unnecessary type coercions.
+
+When HAVE_IEEE_754 is defined (as it will be on almost all modern
+systems), floating-point exceptions no longer terminate execution.
+
+In assign() and str_assign(), prevent assignment to immutable named
+constants.
+
+Use get_precision() to get the current value of PREC, instead of
+explicit symbol table lookup, both for information hiding, and to
+simplify the code.
+@
+text
+@d4 4
+d16 5
+a20 2
+#if defined(HAVE_GNU_READLINE)
+extern int rl_fscanf(FILE *fpin_, const char *format_, void *pdata_);
+d22 1
+a22 2
+#define fscanf(fpin,format,pdata)	rl_fscanf(fpin,format,pdata)
+#endif
+d24 2
+a25 2
+#if !defined(NSTACK)
+#define	NSTACK	2560
+d28 1
+a28 1
+static Datum stack[NSTACK];	/* the stack */
+d31 2
+a32 2
+#if !defined(NPROG)
+#define	NPROG	20000
+d35 1
+a35 1
+Inst	prog[NPROG];	/* the machine */
+d42 4
+d53 10
+a62 2
+#define	NFRAME	1024
+Frame	frame[NFRAME];
+d73 36
+d112 1
+a112 6
+	union
+	{
+		double v;
+		unsigned int i[2];
+	} d;
+	int big_endian;
+d114 2
+a115 3
+
+	d.v = 1.0;
+	big_endian = (d.i[0] != 0) ? 1 : 0;
+d119 5
+a123 1
+	(void)printf("0x%08x_%08x\n", d.i[1 - big_endian], d.i[big_endian]);
+d128 20
+d158 10
+d170 1
+a170 1
+	if (stackp >= &stack[NSTACK])
+d173 21
+d196 1
+a196 1
+Datum
+d199 21
+d317 1
+a317 1
+	if (fp++ >= &frame[NFRAME-1])
+d358 1
+a358 1
+double*
+d424 1
+a424 1
+	double *x;
+d514 1
+a514 1
+	long x;
+d520 3
+a522 3
+	x = (long)d1.val;
+	x %= (long) d2.val;
+	d1.val = d2.val = x;
+d540 1
+a540 1
+void
+d583 1
+a583 1
+	double v;
+d596 1
+a596 1
+	double v;
+d611 11
+a621 1
+	d1.val = (double)(d1.val > d2.val);
+d631 11
+a641 1
+	d1.val = (double)(d1.val < d2.val);
+d651 11
+a661 1
+	d1.val = (double)(d1.val >= d2.val);
+d671 11
+a681 1
+	d1.val = (double)(d1.val <= d2.val);
+d691 11
+a701 1
+	d1.val = (double)(d1.val == d2.val);
+d711 11
+a721 1
+	d1.val = (double)(d1.val != d2.val);
+d731 1
+a731 1
+	d1.val = (double)(d1.val != 0.0 && d2.val != 0.0);
+d741 1
+a741 1
+	d1.val = (double)(d1.val != 0.0 || d2.val != 0.0);
+d750 1
+a750 1
+	d.val = (double)(d.val == 0.0);
+d770 2
+d861 1
+d866 1
+a866 1
+		s->immutable = 1;	/* to prevent user reassignment */
+d869 2
+a870 1
+	printf("%.*g\n", get_precision(), d.val);
+d882 2
+a883 2
+		s->type = STRING;
+		s->immutable = 1;	/* to prevent user reassignment */
+d886 2
+a887 1
+	printf("%s\n", d.str);
+d896 14
+a909 1
+	printf("%.*g ", get_precision(), d.val);
+d917 26
+a942 1
+	printf("%s", d.str);
+d950 71
+a1020 13
+  Again:
+	switch (fscanf(fin, "%lf", &var->u.val)) {
+	case EOF:
+		if (moreinput())
+			goto Again;
+		d.val = var->u.val = 0.0;
+		break;
+	case 0:
+		execerror("non-number read into", var->name);
+		break;
+	default:
+		d.val = 1.0;
+		break;
+a1021 1
+	var->type = VAR;
+d1029 1
+a1029 1
+	if (progp >= &prog[NPROG])
+d1043 1
+a1043 1
+	d.sym->immutable = 1;
+d1069 1
+a1069 1
+	d.sym->immutable = 1;
+d1078 3
+a1080 1
+	if (d1.sym->type != VAR && d1.sym->type != STRVAR && d1.sym->type != UNDEF)
+d1091 40
+a1130 1
+str_concat(void)		/* concatenate strings on stack */
+d1142 138
+a1279 2
+	d3.str = strcat(strcpy((char*)emalloc(strlen(d1.str) + strlen(d2.str) + 1),
+			       d1.str), d2.str);
+d1284 92
+d1386 2
+a1387 2
+void
+who(void)
+d1389 2
+a1390 1
+	dump_syms();
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 2
+d6 1
+d8 13
+a20 1
+#define	NSTACK	256
+d25 4
+a28 1
+#define	NPROG	2000
+d35 1
+d41 1
+a41 1
+	int	nargs;	/* number of arguments */
+d43 1
+a43 1
+#define	NFRAME	100
+d48 28
+d89 1
+a89 1
+		execerror("stack too deep", 0);
+d97 1
+a97 1
+		execerror("stack underflow", 0);
+d104 1
+a104 3
+	if (stackp == stack)
+		execerror("stack underflow", (char *)0);
+	--stackp;
+d149 1
+a149 1
+	pop();
+d157 1
+a157 1
+		pop();
+d166 1
+a166 1
+ifcode(void) 
+d174 1
+a174 1
+		execute(*((Inst **)(savepc)));	
+d196 1
+a196 1
+	fp->nargs = (int)pc[1];
+d208 1
+a208 1
+		pop();	/* pop arguments */
+d237 1
+a237 1
+	int nargs = (int) *pc++;
+d305 1
+a305 1
+	y = *x;
+d311 10
+a320 1
+bltin(void) 
+d325 1
+a325 1
+	d.val = (*(double (*)(double))*pc++)(d.val);
+d330 11
+d375 3
+d379 2
+a380 1
+		execerror("division by zero", (char *)0);
+d393 1
+a393 1
+		execerror("division by zero", (char *)0);
+d396 1
+a396 1
+	x = d1.val;
+d412 5
+d542 1
+a542 1
+and(void)
+d552 1
+a552 1
+or(void)
+d562 1
+a562 1
+not(void)
+d587 4
+a590 2
+		execerror("assignment to non-variable",
+			d1.sym->name);
+d663 1
+a663 1
+	x = d1.sym->u.val;
+d675 2
+a676 1
+	if (s == 0)
+d678 3
+d682 1
+a682 1
+	printf("%.*g\n", (int)lookup("PREC")->u.val, d.val);
+d687 17
+a703 1
+prexpr(void)	/* print numeric value */
+d707 1
+a707 1
+	printf("%.*g ", (int)lookup("PREC")->u.val, d.val);
+d711 1
+a711 1
+prstr(void)		/* print string value */ 
+d713 3
+a715 1
+	printf("%s", (char *) *pc++);
+a721 1
+	extern FILE *fin;
+d746 1
+a746 1
+		execerror("program too big", (char *)0);
+d752 11
+d767 70
+@

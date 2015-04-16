@@ -1,0 +1,49 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.33;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### This file is loaded by the endinput.hoc test.
+### [07-Jan-2002]
+### ====================================================================
+
+println "Loaded endinp00.hoc: level =", level
+
+proc endcheck() \
+{
+	if (level <= $1) \
+		endinput() \
+	else \
+		println "Got past level", $1, "endinput()"
+}
+
+endcheck(0)
+endcheck(1)
+endcheck(2)
+endcheck(3)
+endcheck(4)
+endcheck(5)
+endcheck(6)
+endcheck(7)
+@

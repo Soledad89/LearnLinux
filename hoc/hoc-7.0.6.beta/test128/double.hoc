@@ -1,0 +1,10 @@
+proc double_to(){
+}
+proc double_to(){
+	if($1 > 1){
+		double_to($1/2)
+	}
+	print $1, ""
+}
+double_to(1024)
+print "\n"

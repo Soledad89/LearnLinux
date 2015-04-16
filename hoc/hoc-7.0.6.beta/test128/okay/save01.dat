@@ -1,0 +1,12 @@
+### -*-hoc-*-
+### ====================================================================
+### This is hoc save file save01.dat
+### Creator:           hoc version 7.0.6.beta [09-Aug-2002]
+### CreationDate:      Tue Jul 30 15:39:55 MDT 2002
+### PackageBugReports: Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+
+e_inverse              	= +0x1.78b56362cef37c6aeb7b1e0a4154p-2	# 0.367879441171442321595523770161460873
+t_e_inverse            	= "e_inverse = 1/E"
+t_two_pi               	= "two_pi = 2*PI"
+two_pi                 	= +0x1.921fb54442d18469898cc51701b8p+2	# 6.28318530717958647692528676655900559

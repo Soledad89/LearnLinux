@@ -1,0 +1,1448 @@
+head	1.7;
+access;
+symbols;
+locks
+	beebe:1.7; strict;
+comment	@ * @;
+
+
+1.7
+date	2002.06.23.17.50.23;	author beebe;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.06.15.22.41.56;	author beebe;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.01.27.18.19.43;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.01.01.14.55.31;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2001.12.12.01.30.42;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	98.03.05.18.28.16;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.03.05.16.50.19;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@Add better definition of fallback version of log1p(), which
+does, however, rely on an accurate underlying log().
+@
+text
+@#include "hoc.h"
+
+#if defined(HAVE_ERRNO_H)
+#include <errno.h>
+#endif
+
+#if defined(HAVE_FLOAT_H)
+#include <float.h>
+#endif
+
+#if defined(HAVE_MATH_H)
+#include <math.h>
+#endif
+
+#define LOG10_2 FP(0.3010299956639811952137388947244930267682)
+
+#if defined(DBL_MAX)
+#define LOG_DBL_MAX log(DBL_MAX)
+#else
+#define LOG_DBL_MAX FP(88.72) /* approximate value of log(DBL_MAX) for DEC VAX F-floating */
+#endif
+
+static fp_t	errcheck ARGS((fp_t, const char*));
+EXTERN int signgam;
+
+static fp_t
+errcheck(fp_t d, const char* s)	/* check result of library call */
+{
+	if (errno == EDOM) {
+		errno = 0;
+#if defined(HAVE_IEEE_754)
+		/* accept the default value */
+#else
+		execerror(s, "argument out of domain");
+#endif
+	} else if (errno == ERANGE) {
+		errno = 0;
+#if defined(HAVE_IEEE_754)
+		/* accept the default value */
+#else
+		execerror(s, "result out of range");
+#endif
+	}
+	return d;
+}
+
+fp_t
+Abs(fp_t x)
+{
+	return (fabs(x));
+}
+
+fp_t
+Acos(fp_t x)
+{
+	return errcheck(acos(x), "acos");
+}
+
+fp_t
+Acosh(fp_t x)
+{
+#if defined(HAVE_ACOSH)
+	return (acosh(x));
+#else
+	execerror("acosh(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Asin(fp_t x)
+{
+	return errcheck(asin(x), "asin");
+}
+
+fp_t
+Asinh(fp_t x)
+{
+#if defined(HAVE_ASINH)
+	return (asinh(x));
+#else
+	execerror("asinh(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Atan(fp_t x)
+{
+	return (atan(x));
+}
+
+fp_t
+Atanh(fp_t x)
+{
+#if defined(HAVE_ATANH)
+	return (atanh(x));
+#else
+	execerror("atanh(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Cbrt(fp_t x)
+{
+#if defined(HAVE_CBRT)
+	return (cbrt(x));
+#else
+	return (pow(x,FP(1.0)/FP(3.0)));
+#endif
+}
+
+fp_t
+Cos(fp_t x)
+{
+	return (cos(x));
+}
+
+fp_t
+Cosh(fp_t x)
+{
+	return errcheck(cosh(x), "cosh");
+}
+
+fp_t
+Double(fp_t x)
+{
+    return ((fp_t)((double)x));
+}
+
+
+fp_t
+Erf(fp_t x)
+{
+#if defined(HAVE_ERF)
+	return (erf(x));
+#else
+	execerror("erf(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Erfc(fp_t x)
+{
+#if defined(HAVE_ERFC)
+	return (erfc(x));
+#else
+	execerror("erfc(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Exp(fp_t x)
+{
+#if defined(HAVE_NAN_BOTCH)
+	/* The Portland Group math library incorrectly returns NaN for
+	these cases, sigh... */
+	if (IsInf(x))
+	{
+		if (x < 0)
+			return (FP(0.0));
+		else
+			return (x);
+	}
+#endif
+	return errcheck(exp(x), "exp");
+}
+
+fp_t
+Expm1(fp_t x)
+{
+#if defined(HAVE_EXPM1)
+	return (expm1(x));
+#else
+	return (exp(x) - FP(1.0));		/* TO BE FIXED: inaccurate for small x */
+#endif
+}
+
+fp_t
+Gamma(fp_t x)
+{
+	fp_t y;
+
+	if (IsNaN(x))
+		return (x);
+	else if (IsInf(x))
+		return ((x > 0) ? x : NaN());
+
+	y = Lgamma(x);
+
+#if defined(HAVE_IEEE_754)
+#else
+	y=errcheck(y, "gamma");
+	if(y > LOG_DBL_MAX)
+		execerror("gamma result out of range", (char *)NULL);
+#endif
+
+	/* signgam is documented to be -1 or +1, yet on Sun Solaris
+	   2.7 and 2.8, with ``Sun WorkShop 6 update 1 C++ 5.2 Patch
+	   109508-01 2001/01/31'', and the later ``Sun WorkShop 6
+	   update 2 C++ 5.3 2001/05/15'', when hoc is compiled with
+	   either C or C++, and then linked with shared libraries,
+	   signgam is 0 on return from both lgamma() and gamma()!  The
+	   same object files, when linked staticly, produce correct
+	   signgam values.  Curiously, a short test program does not
+	   reproduce this bug. */
+
+	if (signgam == 0)		/* should never happen */
+	{
+		int nmod2;
+
+		nmod2 = (LONG_LONG)fabs(x) % (LONG_LONG)2;
+		if (x >= FP(0.0))	/* Gamma() > 0 for x >= 0 */
+			signgam = 1;
+		else if (nmod2 == 0)	/* Gamma() is negative for negative even n */
+			signgam = -1;
+		else			/* Gamma() is positive for negative odd n */
+			signgam = 1;
+	}
+
+	return (signgam * exp(y));
+}
+
+fp_t
+Hypot(fp_t x, fp_t y)
+{
+	/***************************************************************
+	   Discussion on the IEEE 754 Standard mailing list on
+	   10-Dec-2001 cited this desired behavior of hypot():
+
+	   ... From the 4.3BSD man page for hypot:
+
+		NOTES
+		     As might be expected, hypot(v,NaN) and
+		     hypot(NaN,v) are NaN for all finite v; with
+		     "reserved operand" in place of "NaN", the same is
+		     true on a VAX.  But programmers on machines other
+		     than a VAX (it has no infinity) might be
+		     surprised at first to discover that
+		     hypot(+infinity,NaN) = +infinity.  This is
+		     intentional; it happens because hypot(infinity,v)
+		     = +infinity for all v, finite or infinite.  Hence
+		     hypot(infinity,v) is independent of v.  Unlike
+		     the reserved operand on a VAX, the IEEE NaN is
+		     designed to disappear when it turns out to be
+		     irrelevant, as it does in hypot(infinity,NaN).
+
+	   Tests show that native implementations did not always
+	   conform, so we add our own special handling.
+	***************************************************************/
+
+	if (IsInf(x) || IsInf(y))
+	   	return (Infinity());
+
+#if defined(HAVE_HYPOT)
+	return (hypot(x,y));
+#else
+	if (IsNaN(x))
+		return (x);
+	else if (IsNaN(y))
+		return (y);
+	else if (fabs(x) > fabs(y))
+		return (fabs(x)*sqrt(FP(1.0) + (y/x)*(y/x)));
+	else if (fabs(x) < fabs(y))
+		return (fabs(y)*sqrt(FP(1.0) + (x/y)*(x/y)));
+	else				/* must be equal */
+		return (fabs(x)*sqrt(FP(2.0)));
+#endif
+}
+
+fp_t
+J0(fp_t x)
+{
+#if defined(HAVE_J0)
+	return (j0(x));
+#else
+	execerror("J0(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+J1(fp_t x)
+{
+#if defined(HAVE_J1)
+	return (j1(x));
+#else
+	execerror("J1(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Jn(fp_t n, fp_t x)
+{
+#if defined(HAVE_JN)
+	return (jn((int)n, x));
+#else
+	execerror("Jn(n,x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Lgamma(fp_t x)
+{
+	/* return log(abs(Gamma(x))) */
+#if defined(HAVE_LGAMMA)
+	return (lgamma(x));
+#elif defined(HAVE_GAMMA)
+	return (gamma(x));		/* gamma() in C is log(Gamma()) */
+#else
+	execerror("lgamma(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Log(fp_t x)
+{
+	return errcheck(log(x), "log");
+}
+
+fp_t
+Log10(fp_t x)
+{
+	return errcheck(log10(x), "log10");
+}
+
+fp_t
+Log1p(fp_t x)
+{
+#if defined(HAVE_LOG1P)
+	return (log1p(x));
+#else
+	fp_t u;
+	/* Use log(), corrected to first order for truncation loss */
+	u = FP(1.0) + x;
+	if (u == FP(1.0))
+		return (x);
+	else
+		return (log(u) * (x / (u - FP(1.0)) ));
+#endif
+}
+
+fp_t
+Log2(fp_t x)
+{
+	return errcheck(log10(x)/LOG10_2, "log2");
+}
+
+fp_t
+Pow(fp_t x, fp_t y)
+{
+	return errcheck(pow(x,y), "exponentiation");
+}
+
+fp_t
+Rsqrt(fp_t x)
+{
+#if defined(HAVE_RSQRT)
+	return (rsqrt(x));
+#else
+	return (FP(1.0) / sqrt(x));
+#endif
+}
+
+fp_t
+Sin(fp_t x)
+{
+	return (sin(x));
+}
+
+fp_t
+Single(fp_t x)
+{
+    return ((fp_t)((float)x));
+}
+
+
+fp_t
+Sinh(fp_t x)
+{
+	return errcheck(sinh(x), "sinh");
+}
+
+fp_t
+Sqrt(fp_t x)
+{
+	return errcheck(sqrt(x), "sqrt");
+}
+
+fp_t
+Tan(fp_t x)
+{
+	return (tan(x));
+}
+
+fp_t
+Tanh(fp_t x)
+{
+	return (tanh(x));
+}
+
+fp_t
+Y0(fp_t x)
+{
+#if defined(HAVE_Y0)
+	return (y0(x));
+#else
+	execerror("Y0(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Y1(fp_t x)
+{
+#if defined(HAVE_Y1)
+	return (y1(x));
+#else
+	execerror("Y1(x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+
+fp_t
+Yn(fp_t n, fp_t x)
+{
+#if defined(HAVE_YN)
+	return (yn((int)n, x));
+#else
+	execerror("Yn(n,x) is not available on this system", (const char*)NULL);
+	return (FP(0.0));			/* NOT REACHED */
+#endif
+}
+@
+
+
+1.6
+log
+@Add Double() and Single() function implementations.
+@
+text
+@d339 7
+a345 1
+	return (log(FP(1.0) + x));		/* TO BE FIXED: inaccurate for small x */
+@
+
+
+1.5
+log
+@Add FP() wrappers on floating-point constants.
+@
+text
+@d127 7
+d372 7
+@
+
+
+1.4
+log
+@Major update, with several new functions, and removal of several
+others, which now are in ieee754.c.
+@
+text
+@d15 1
+a15 1
+#define LOG10_2 0.3010299956639811952137388947244930267682
+d20 1
+a20 1
+#define LOG_DBL_MAX 88.72 /* approximate value of log(DBL_MAX) for DEC VAX F-floating */
+d66 1
+a66 1
+	return (0.0);			/* NOT REACHED */
+d83 1
+a83 1
+	return (0.0);			/* NOT REACHED */
+d100 1
+a100 1
+	return (0.0);			/* NOT REACHED */
+d110 1
+a110 1
+	return (pow(x,1.0/3.0));
+d133 1
+a133 1
+	return (0.0);			/* NOT REACHED */
+d144 1
+a144 1
+	return (0.0);			/* NOT REACHED */
+d157 1
+a157 1
+			return (0.0);
+d171 1
+a171 1
+	return (exp(x) - 1.0);		/* TO BE FIXED: inaccurate for small x */
+d209 1
+a209 1
+		if (x >= 0.0)		/* Gamma() > 0 for x >= 0 */
+d259 1
+a259 1
+		return (fabs(x)*sqrt(1.0 + (y/x)*(y/x)));
+d261 1
+a261 1
+		return (fabs(y)*sqrt(1.0 + (x/y)*(x/y)));
+d263 1
+a263 1
+		return (fabs(x)*sqrt(2.0));
+d274 1
+a274 1
+	return (0.0);			/* NOT REACHED */
+d285 1
+a285 1
+	return (0.0);			/* NOT REACHED */
+d296 1
+a296 1
+	return (0.0);			/* NOT REACHED */
+d310 1
+a310 1
+	return (0.0);			/* NOT REACHED */
+d332 1
+a332 1
+	return (log(1.0 + x));		/* TO BE FIXED: inaccurate for small x */
+d354 1
+a354 1
+	return (1.0 / sqrt(x));
+d395 1
+a395 1
+	return (0.0);			/* NOT REACHED */
+d406 1
+a406 1
+	return (0.0);			/* NOT REACHED */
+d417 1
+a417 1
+	return (0.0);			/* NOT REACHED */
+@
+
+
+1.3
+log
+@There are a great many changes in this file.
+
+The most significant is that ALL hoc functions now go through interface
+functions.  In hoc version 6, some did, and some did not.  This change
+makes it easy to provide additional features to make library functions
+more uniform across platforms, and to provide private implementations.
+It will also facilitate adding support later for run-time profiling.
+
+Instead of the original small set of 18 functions (three of which are
+not universally supplied in C libraries), there are now 59 built-in
+functions, providing access to the union of mathematical library support
+available in UNIX C implementations.  Some will fall back to less
+accurate implementations if the native library support is not available;
+others will declare a run-time failure, and abort the expression in
+which they were used (but NOT the hoc job!).
+
+Built-in functions fall into three classes, according to the fixed
+number of arguments that they take: 0, 1, or 2.  I felt that it was
+better to enforce the argument count in the grammar, rather than have a
+generic n-argument function call that trusted users to get the argument
+counts right.
+
+Interface functions are stored alphabetically in the source file,
+instead of in the old haphazard order of hoc version 6.
+@
+text
+@a14 23
+#if defined(HAVE_STDLIB_H)
+#include <stdlib.h>
+#endif
+
+#if defined(HAVE_TIME_H)
+#include <time.h>
+#endif
+
+#if defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+
+#if defined(__cplusplus) || defined(c_plusplus)
+#define EXTERN extern "C"
+#else
+#define EXTERN extern
+#endif
+
+/* These functions are in -lm, but are missing from math.h, sigh... */
+EXTERN double trunc(double);		/* all GNU/Linux */
+EXTERN int ilogb(double);		/* Compaq/DEC OSF/1 */
+EXTERN double nearest(double,double);	/* Compaq/DEC OSF/1 */
+
+d23 1
+a23 1
+static double	errcheck(double, const char*);
+d26 2
+a27 2
+static double
+errcheck(double d, const char* s)	/* check result of library call */
+d47 2
+a48 2
+double
+Abs(double x)
+d53 2
+a54 2
+double
+Acos(double x)
+d59 2
+a60 2
+double
+Acosh(double x)
+d65 1
+a65 1
+	execerror("acosh(x) is not available on this system.", (const char*)NULL);
+d70 2
+a71 2
+double
+Asin(double x)
+d76 2
+a77 2
+double
+Asinh(double x)
+d82 1
+a82 1
+	execerror("asinh(x) is not available on this system.", (const char*)NULL);
+d87 2
+a88 2
+double
+Atan(double x)
+d93 2
+a94 2
+double
+Atanh(double x)
+d99 1
+a99 1
+	execerror("atanh(x) is not available on this system.", (const char*)NULL);
+d104 2
+a105 2
+double
+Cbrt(double x)
+d114 2
+a115 33
+double
+Ceil(double x)
+{
+	double y;
+
+	/* TO DO: Should Ceil(-Infinity) return a finite number or
+	not? Sun's returns ceil(Infinity) as 2^63, and ceil(-Infinity)
+	as -2^63, which both seem inconsistent. */
+
+	if (IsNaN(x))
+		return (x);
+	else if (IsInf(x))
+		return (x);
+
+	y = (double)((LONG_LONG)(x));
+	if (x > y)
+		y++;
+	return (y);
+}
+
+double
+Copysign(double x, double y)
+{
+#if defined(HAVE_COPYSIGN)
+	return (copysign(x,y));
+#else
+	execerror("copysign(x,y) is not available on this system.", (const char*)NULL);
+	return (0.0);			/* NOT REACHED */
+#endif
+}
+
+double
+Cos(double x)
+d120 2
+a121 2
+double
+Cosh(double x)
+d126 2
+a127 2
+double
+Erf(double x)
+d132 1
+a132 1
+	execerror("erf(x) is not available on this system.", (const char*)NULL);
+d137 2
+a138 2
+double
+Erfc(double x)
+d143 1
+a143 1
+	execerror("erfc(x) is not available on this system.", (const char*)NULL);
+d148 2
+a149 2
+double
+Exp(double x)
+d151 11
+d165 2
+a166 2
+double
+Expm1(double x)
+d175 2
+a176 33
+double
+Floor(double x)
+{
+	double y;
+
+	/* TO DO: Should Floor(-Infinity) return a finite number or
+	not? Sun's returns floor(Infinity) as 2^63, and floor(-Infinity)
+	as -2^63, which both seem inconsistent. */
+
+	if (IsNaN(x))
+		return (x);
+	else if (IsInf(x))
+		return (x);
+
+	y = (double)((LONG_LONG)(x));
+	if (x < y)
+		y--;
+	return (y);
+}
+
+double
+Fmod(double x, double y)
+{
+#if defined(HAVE_FMOD)
+	return (fmod(x,y));
+#else
+	execerror("fmod(x,y) is not available on this system.", (const char*)NULL);
+	return (0.0);			/* NOT REACHED */
+#endif
+}
+
+double
+Gamma(double x)
+d178 1
+a178 1
+	double y;
+d191 1
+a191 1
+		execerror("gamma result out of range", (char *)NUL);
+d210 1
+a210 1
+			signgam = +1;
+d214 1
+a214 1
+			signgam = +1;
+d220 2
+a221 2
+double
+Hypot(double x, double y)
+d267 2
+a268 253
+double
+Ilogb(double x)
+{
+#if defined(HAVE_ILOGB)
+	return ((double)ilogb(x));
+#else
+	return ((double)(int)Log2(x));
+#endif
+}
+
+double
+Infinity(void)
+{
+#if defined(HAVE_IEEE_754)
+	return (store(1.0) / store(0.0));
+#elif defined(DBL_MAX)
+	return (DBL_MAX);
+#else
+	execerror("Infinity() is not available on this system.", (const char*)NULL);
+#endif
+}
+
+double
+Integer(double x)
+{
+#if 0
+	return (double)(long)x;
+#else
+	/* Since all numbers are represented as type double, we can
+	provided a wider range of integers than long provides: */
+	if (IsNaN(x))
+	{
+		execerror("int(NaN) is undefined", (const char*)NULL);
+		return (0.0);		/* NOT REACHED */
+	}
+	else if (x < 0.0)
+		return (Ceil(x));
+	else /* (x >= 0.0) */
+		return (Floor(x));
+#endif
+}
+
+double
+IsFinite(double x)
+{
+	return ((double)(!IsNaN(x) && !IsInf(x)));
+}
+
+double
+IsInf(double x)
+{
+	/* This portable implementation that does not require IEEE 754
+	   arithmetic to function properly is due to Norman
+	   L. Schryer, and used in his FPTEST package.  See ``A Test
+	   of a Computer's Floating-Point Arithmetic Unit'', Bell
+	   Laboratories Computing Science Technical Report no. 89,
+	   February 4, 1981.  Available, with the software (under
+	   license), at http://www.bell-labs.com/project/fptest/ */
+
+	if (x < 0.0)
+		x = -x;			/* force positive */
+	if (x < 1.0)			/* small, so finite */
+		return (0.0);
+	else if ((x / 2.0) == x)	/* only Inf/2 == Inf */
+		return (1.0);
+	else				/* must be finite */
+		return (0.0);
+}
+
+double
+IsNaN(double x)
+{
+	return ((double)(store(x) != x));	/* should thwart optimizers */
+}
+
+double
+IsNormal(double x)
+{
+	return (double)((IsFinite(x) && !IsSubnormal(x)));
+}
+
+/***********************************************************************
+The implementation of IsQNaN() is unavoidably system-dependent, and for
+two of these architectures, there is only one type of NaN, so for them,
+both IsSNaN() and IsQNaN() should be true!
+
+From p. 4-59 of the Alpha AXP Architecture Manual:
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 21 of SPARC Architecture Manual v8:
+[same choice as Alpha]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 145 of The PowerPC Architecture:
+[same as Alpha and SPARC]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 2-5 of i860 Microprocessor Programmer's Reference Manual:
+[same as Alpha, SPARC, PowerPC]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 2-15 of MC68881 Floating-Point Coprocessor Users Manual:
+[same as Alpha, SPARC, PowerPC, Intel i860]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 5-3 (sequential 87 of 216) Intel IA-64 Architecture Software
+Developer's Manual, Rev 1.0:
+[same as Alpha, SPARC, PowerPC, Intel i860, MC68881]
+	quiet NaN:	initial fraction bit of 1
+	signaling NaN:	initial fraction bit of 0
+------------------------------------------------------------------------
+From p. 8-7 of PA-RISC 2.0 Architecture:
+[opposite of Alpha, SPARC, PowerPC, i860]
+	quiet NaN:	initial fraction bit of 0
+	signaling NaN:	initial fraction bit of 1
+------------------------------------------------------------------------
+From p. E-2 of MIPS RISC Architecture:
+[no distinction between NaNs]
+	NaN:		initial fraction bit of 0
+------------------------------------------------------------------------
+From Palmer and Morse The 8087 Primer and p. I-25 of iAPX 286
+Programmer's Reference Manual:
+[no distinction between NaNs]
+	NaN:		at least one nonzero fraction bit
+Generated NaNs have negative sign bit.
+
+Experiments on Pentium III show 0/0 -> 0xfff80000_00000000, so the
+leading fraction bit is the only nonzero generated.  However, this can
+be explicitly negated to obtain 0x7ff80000_00000000.
+------------------------------------------------------------------------
+***********************************************************************/
+
+double
+IsQNaN(double x)
+{
+	if (IsNaN(x))
+	{
+		union
+		{
+			double v;
+			unsigned int i[2];
+		} d;
+		int big_endian;
+
+		d.v = 1.0;
+		big_endian = (d.i[0] != 0) ? 1 : 0;
+
+		d.v = x;
+
+#if defined(__alpha)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#elif defined(__sparc)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#elif defined(__i860)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#elif defined(_POWER) || defined(__PPC) || defined(__powerpc)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#elif defined(__ia64)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#elif defined(__hppa)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#elif defined(__i386) || defined(__i486) || defined(__i586) || defined(__i686)
+		return ((double)(big_endian == big_endian)); /* avoids compiler warnings about unused big_endian*/
+#elif defined(__mips)
+		return ((double)(big_endian == big_endian)); /* avoids compiler warnings about unused big_endian*/
+#else  /* fall back to majority style, which could still be wrong */
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#endif
+
+	}
+	else
+		return (0.0);
+}
+
+double
+IsSNaN(double x)
+{
+	if (IsNaN(x))
+	{
+		union
+		{
+			double v;
+			unsigned int i[2];
+		} d;
+		int big_endian;
+
+		d.v = 1.0;
+		big_endian = (d.i[0] != 0) ? 1 : 0;
+
+		d.v = x;
+
+#if defined(__alpha)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#elif defined(__sparc)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#elif defined(__i860)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#elif defined(_POWER) || defined(__PPC) || defined(__powerpc)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#elif defined(__ia64)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#elif defined(__hppa)
+		return ((double)((d.i[1 - big_endian] & 0x00080000) != 0));
+#elif defined(__i386) || defined(__i486) || defined(__i586) || defined(__i686)
+		return ((double)(big_endian == big_endian)); /* avoids compiler warnings about unused big_endian*/
+#elif defined(__mips)
+		return ((double)(big_endian == big_endian)); /* avoids compiler warnings about unused big_endian*/
+#else  /* fall back to majority style, which could still be wrong */
+		return ((double)((d.i[1 - big_endian] & 0x00080000) == 0));
+#endif
+
+	}
+	else
+		return (0.0);
+}
+
+double
+IsSubnormal(double x)
+{
+	if (x == 0.0)
+		return (0.0);
+	else if (IsNaN(x))
+		return (0.0);
+	else if (IsInf(x))
+		return (0.0);
+	else
+	{
+#if defined(HAVE_IEEE_754)
+		union
+		{
+			double v;
+			unsigned int i[2];
+		} d;
+		int big_endian;
+
+		d.v = 1.0;
+		big_endian = (d.i[0] != 0) ? 1 : 0;
+
+		d.v = x;
+		return ((double)(((d.i[1 - big_endian] >> 20) & 0x7ff) == 0));
+#else
+		return (0.0);
+#endif
+	}
+}
+
+double
+J0(double x)
+d273 1
+a273 1
+	execerror("j0(x) is not available on this system.", (const char*)NULL);
+d278 2
+a279 2
+double
+J1(double x)
+d284 1
+a284 1
+	execerror("j1(x) is not available on this system.", (const char*)NULL);
+d289 2
+a290 2
+double
+Jn(double n, double x)
+d295 1
+a295 1
+	execerror("jn(n,x) is not available on this system.", (const char*)NULL);
+d300 2
+a301 12
+double
+Ldexp(double x, double y)
+{
+#if defined(HAVE_LDEXP)
+	return (ldexp(x,(int)y));
+#else
+	return (x * pow(2.0,(double)(int)y));
+#endif
+}
+
+double
+Lgamma(double x)
+d309 1
+a309 1
+	execerror("lgamma(x) is not available on this system.", (const char*)NULL);
+d314 2
+a315 2
+double
+Log(double x)
+d320 2
+a321 2
+double
+Log10(double x)
+d326 2
+a327 2
+double
+Log1p(double x)
+d336 2
+a337 2
+double
+Log2(double x)
+d342 2
+a343 45
+double
+NaN(void)
+{
+#if defined(HAVE_IEEE_754)
+	return (store(0.0) / store(0.0));
+#else
+	/* ISO/IEC 9899:1999(E) Programming languages -- C, Second
+	edition 1999-12-01, says in section 7.12.11.2 on p. 236: ``If
+	the implementation does not support quiet NaNs, the functions
+	[nan(""), nanf(""), nanl("")] return zero.'' */
+	return (0.0);
+#endif
+}
+
+double
+Nearest(double x, double y)
+{
+#if defined(HAVE_NEAREST)
+	return (nearest(x,y));
+#else
+	return (Nextafter(x,y));		/* TO BE FIXED: incorrect translation */
+#endif
+}
+
+double
+Nextafter(double x, double y)
+{
+#if defined(HAVE_NEXTAFTER)
+	return (nextafter(x,y));
+#else
+	execerror("nextafter(x,y) is not available on this system.", (const char*)NULL);
+	return (0.0);			/* NOT REACHED */
+#endif
+}
+
+double
+Nint(double x)
+{
+	return ((x >= 0.0) ?
+		(double)((LONG_LONG)(x + 0.5)) :
+		(double)((LONG_LONG)(x - 0.5)));
+}
+
+double
+Pow(double x, double y)
+d348 2
+a349 67
+static unsigned long Ran_Seed = 100001UL; /* changeable by SetRanSeed(x) */
+
+double
+Ran(void)
+{
+	/***************************************************************
+	Random number generator - based on Algorithm 266 by Pike and
+	Hill (modified by Hansson), Communications of the ACM, Vol. 8,
+	No. 10, October 1965.
+
+	This subprogram is intended for use on computers with fixed
+	point wordlength of at least 29 bits.  It is best if the
+	floating point significand has at most 29 bits.
+
+	Following Cody and Waite's recommendation (p .14), we produce
+	a pair of random numbers and use ran1 + 2**(-29)*ran2 in an
+	attempt to generate about 58 random bits.
+	***************************************************************/
+
+	double d;
+
+	Ran_Seed = Ran_Seed * 125UL;
+	Ran_Seed = Ran_Seed - (Ran_Seed / 2796203UL) * 2796203UL;
+	d = (double)Ran_Seed / (double)2796203UL;
+
+	Ran_Seed = Ran_Seed * 125UL;
+	Ran_Seed = Ran_Seed - (Ran_Seed / 2796203UL) * 2796203UL;
+	d += (double)Ran_Seed / (double)2796203UL / (double)536870912UL;
+
+	return (d);
+}
+
+double
+Randl(double x)
+{
+	/***************************************************************
+	Return a pseudo random number logarithmically distributed over
+	(1,exp(x)).  Thus a*Randl(ln(b/a)) is logarithmically
+	distributed in (a,b).
+	***************************************************************/
+	return (Exp(x * Ran()));
+}
+
+double
+Remainder(double x, double y)
+{
+#if defined(HAVE_REMAINDER)
+	return (remainder(x,y));
+#else
+	execerror("remainder(x) is not available on this system.", (const char*)NULL);
+	return (0.0);			/* NOT REACHED */
+#endif
+}
+
+double
+Rint(double x)
+{
+#if defined(HAVE_RINT)
+	return (rint(x));
+#else
+	execerror("rint(x) is not available on this system.", (const char*)NULL);
+	return (0.0);			/* NOT REACHED */
+#endif
+}
+
+double
+Rsqrt(double x)
+d358 2
+a359 61
+double
+Scalb(double x, double y)
+{
+	y = Integer(y);		/* to match documentation in help_scalb() */
+				/* and get consistency across platforms */
+				/* NB: Use Integer(), not (LONG_LONG)(), to */
+				/* handle NaN as documented */
+#if defined(HAVE_SCALB)
+	return (scalb(x,y));
+#else
+	return (x * pow(2.0, y));
+#endif
+}
+
+double
+SetRanSeed(double new_seed)
+{
+	/* Set the random number generator seed to new_seed, which
+	should be a large integer.  If new_seed is zero, then the time
+	calendar, or process id, or a modification of the current
+	seed, are used to try to get a new, and unpredicatable,
+	seed.  The return value is the old seed. */
+
+	unsigned long old_seed;
+
+	old_seed = Ran_Seed;
+
+	/* NB: it is important to multiply the `random' integer from
+	time(), getpid(), or Ran_Seed by Ran(), so that repeated
+	calls to this function will produce different seeds. */
+
+#if defined(HAVE_TIME_H)
+	Ran_Seed = (unsigned long)((new_seed == 0.0) ? Ran() * (unsigned long)time((time_t*)NULL) : Abs(new_seed));
+#elif defined(HAVE_UNISTD_H)
+	Ran_Seed = (unsigned long)((new_seed == 0.0) ? Ran() * ((unsigned long)getpid() << 15) : Abs(new_seed));
+#else
+	Ran_Seed = (unsigned long)((new_seed == 0.0) ? Ran() * (Ran_Seed >> 4)*15L : Abs(new_seed));
+#endif
+
+	return ((double)old_seed);
+}
+
+double
+Significand(double x)
+{
+#if defined(HAVE_SIGNIFICAND)
+	return (significand(x));
+#else
+	if (IsNaN(x))
+		return (NaN());
+	else if (IsInf(x))
+		return (NaN());
+	else if (x == 0.0)
+		return (NaN());
+	else
+		return (x * pow(2.0, -Trunc(Log2(x))));	/* TO BE MADE MORE EFFICIENT! */
+#endif
+}
+
+double
+Sin(double x)
+d364 2
+a365 2
+double
+Sinh(double x)
+d370 2
+a371 2
+double
+Sqrt(double x)
+d376 2
+a377 2
+double
+Tan(double x)
+d382 2
+a383 2
+double
+Tanh(double x)
+d388 2
+a389 12
+double
+Trunc(double x)
+{
+#if defined(HAVE_TRUNC)
+	return (trunc(x));
+#else
+	return (Integer(x));
+#endif
+}
+
+double
+Y0(double x)
+d394 1
+a394 1
+	execerror("y0(x) is not available on this system.", (const char*)NULL);
+d399 2
+a400 2
+double
+Y1(double x)
+d405 1
+a405 1
+	execerror("y1(x) is not available on this system.", (const char*)NULL);
+d410 2
+a411 2
+double
+Yn(double n, double x)
+d416 1
+a416 1
+	execerror("yn(n,x) is not available on this system.", (const char*)NULL);
+@
+
+
+1.2
+log
+@Add gamma() function on NeXT systems.
+@
+text
+@d1 11
+d13 611
+a623 3
+#include <errno.h>
+extern	int	errno;
+double	errcheck();
+d625 9
+a633 1
+#include "hoc.h"
+d635 13
+a647 1
+double	errcheck(double, char*);
+d654 1
+d662 98
+a759 1
+Sqrt(double x)
+d761 6
+a766 1
+	return errcheck(sqrt(x), "sqrt");
+a768 1
+#if defined(__NeXT__)
+d770 1
+a770 1
+gamma(double x)
+d772 6
+a777 1
+    return (lgamma(x));	/* NeXT only has lgamma(), an alias for gamma() */
+d779 9
+d789 1
+d792 11
+a802 1
+Gamma(double x)
+d804 9
+a812 6
+	double y;
+	extern int signgam;
+	y=errcheck(gamma(x), "gamma");
+	if(y>88.0)
+		execerror("gamma result out of range", (char *)0);
+	return signgam*exp(y);
+d816 1
+a816 1
+Exp(double x)
+d818 23
+a840 1
+	return errcheck(exp(x), "exp");
+d844 1
+a844 1
+Asin(double x)
+d846 12
+a857 1
+	return errcheck(asin(x), "asin");
+d861 1
+a861 1
+Acos(double x)
+d863 1
+a863 1
+	return errcheck(acos(x), "acos");
+d871 13
+d885 7
+a891 1
+Cosh(double x)
+d893 5
+a897 1
+	return errcheck(cosh(x), "cosh");
+d899 1
+d901 1
+a901 1
+Pow(double x, double y)
+d903 6
+a908 1
+	return errcheck(pow(x,y), "exponentiation");
+d912 1
+a912 1
+integer(double x)
+d914 6
+a919 1
+	return (double)(long)x;
+d923 1
+a923 1
+errcheck(double d, char* s)	/* check result of library call */
+d925 6
+a930 8
+	if (errno == EDOM) {
+		errno = 0;
+		execerror(s, "argument out of domain");
+	} else if (errno == ERANGE) {
+		errno = 0;
+		execerror(s, "result out of range");
+	}
+	return d;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d27 8
+@

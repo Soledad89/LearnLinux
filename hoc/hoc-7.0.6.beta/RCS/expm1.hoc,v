@@ -1,0 +1,366 @@
+head	1.3;
+access;
+symbols;
+locks
+	beebe:1.3; strict;
+comment	@# @;
+
+
+1.3
+date	2002.08.06.13.35.52;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.01.11.02.18.39;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.19.28;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.3
+log
+@Update to used named, rather than numbered, function/procedure
+arguments.
+@
+text
+@### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.0.beta/expm1.hoc, Sat Dec  8 14:25:46 2001
+### Edit by Nelson H. F. Beebe <beebe@@math.utah.edu>
+### ====================================================================
+### Provide an implementation of, and test package for, Expm1(x).
+### [08-Dec-2001]
+### ====================================================================
+
+func Expm1(x) \
+{
+	### Compute Expm1(x) = exp(x) - 1 accurately.  The cutoffs at
+	### which at least one bit is lost in substraction were
+	### accurately determined in Maple with this code:
+	###
+	###	Digits := 50;
+	###	g := proc(x) return (evalf(exp(x) - 1)); end proc;
+	###	plot(g(x), x = 0.2..0.8);
+	###	fsolve(g(x) = 0.5, x, 0.4..0.6);
+	###		.40546510810816438197801311546434913657199042346249
+	###	plot(g(x), x = -1 .. 0);
+	###	fsolve(g(x) = -0.5, x, -1..0);
+	### 		-.69314718055994530941723212145817656807550013436026
+	###
+	### For positive small values between the cutoffs, we use the
+	### Taylor series expansion, adding terms until they are small
+	### enough to be ignored.  For negative small values, we
+	### compute with the absolute value of the argument, then
+	### invert the formula, to avoid the alternating signs in the
+	### Taylor series for negative x.
+	###
+	### The ___test_expm1() function produces output that looks like
+	### this (on a Sun Solaris 2.7 system, using the vendor's native
+	### expm1() function for comparison):
+	###
+	###     x               # terms         error in Expm1(x)       Ulps
+	###     -0.7            0               0                       0
+	###     -0.69           17              0                       0
+	###     -0.65           16              5.55e-17                0.25
+	###     -0.52           15              0                       0
+	###     -0.41           14              0                       0
+	###     -0.4            15              0                       0
+	###     -0.39           14              0                       0
+	###     -0.3            13              5.55e-17                0.25
+	###     -0.2            12              -2.78e-17              -0.125
+	###     -0.14           11              0                       0
+	###     -0.08           10              1.39e-17                0.0625
+	###     -0.04           9               0                       0
+	###     -0.02           8               6.94e-18                0.0312
+	###     5.31e-16        3               0                       0
+	###     0.01            8               0                       0
+	###     0.03            9               0                       0
+	###     0.05            10              6.94e-18                0.0312
+	###     0.09            11              1.39e-17                0.0625
+	###     0.15            12              0                       0
+	###     0.21            13              2.78e-17                0.125
+	###     0.31            14              0                       0
+	###     0.4             15              -5.55e-17              -0.25
+	###     0.41            0               -1.11e-16              -0.5
+	###
+	###     -0.693          17              0                       0
+	###     0.405           15              0                       0
+	###
+	### Thus, we need from 1 (x near 0) to 17 (x near cutoffs)
+	### terms of the Taylor series.  A polynomial appoximation
+	### would be faster, and more efficient, but this code is
+	### simple and acceptable for now.
+
+	global k
+	k = 0
+
+	### Give names to the cutoff values:
+	xcutneg = -0.69314718055994530941723212145817656807550013436026
+	xcutpos = +0.40546510810816438197801311546434913657199042346249
+
+	### Handle easy special cases first:
+	if (isnan(x)) \
+		return (x) \
+	else if (x == 0) \
+		return (0) \
+	else if (x >= xcutpos) \
+		return (exp(x) - 1) \
+	else if (x <= xcutneg) \
+		return (exp(x) - 1)
+
+	xabs = abs(x)
+
+	k = 1
+	sum = 0
+	term = xabs
+	while ((sum + term) != sum) \
+	{
+		sum += term
+		k++
+		term = xabs * term / k
+		## print k, term, sum
+		## print "\n"
+	}
+	if (x < 0) \
+		return (-(sum/(1 + sum))) \
+	else \
+		return (sum)
+}
+
+func expm1_err(x) return (Expm1(x) - expm1(x))
+
+proc ___test_expm1_print() \
+{
+	global xx, k, e, epsilon
+	printf "%7.2e\t%7d\t%15.2e\t%15.2f\n", xx, k, e, e/epsilon
+}
+
+proc ___test_expm1() \
+{
+	global xx, k, e, epsilon
+	k = 0
+	epsilon = macheps(1)
+	PREC = 3
+	print "x\t\t# terms\t\terror in Expm1(x)\tUlps\n"
+	last_k = -1
+	for (xx = -0.7; xx < 0.6; xx += 0.01) \
+	{
+		e = expm1_err(xx)
+		if (k != last_k) ___test_expm1_print()
+		last_k = k
+	}
+	xx = xcutneg + epsilon
+	e = expm1_err(xx)
+	___test_expm1_print()
+
+	xx = xcutpos - epsilon
+	e = expm1_err(xx)
+	___test_expm1_print()
+}
+
+proc help_Expm1() \
+{
+	print "\tExpm1(x) returns the exponential function of x, less 1: E^x - 1.\n\n"
+
+	print "\tFor small x, exp(x) is approximately 1, so there is serious\n"
+	print "\tsubtraction loss in directly using exp(x) - 1; Expm1(x) avoids\n"
+	print "\tthis loss.\n\n"
+
+	print "\tFrom Sun Solaris documentation: ``The Expm1() and log1p()\n"
+	print "\tfunctions are useful for financial calculations of\n"
+	print "\t((1 + x)^n - 1) / x, namely:\n\n"
+
+	print "\t	Expm1(n * log1p(x))/x\n\n"
+
+	print "\twhen x is very small (for example, when performing calculations\n"
+	print "\twith a small daily interest rate).  These functions also\n"
+	print "\tsimplify writing accurate inverse hyperbolic functions.''\n\n"
+}
+@
+
+
+1.2
+log
+@Change double underscore to triple underscore for hidden
+variables.
+@
+text
+@d9 1
+a9 1
+func Expm1() \
+d68 2
+a69 2
+	___x = $1
+	___k = 0
+d72 2
+a73 2
+	___xcutneg = -0.69314718055994530941723212145817656807550013436026
+	___xcutpos = +0.40546510810816438197801311546434913657199042346249
+d76 3
+a78 3
+	if (isnan(___x)) \
+		return (___x) \
+	else if (___x == 0) \
+d80 11
+a90 11
+	else if (___x >= ___xcutpos) \
+		return (exp(___x) - 1) \
+	else if (___x <= ___xcutneg) \
+		return (exp(___x) - 1)
+
+	___xabs = abs(___x)
+
+	___k = 1
+	___sum = 0
+	___term = ___xabs
+	while ((___sum + ___term) != ___sum) \
+d92 4
+a95 4
+		___sum += ___term
+		___k++
+		___term = ___xabs * ___term / ___k
+		## print ___k, ___term, ___sum
+d98 2
+a99 2
+	if (___x < 0) \
+		return (-(___sum/(1 + ___sum))) \
+d101 1
+a101 1
+		return (___sum)
+d104 1
+a104 1
+func ___expm1_err() return (Expm1($1) - expm1($1))
+d108 2
+a109 8
+	print ___xx
+	print "\t\t"
+	print ___k
+	print "\t\t"
+	print ___e
+	print "\t\t"
+	print ___e/___macheps
+	print "\n"
+d114 3
+a116 2
+	___k = 0
+	___macheps = macheps(1)
+d119 2
+a120 2
+	___last_k = -1
+	for (___xx = -0.7; ___xx < 0.6; ___xx += 0.01) \
+d122 3
+a124 3
+		___e = ___expm1_err(___xx)
+		if (___k != ___last_k) ___test_expm1_print()
+		___last_k = ___k
+d126 2
+a127 2
+	___xx = ___xcutneg + ___macheps
+	___e = ___expm1_err(___xx)
+d130 2
+a131 2
+	___xx = ___xcutpos - ___macheps
+	___e = ___expm1_err(___xx)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d31 1
+a31 1
+	### The __test_expm1() function produces output that looks like
+d68 2
+a69 2
+	__x = $1
+	__k = 0
+d72 2
+a73 2
+	__xcutneg = -0.69314718055994530941723212145817656807550013436026
+	__xcutpos = +0.40546510810816438197801311546434913657199042346249
+d76 3
+a78 3
+	if (isnan(__x)) \
+		return (__x) \
+	else if (__x == 0) \
+d80 11
+a90 11
+	else if (__x >= __xcutpos) \
+		return (exp(__x) - 1) \
+	else if (__x <= __xcutneg) \
+		return (exp(__x) - 1)
+
+	__xabs = abs(__x)
+
+	__k = 1
+	__sum = 0
+	__term = __xabs
+	while ((__sum + __term) != __sum) \
+d92 4
+a95 4
+		__sum += __term
+		__k++
+		__term = __xabs * __term / __k
+		## print __k, __term, __sum
+d98 2
+a99 2
+	if (__x < 0) \
+		return (-(__sum/(1 + __sum))) \
+d101 1
+a101 1
+		return (__sum)
+d104 1
+a104 1
+func __expm1_err() return (Expm1($1) - expm1($1))
+d106 1
+a106 1
+proc __test_expm1_print() \
+d108 1
+a108 1
+	print __xx
+d110 1
+a110 1
+	print __k
+d112 1
+a112 1
+	print __e
+d114 1
+a114 1
+	print __e/__macheps
+d118 1
+a118 1
+proc __test_expm1() \
+d120 2
+a121 2
+	__k = 0
+	__macheps = macheps(1)
+d124 2
+a125 2
+	__last_k = -1
+	for (__xx = -0.7; __xx < 0.6; __xx += 0.01) \
+d127 3
+a129 3
+		__e = __expm1_err(__xx)
+		if (__k != __last_k) __test_expm1_print()
+		__last_k = __k
+d131 7
+a137 7
+	__xx = __xcutneg + __macheps
+	__e = __expm1_err(__xx)
+	__test_expm1_print()
+
+	__xx = __xcutpos - __macheps
+	__e = __expm1_err(__xx)
+	__test_expm1_print()
+@

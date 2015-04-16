@@ -1,0 +1,1948 @@
+head	1.27;
+access;
+symbols;
+locks
+	beebe:1.27; strict;
+comment	@ * @;
+
+
+1.27
+date	2002.08.08.22.14.47;	author beebe;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	2002.08.08.01.23.32;	author beebe;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	2002.08.06.13.17.28;	author beebe;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	2002.07.31.17.24.42;	author beebe;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	2002.07.30.16.44.47;	author beebe;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	2002.07.28.18.21.45;	author beebe;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	2002.07.28.14.22.23;	author beebe;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2002.07.26.14.30.15;	author beebe;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2002.07.24.19.20.14;	author beebe;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2002.07.24.14.46.53;	author beebe;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2002.07.20.23.03.43;	author beebe;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2002.07.04.14.44.36;	author beebe;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2002.06.22.23.08.18;	author beebe;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2002.06.15.22.38.18;	author beebe;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2002.02.19.01.03.34;	author beebe;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2002.01.30.17.00.41;	author beebe;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2002.01.27.18.11.11;	author beebe;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2002.01.17.01.36.00;	author beebe;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2002.01.11.19.40.30;	author beebe;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2002.01.11.18.42.43;	author beebe;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.01.11.02.03.07;	author beebe;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.01.05.14.40.51;	author beebe;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.01.04.17.28.30;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.01.02.15.01.48;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.01.01.14.51.30;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2001.12.12.01.27.26;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.11.25.23.03.06;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.27
+log
+@Rename StoN to StoF, for symmetry with FtoS.
+@
+text
+@#include "config.h"
+
+#if defined(HAVE_STDLIB_H)
+#include <stdlib.h>			/* for size_t */
+#endif
+
+/* Set dimensions that are fixed at compile time, but whose default
+   values may be overridden by compile-time -DMAX_xxx=nnn options.
+   Some of these have documented minimum values (see hoc.1) which must
+   be enforced here.  All are made available for user inspection in
+   __MAX_xxx__ predefined constants. */
+
+#if defined(__cplusplus) || defined(c_plusplus)
+#define EXTERN extern "C"
+#else
+#define EXTERN extern
+#endif
+
+#include "fp_arch.h"
+#include "fp_t.h"
+
+extern fp_t	BASE;
+extern fp_t	EBIAS;
+extern fp_t	EBITS;
+extern fp_t	EMAX;
+extern fp_t	EMIN;
+extern fp_t	P;
+
+typedef struct Symbol Symbol;		/* temporary incomplete definition */
+
+typedef fp_t		(*F0_t)		ARGS((void));
+typedef fp_t		(*F1_t)		ARGS((fp_t));
+typedef fp_t		(*F1s_t)	ARGS((const char *));
+typedef fp_t		(*F1i_t)	ARGS((Symbol *));
+typedef fp_t		(*F2_t)		ARGS((fp_t,fp_t));
+typedef fp_t		(*F2s_t)	ARGS((const char *, const char *));
+typedef const char *	(*SF0_t)	ARGS((void));
+typedef const char *	(*SF1_t)	ARGS((const char *));
+typedef const char *	(*SF1n_t)	ARGS((fp_t));
+typedef const char *	(*SF2_t)	ARGS((const char *, const char *));
+typedef const char *	(*SF2sn_t)	ARGS((const char *, fp_t));
+typedef const char *	(*SF3snn_t)	ARGS((const char *, fp_t, fp_t));
+
+typedef void (*Inst) ARGS((void));
+#define	STOP	((Inst) NULL)
+
+#if defined(HAVE_LONG_LONG)
+typedef long long LONG_LONG;
+typedef unsigned long long UNSIGNED_LONG_LONG;
+#else
+typedef long LONG_LONG;
+typedef unsigned long UNSIGNED_LONG_LONG;
+#endif
+
+typedef struct Symbol {	/* symbol table entry */
+	union {
+		fp_t	val;		/* VAR */
+		F0_t ptr0;		/* BLTIN0 */
+		F1_t ptr1;		/* BLTIN1 */
+		F1s_t ptr1s;		/* BLTIN1S */
+		F1i_t ptr1i;		/* BLTIN1I */
+		F2_t ptr2;		/* BLTIN2 */
+		F2s_t ptr2s;		/* BLTIN2S */
+		SF0_t sptr0;		/* STRBLTIN0 */
+		SF1_t sptr1;		/* STRBLTIN1 */
+		SF1n_t sptr1n;		/* STRBLTIN1N */
+		SF2_t sptr2;		/* STRBLTIN2 */
+		SF2sn_t sptr2sn;	/* STRBLTIN2SN */
+		SF3snn_t sptr3snn;	/* STRBLTIN3SNN */
+		Inst	*defn;		/* FUNCTION, PROCEDURE */
+		const char *str;	/* STRING */
+	} u;
+	const char	*name;
+	long		builtin;
+	long		immutable;
+	long		type;
+	struct Symbol	*next;	/* to link to another */
+} Symbol;
+
+Symbol	*install ARGS((const char *, int, fp_t));
+Symbol	*lookup ARGS((const char *));
+
+#if 0
+typedef union Datum {	/* interpreter stack type */
+	fp_t	val;
+	const char *str;
+	Symbol	*sym;
+} Datum;
+#else
+typedef struct Datum {	/* interpreter stack type */
+	union {
+		fp_t	val;
+		const char *str;
+		Symbol	*sym;
+	} u;
+	long type;
+} Datum;
+#endif
+
+typedef union DP_Parts { /* access to floating-point bits as integers */
+	double v;
+	unsigned int i[2];
+} DP_Parts;
+
+#if defined(HAVE_FP_T_DOUBLE)
+typedef DP_Parts FP_Parts;
+#endif
+
+#if defined(HAVE_FP_T_SINGLE)
+typedef union SP_Parts { /* access to floating-point bits as integers */
+	float v;
+	unsigned int i[1];
+} SP_Parts;
+typedef SP_Parts FP_Parts;
+#endif
+
+#if defined(HAVE_FP_T_QUADRUPLE)
+typedef union QP_Parts { /* access to floating-point bits as integers */
+	long double v;
+	unsigned int i[4];
+} QP_Parts;
+typedef QP_Parts FP_Parts;
+#endif
+
+#define CLASS_SNAN		1000000
+#define CLASS_QNAN		(CLASS_SNAN + 1)
+#define CLASS_NEGINF		(CLASS_SNAN + 2)
+#define CLASS_NEGNORMAL		(CLASS_SNAN + 3)
+#define CLASS_NEGSUBNORMAL	(CLASS_SNAN + 4)
+#define CLASS_NEGZERO		(CLASS_SNAN + 5)
+#define CLASS_POSZERO		(CLASS_SNAN + 6)
+#define CLASS_POSSUBNORMAL	(CLASS_SNAN + 7)
+#define CLASS_POSNORMAL		(CLASS_SNAN + 8)
+#define CLASS_POSINF		(CLASS_SNAN + 9)
+
+#define CLASS_UNKNOWN		(CLASS_SNAN - 1) /* should never happen */
+
+/* 1989 and 1999 Standard C, and 1998 Standard C++, require that the
+ctype.h isxxx() feature to be functions, so we should be able to
+redefine macros to call the parenthesized functions, without changing
+any code below.  Unfortunately Apple Darwin botches things, and
+defines only isxxx() macros.  Thus, we need our own private names for
+these character classifiers.
+
+It is CRITICAL that, before making the range checks, we first convert
+c to an unsigned value in 0..255, because most UNIX C and C++
+compilers treat char as signed in -128..+127.  Lack of the UC()
+wrapper was a nasty bug that took me some time to track down. */
+
+#define UC(c)	( (int)(unsigned char)(c) )
+#define UL(x)	( (unsigned long)(x) )
+#define IsAlNum(c) (isalnum(c) || ((160 <= UC(c)) && (UC(c) <= 255)))
+#define IsAlpha(c) (isalpha(c) || ((160 <= UC(c)) && (UC(c) <= 255)))
+#define IsIdStart(c) (IsAlpha(c) || ((c) == '_'))
+#define IsIdMiddle(c) (IsAlNum(c) || ((c) == '_'))
+
+#if !defined(HOCPATH)
+#define HOCPATH	"HOCPATH"	/* name of environment variable */
+#endif
+
+#define STREQUAL(a,b)	(strcmp(a,b) == 0)
+
+/* Please keep these declarations of hoc global symbols grouped by
+   data type, and sorted alphabetically, IGNORING lettercase, with one
+   blank line between groups of different data type. Declare only ONE
+   object per line, and keep each declaration on a SINGLE line so that
+   line-sort commands can be safely applied in text-editing sessions. */
+
+extern const char *	progname;
+
+extern Inst		*prog;
+extern size_t		max_prog;
+
+extern Inst *		progbase;
+extern Inst *		progp;
+
+extern int		EOF_flag;
+
+extern const char *	Abort ARGS((const char *));
+extern const char *	Cd ARGS((const char *));
+extern const char *	Char ARGS((fp_t));
+extern const char *	concat2 ARGS((const char *, const char *));
+extern const char *	concat3 ARGS((const char *, const char *, const char *));
+extern const char *	concat4 ARGS((const char *, const char *, const char *, const char *));
+extern const char *	concat5 ARGS((const char *, const char *, const char *, const char *, const char *));
+extern const char *	concat6 ARGS((const char *, const char *, const char *, const char *, const char *, const char *));
+extern const char *	dupstr ARGS((const char *));
+extern const char *	EndInput ARGS((void));
+extern const char *	Evalcommands ARGS((const char *));
+extern const char *	Exit ARGS((const char *));
+extern const char *	Expand ARGS((const char *));
+extern const char *	first_symbol_pname ARGS((void));
+extern const char *	fmtnum ARGS((fp_t));
+extern const char *	FtoH ARGS((fp_t));
+extern const char *	FtoS ARGS((fp_t));
+extern const char *	Getenv ARGS((const char *));
+extern const char *	get_string ARGS((const char *));
+extern const char *	Hex ARGS((fp_t));
+extern const char *	Hexfp ARGS((fp_t));
+extern const char *	Hexint ARGS((fp_t));
+extern const char *	Inf_string ARGS((fp_t));
+extern const char *	Load ARGS((const char *));
+extern const char *	Logfile ARGS((const char *));
+extern const char *	Logoff ARGS((void));
+extern const char *	Logon ARGS((void));
+extern const char *	Msg_Translate ARGS((const char *));
+extern const char *	msg_translate ARGS((const char *));
+extern const char *	NaN_string ARGS((fp_t));
+extern const char *	next_symbol_pname ARGS((void));
+extern const char *	Now ARGS((void));
+extern const char *	parentdir ARGS((const char *));
+extern const char *	Printenv ARGS((const char *));
+extern const char *	Protect ARGS((const char *));
+extern const char *	Pwd ARGS((void));
+extern const char *	Putenv ARGS((const char *, const char *));
+extern const char *	Save ARGS((const char *, const char *));
+extern const char *	Strftime ARGS((const char *, fp_t));
+extern const char *	Substr ARGS((const char *, fp_t, fp_t));
+extern const char *	Tolower ARGS((const char *));
+extern const char *	Toupper ARGS((const char *));
+extern const char *	SymtoS ARGS((const char *));
+extern const char *	Who ARGS((const char *));
+extern const char *	xfptos ARGS((fp_t));
+
+/* Mathematical, numeric, and support functions in extended hoc */
+
+extern fp_t		Abs ARGS((fp_t));
+extern fp_t		Acos ARGS((fp_t));
+extern fp_t		Acosh ARGS((fp_t));
+extern fp_t		Asin ARGS((fp_t));
+extern fp_t		Asinh ARGS((fp_t));
+extern fp_t		Atan ARGS((fp_t));
+extern fp_t		Atanh ARGS((fp_t));
+extern fp_t		Cbrt ARGS((fp_t));
+extern fp_t		Ceil ARGS((fp_t));
+extern fp_t		Class ARGS((fp_t));
+extern fp_t		Copysign ARGS((fp_t, fp_t));
+extern fp_t		Cos ARGS((fp_t));
+extern fp_t		Cosh ARGS((fp_t));
+extern fp_t		CPULimit ARGS((fp_t));
+extern fp_t		Defined ARGS((Symbol *));
+extern fp_t		Delete ARGS((Symbol *));
+extern fp_t		Double ARGS((fp_t));
+extern fp_t		Erf ARGS((fp_t));
+extern fp_t		Erfc ARGS((fp_t));
+extern fp_t		Exp ARGS((fp_t));
+extern fp_t		Expm1 ARGS((fp_t));
+extern fp_t		Exponent ARGS((fp_t));
+extern fp_t		Fgetd ARGS((int));
+extern fp_t		Floor ARGS((fp_t));
+extern fp_t		Fmod ARGS((fp_t, fp_t));
+extern fp_t		Gamma ARGS((fp_t));
+extern fp_t		get_number ARGS((const char *));
+extern fp_t		HtoF ARGS((const char *));
+extern fp_t		Hypot ARGS((fp_t, fp_t));
+extern fp_t		Ichar ARGS((const char *));
+extern fp_t		Ilogb ARGS((fp_t));
+extern fp_t		Index ARGS((const char *,const char *));
+extern fp_t		Infinity ARGS((void));
+extern fp_t		Integer ARGS((fp_t));
+extern fp_t		IsFinite ARGS((fp_t));
+extern fp_t		IsInf ARGS((fp_t));
+extern fp_t		IsNaN ARGS((fp_t));
+extern fp_t		IsNormal ARGS((fp_t));
+extern fp_t		IsQNaN ARGS((fp_t));
+extern fp_t		IsSNaN ARGS((fp_t));
+extern fp_t		IsSubnormal ARGS((fp_t));
+extern fp_t		J0 ARGS((fp_t));
+extern fp_t		J1 ARGS((fp_t));
+extern fp_t		Jn ARGS((fp_t, fp_t));
+extern fp_t		Ldexp ARGS((fp_t, fp_t));
+extern fp_t		Length ARGS((const char *));
+extern fp_t		Lgamma ARGS((fp_t));
+extern fp_t		Log ARGS((fp_t));
+extern fp_t		Log10 ARGS((fp_t));
+extern fp_t		Log1p ARGS((fp_t));
+extern fp_t		Log2 ARGS((fp_t));
+extern fp_t		Macheps ARGS((fp_t));
+extern fp_t		MaxNormal ARGS((void));
+extern fp_t		MaxSubnormal ARGS((void));
+extern fp_t		MinNormal ARGS((void));
+extern fp_t		MinSubnormal ARGS((void));
+extern fp_t		NaN ARGS((void));
+extern fp_t		Nearest ARGS((fp_t, fp_t));
+extern fp_t		Nextafter ARGS((fp_t, fp_t));
+extern fp_t		Nint ARGS((fp_t));
+extern fp_t		Pow ARGS((fp_t, fp_t));
+extern fp_t		QNaN ARGS((void));
+extern fp_t		Rand ARGS((void));
+extern fp_t		RandInt ARGS((fp_t, fp_t));
+extern fp_t		Randl ARGS((fp_t));
+extern fp_t		Remainder ARGS((fp_t, fp_t));
+extern fp_t		Rint ARGS((fp_t));
+extern fp_t		Rsqrt ARGS((fp_t));
+extern fp_t		Scalb ARGS((fp_t, fp_t));
+extern fp_t		Second ARGS((void));
+extern fp_t		SetRandSeed ARGS((fp_t));
+extern fp_t		Significand ARGS((fp_t));
+extern fp_t		Sin ARGS((fp_t));
+extern fp_t		Single ARGS((fp_t));
+extern fp_t		Sinh ARGS((fp_t));
+extern fp_t		SNaN ARGS((void));
+extern fp_t		Sqrt ARGS((fp_t));
+extern fp_t		StoF ARGS((const char *));
+extern fp_t		SymtoN ARGS((const char *));
+extern fp_t		store ARGS((fp_t *));
+extern fp_t		strton ARGS((const char *, char **));
+extern fp_t		Systime ARGS((void));
+extern fp_t		Tan ARGS((fp_t));
+extern fp_t		Tanh ARGS((fp_t));
+extern fp_t		Trunc ARGS((fp_t));
+extern fp_t		Unordered ARGS((fp_t, fp_t));
+extern fp_t		xstrtod ARGS((const char *, char **));
+extern fp_t		Y0 ARGS((fp_t));
+extern fp_t		Y1 ARGS((fp_t));
+extern fp_t		Yn ARGS((fp_t, fp_t));
+
+extern int		decval ARGS((int));
+extern int		default_precision ARGS((void));
+extern int		delete_symbol ARGS((Symbol *));
+extern int		get_precision ARGS((void));
+extern int		hexval ARGS((int));
+extern int		is_debug ARGS((const char *));
+extern int		is_hidden ARGS((const char *, const char *));
+extern int		is_immutable ARGS((const char *));
+extern int		is_local ARGS((const char *));
+extern int		is_match ARGS((const char *, const char *));
+extern int		IsBigEndian ARGS((void));
+extern int		match ARGS((const char *, const char *));
+extern int		moreinput ARGS((void));
+extern int		set_precision ARGS((int));
+EXTERN int              yyparse ARGS((void)); /* NB: EXTERN, not extern! */
+
+EXTERN size_t		strlcat(char *, const char *, size_t);
+EXTERN size_t		strlcpy(char *, const char *, size_t);
+
+extern Inst *		code ARGS((Inst));
+
+extern Symbol *		first_symbol ARGS((void));
+extern Symbol *		install_const_number ARGS((const char *, fp_t));
+extern Symbol *		install_const_string ARGS((const char *, const char *));
+extern Symbol *		install_number ARGS((const char *, fp_t));
+extern Symbol *		install_string ARGS((const char *, const char *));
+extern Symbol *		next_symbol ARGS((void));
+extern Symbol *		set_string ARGS((Symbol *, const char *));
+extern Symbol *		update_const_number ARGS((const char *, fp_t));
+extern Symbol *		update_const_string ARGS((const char *, const char *));
+extern Symbol *		update_number ARGS((const char *, fp_t));
+extern Symbol *		update_string ARGS((const char *, const char *));
+
+extern void		add ARGS((void));
+extern void		addeq ARGS((void));
+extern void		And ARGS((void));
+extern void		arg ARGS((void));
+extern void		argaddeq ARGS((void));
+extern void		argassign ARGS((void));
+extern void		argdiveq ARGS((void));
+extern void		argmodeq ARGS((void));
+extern void		argmuleq ARGS((void));
+extern void		argsubeq ARGS((void));
+extern void		assign ARGS((void));
+extern void		bltin0 ARGS((void));
+extern void		bltin1 ARGS((void));
+extern void		bltin1i ARGS((void));
+extern void		bltin1s ARGS((void));
+extern void		bltin2 ARGS((void));
+extern void		bltin2s ARGS((void));
+extern void		breakstmt ARGS((void));
+extern void		call ARGS((void));
+extern void		const_assign ARGS((void));
+extern void		const_str_assign ARGS((void));
+extern void		const_str_push ARGS((void));
+extern void		constpush ARGS((void));
+extern void		continuestmt ARGS((void));
+extern void		define ARGS((Symbol *));
+extern void		diveq ARGS((void));
+extern void		divop ARGS((void));
+extern void		dump_syms ARGS((const char *));
+extern void		efree ARGS((void *));
+extern void		eq ARGS((void));
+extern void		eval ARGS((void));
+extern void		execerror ARGS((const char *, const char *));
+extern void		execute ARGS((Inst*));
+extern void		forcode ARGS((void));
+extern void		free_symbol_table ARGS((void));
+extern void		funcret ARGS((void));
+extern void		ge ARGS((void));
+extern void		gt ARGS((void));
+extern void		ifcode ARGS((void));
+extern void		init_builtins ARGS((void));
+extern void		initcode ARGS((void));
+extern void		le ARGS((void));
+extern void		lt ARGS((void));
+extern void		ltgt ARGS((void));
+extern void		make_immutable ARGS((Symbol *));
+extern void		mod ARGS((void));
+extern void		modeq ARGS((void));
+extern void		mul ARGS((void));
+extern void		muleq ARGS((void));
+extern void		ne ARGS((void));
+extern void		negate ARGS((void));
+extern void		noop ARGS((void));
+extern void		Not ARGS((void));
+extern void		Or ARGS((void));
+extern void		postdec ARGS((void));
+extern void		postinc ARGS((void));
+extern void		power ARGS((void));
+extern void		predec ARGS((void));
+extern void		preinc ARGS((void));
+extern void		prexpr ARGS((void));
+extern void		prfmt ARGS((void));
+extern void		printtop ARGS((void));
+extern void		printtopstring ARGS((void));
+extern void		prnl ARGS((void));
+extern void		prnum ARGS((fp_t));
+extern void		procret ARGS((void));
+extern void		prsep ARGS((void));
+extern void		prstr ARGS((void));
+extern void		prtext ARGS((const char *));
+extern void		prtext2 ARGS((const char *, int));
+extern void		sanity_check ARGS((void));
+extern void		set_filename ARGS((const char *));
+extern void		sprexpr ARGS((void));
+extern void		sprfmt ARGS((void));
+extern void		sprjoin ARGS((void));
+extern void		sprstr ARGS((void));
+extern void		str_assign ARGS((void));
+extern void		str_concat ARGS((void));
+extern void		str_eq ARGS((void));
+extern void		str_ge ARGS((void));
+extern void		str_gt ARGS((void));
+extern void		str_le ARGS((void));
+extern void		str_lt ARGS((void));
+extern void		str_ne ARGS((void));
+extern void		str_to_num ARGS((void));
+extern void		strarg ARGS((void));
+extern void		strbltin0 ARGS((void));
+extern void		strbltin1 ARGS((void));
+extern void		strbltin1n ARGS((void));
+extern void		strbltin2 ARGS((void));
+extern void		strbltin2sn ARGS((void));
+extern void		strbltin3snn ARGS((void));
+extern void		streval ARGS((void));
+extern void		sub ARGS((void));
+extern void		subeq ARGS((void));
+extern void		varpush ARGS((void));
+extern void		varread ARGS((void));
+extern void		warning ARGS((const char *, const char *));
+extern void		whilecode ARGS((void));
+extern void		xpop ARGS((void));
+
+extern void *		egrow ARGS((void *, size_t *, size_t));
+extern void *		emalloc ARGS((size_t));
+extern void *		erealloc ARGS((void *, size_t, size_t));
+
+#if !defined(HAVE_SNPRINTF_PROTOTYPE)
+EXTERN int		snprintf ARGS((char *, size_t, const char *, ...));
+#endif
+
+#if defined(HAVE_SNPRINTF)
+#define CHKRET(r,n)	if (r >= n) (void)fprintf(stderr,"%s:%d:%s\n", __FILE__, (int)__LINE__, "snprintf() buffer too small"); \
+			if (r < 0) (void)fprintf(stderr,"%s:%d:%s\n", __FILE__, (int)__LINE__, "snprintf() output error")
+#define SNPRINTF4(s,n,fmt,a)		do {int n__; n__ = (snprintf)((s),(n),(fmt),(a)); CHKRET(n__,(n)); } while (0)
+#define SNPRINTF5(s,n,fmt,a,b)		do {int n__; n__ = (snprintf)((s),(n),(fmt),(a),(b)); CHKRET(n__,(n)); } while (0)
+#define SNPRINTF6(s,n,fmt,a,b,c)	do {int n__; n__ = (snprintf)((s),(n),(fmt),(a),(b),(c)); CHKRET(n__,(n)); } while (0)
+#define SNPRINTF7(s,n,fmt,a,b,c,d)	do {int n__; n__ = (snprintf)((s),(n),(fmt),(a),(b),(c),(d)); CHKRET(n__,(n)); } while (0)
+#define SNPRINTF8(s,n,fmt,a,b,c,d,e)	do {int n__; n__ = (snprintf)((s),(n),(fmt),(a),(b),(c),(d),(e)); CHKRET(n__,(n)); } while (0)
+#define SNPRINTF9(s,n,fmt,a,b,c,d,e,f)	do {int n__; n__ = (snprintf)((s),(n),(fmt),(a),(b),(c),(d),(e),(f)); CHKRET(n__,(n)); } while (0)
+#else /* NOT defined(HAVE_SNPRINTF) */
+#define SNPRINTF4(s,n,fmt,a)		(void)(sprintf)((s),    (fmt),(a))
+#define SNPRINTF5(s,n,fmt,a,b)		(void)(sprintf)((s),    (fmt),(a),(b))
+#define SNPRINTF6(s,n,fmt,a,b,c)	(void)(sprintf)((s),    (fmt),(a),(b),(c))
+#define SNPRINTF7(s,n,fmt,a,b,c,d)	(void)(sprintf)((s),    (fmt),(a),(b),(c),(d))
+#define SNPRINTF8(s,n,fmt,a,b,c,d,e)	(void)(sprintf)((s),    (fmt),(a),(b),(c),(d),(e))
+#define SNPRINTF9(s,n,fmt,a,b,c,d,e,f)	(void)(sprintf)((s),    (fmt),(a),(b),(c),(d),(e),(f))
+#endif /* defined(HAVE_SNPRINTF) */
+
+#if defined(__LCC__)
+/* Prototypes for all of the UNIX extensions that are absent from ISO
+   1989 Standard C are omitted from lcc's header files, even though
+   they are present in the runtime library.  For safety, we include
+   prototypes of all of the math library functions needed by hoc. */
+
+extern float		(acosf) ARGS((float));
+extern float		(acoshf) ARGS((float));
+extern float		(asinf) ARGS((float));
+extern float		(asinhf) ARGS((float));
+extern float		(atanf) ARGS((float));
+extern float		(atanhf) ARGS((float));
+extern float		(cbrtf) ARGS((float));
+extern float		(ceilf) ARGS((float));
+extern float		(copysignf) ARGS((float, float));
+extern float		(cosf) ARGS((float));
+extern float		(coshf) ARGS((float));
+extern float		(erfcf) ARGS((float));
+extern float		(erff) ARGS((float));
+extern float		(expf) ARGS((float));
+extern float		(expm1f) ARGS((float));
+extern float		(fabsf) ARGS((float));
+extern float		(floorf) ARGS((float));
+extern float		(fmodf) ARGS((float, float));
+extern float		(hypotf) ARGS((float, float));
+extern float		(j0f) ARGS((float));
+extern float		(j1f) ARGS((float));
+extern float		(jnf) ARGS((int, float));
+extern float		(ldexpf) ARGS((float, int));
+extern float		(lgammaf) ARGS((float));
+extern float		(log10f) ARGS((float));
+extern float		(logf) ARGS((float));
+extern float		(log1pf) ARGS((float));
+extern float		(powf) ARGS((float, float));
+extern float		(nextafterf) ARGS((float, float));
+extern float		(remainderf) ARGS((float, float));
+extern float		(rintf) ARGS((float));
+extern float		(scalbf) ARGS((float, float));
+extern float		(significandf) ARGS((float));
+extern float		(sinf) ARGS((float));
+extern float		(sinhf) ARGS((float));
+extern float		(sqrtf) ARGS((float));
+extern float		(truncf) ARGS((float));
+extern float		(tanf) ARGS((float));
+extern float		(tanhf) ARGS((float));
+extern float		(y0f) ARGS((float));
+extern float		(y1f) ARGS((float));
+extern float		(ynf) ARGS((int, float));
+extern int		(ilogbf) ARGS((float));
+
+extern double		(acos) ARGS((double));
+extern double		(acosh) ARGS((double));
+extern double		(asin) ARGS((double));
+extern double		(asinh) ARGS((double));
+extern double		(atan) ARGS((double));
+extern double		(atanh) ARGS((double));
+extern double		(cbrt) ARGS((double));
+extern double		(ceil) ARGS((double));
+extern double		(copysign) ARGS((double, double));
+extern double		(cos) ARGS((double));
+extern double		(cosh) ARGS((double));
+extern double		(erfc) ARGS((double));
+extern double		(erf) ARGS((double));
+extern double		(exp) ARGS((double));
+extern double		(expm1) ARGS((double));
+extern double		(fabs) ARGS((double));
+extern double		(floor) ARGS((double));
+extern double		(fmod) ARGS((double, double));
+extern double		(hypot) ARGS((double, double));
+extern double		(j0) ARGS((double));
+extern double		(j1) ARGS((double));
+extern double		(jn) ARGS((int, double));
+extern double		(ldexp) ARGS((double, int));
+extern double		(lgamma) ARGS((double));
+extern double		(log10) ARGS((double));
+extern double		(log) ARGS((double));
+extern double		(log1p) ARGS((double));
+extern double		(nextafter) ARGS((double, double));
+extern double		(pow) ARGS((double, double));
+extern double		(remainder) ARGS((double, double));
+extern double		(rint) ARGS((double));
+extern double		(scalb) ARGS((double, double));
+extern double		(significand) ARGS((double));
+extern double		(sin) ARGS((double));
+extern double		(sinh) ARGS((double));
+extern double		(sqrt) ARGS((double));
+extern double		(tan) ARGS((double));
+extern double		(tanh) ARGS((double));
+extern double		(trunc) ARGS((double));
+extern double		(y0) ARGS((double));
+extern double		(y1) ARGS((double));
+extern double		(yn) ARGS((int, double));
+extern int		(ilogb) ARGS((double));
+
+extern long double	(acosl) ARGS((long double));
+extern long double	(acoshl) ARGS((long double));
+extern long double	(asinl) ARGS((long double));
+extern long double	(asinhl) ARGS((long double));
+extern long double	(atanl) ARGS((long double));
+extern long double	(atanhl) ARGS((long double));
+extern long double	(cbrtl) ARGS((long double));
+extern long double	(ceill) ARGS((long double));
+extern long double	(copysignl) ARGS((long double, long double));
+extern long double	(cosl) ARGS((long double));
+extern long double	(coshl) ARGS((long double));
+extern long double	(erfcl) ARGS((long double));
+extern long double	(erfl) ARGS((long double));
+extern long double	(expl) ARGS((long double));
+extern long double	(expm1l) ARGS((long double));
+extern long double	(fabsl) ARGS((long double));
+extern long double	(floorl) ARGS((long double));
+extern long double	(fmodl) ARGS((long double, long double));
+extern long double	(hypotl) ARGS((long double, long double));
+extern long double	(j0l) ARGS((long double));
+extern long double	(j1l) ARGS((long double));
+extern long double	(jnl) ARGS((int, long double));
+extern long double	(ldexpl) ARGS((long double, int));
+extern long double	(lgammal) ARGS((long double));
+extern long double	(log10l) ARGS((long double));
+extern long double	(logl) ARGS((long double));
+extern long double	(log1pl) ARGS((long double));
+extern long double	(nextafterl) ARGS((long double, long double));
+extern long double	(powl) ARGS((long double, long double));
+extern long double	(remainderl) ARGS((long double, long double));
+extern long double	(rintl) ARGS((long double));
+extern long double	(scalbl) ARGS((long double, long double));
+extern long double	(significandl) ARGS((long double));
+extern long double	(sinl) ARGS((long double));
+extern long double	(sinhl) ARGS((long double));
+extern long double	(sqrtl) ARGS((long double));
+extern long double	(tanl) ARGS((long double));
+extern long double	(tanhl) ARGS((long double));
+extern long double	(truncl) ARGS((long double));
+extern long double	(y0l) ARGS((long double));
+extern long double	(y1l) ARGS((long double));
+extern long double	(ynl) ARGS((int, long double));
+extern int		(ilogbl) ARGS((long double));
+
+#if defined(HAVE_FP_T_QUADRUPLE)
+/* lcc 4.1 implements long double as double */
+#undef acos
+#undef acosh
+#undef asin
+#undef asinh
+#undef atan
+#undef atanh
+#undef cbrt
+#undef ceil
+#undef copysign
+#undef cos
+#undef cosh
+#undef erf
+#undef erfc
+#undef exp
+#undef expm1
+#undef fabs
+#undef floor
+#undef fmod
+#undef hypot
+#undef ilogb
+#undef j0
+#undef j1
+#undef jn
+#undef ldexp
+#undef lgamma
+#undef log
+#undef log10
+#undef log1p
+#undef nextafter
+#undef pow
+#undef remainder
+#undef rint
+#undef scalb
+#undef significand
+#undef sin
+#undef sinh
+#undef sqrt
+#undef tan
+#undef tanh
+#undef trunc
+#undef y0
+#undef y1
+#undef yn
+#endif /* defined(HAVE_FP_T_QUADRUPLE) */
+
+#include <sys/types.h>			/* need for gid_t, pid_t, uid_t */
+
+extern char *		(getcwd) ARGS((char *, size_t));
+extern gid_t		(getgid) ARGS((void));
+extern pid_t		(getpid) ARGS((void));
+extern uid_t		(getuid) ARGS((void));
+#endif /* defined(__LCC__) */
+
+#if defined(__PGI) || defined(__LCC__)
+/* The Portland Group compilers (pgcc and pgCC), and the
+AT&T/Princeton lcc compiler, generate code that handles NaNs
+incorrectly, and there may be others found in the future, so create a
+single preprocessor symbol that we can cleanly test, sigh... */
+#define HAVE_NAN_BOTCH
+#endif /* defined(__PGI) || defined(__LCC__) */
+
+#if defined(HAVE_FP_T_QUADRUPLE)
+/* Some systems lack one or more of these, either prototypes header
+   files, or functions in runtime libraries */
+EXTERN fp_t		(acoshl) ARGS((fp_t));
+EXTERN fp_t		(acosl) ARGS((fp_t));
+EXTERN fp_t		(asinhl) ARGS((fp_t));
+EXTERN fp_t		(asinl) ARGS((fp_t));
+EXTERN fp_t		(atanhl) ARGS((fp_t));
+EXTERN fp_t		(atanl) ARGS((fp_t));
+EXTERN fp_t		(cbrtl) ARGS((fp_t));
+EXTERN fp_t		(ceill) ARGS((fp_t));
+EXTERN fp_t		(copysignl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(coshl) ARGS((fp_t));
+EXTERN fp_t		(cosl) ARGS((fp_t));
+EXTERN fp_t		(erfcl) ARGS((fp_t));
+EXTERN fp_t		(erfl) ARGS((fp_t));
+EXTERN fp_t		(expl) ARGS((fp_t));
+EXTERN fp_t		(expm1l) ARGS((fp_t));
+EXTERN fp_t		(fabsl) ARGS((fp_t));
+EXTERN fp_t		(floorl) ARGS((fp_t));
+EXTERN fp_t		(fmodl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(hypotl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(j0l) ARGS((fp_t));
+EXTERN fp_t		(j1l) ARGS((fp_t));
+EXTERN fp_t		(jnl) ARGS((int, fp_t));
+EXTERN fp_t		(ldexpl) ARGS((fp_t, int));
+EXTERN fp_t		(lgammal) ARGS((fp_t));
+EXTERN fp_t		(log10l) ARGS((fp_t));
+EXTERN fp_t		(logl) ARGS((fp_t));
+EXTERN fp_t		(nextafterl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(powl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(remainderl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(rintl) ARGS((fp_t));
+EXTERN fp_t		(scalbl) ARGS((fp_t, fp_t));
+EXTERN fp_t		(sinhl) ARGS((fp_t));
+EXTERN fp_t		(sinl) ARGS((fp_t));
+EXTERN fp_t		(sqrtl) ARGS((fp_t));
+EXTERN fp_t		(tanhl) ARGS((fp_t));
+EXTERN fp_t		(tanl) ARGS((fp_t));
+EXTERN fp_t		(truncl) ARGS((fp_t));
+EXTERN fp_t		(y0l) ARGS((fp_t));
+EXTERN fp_t		(y1l) ARGS((fp_t));
+EXTERN fp_t		(ynl) ARGS((int, fp_t));
+EXTERN int		(ilogbl) ARGS((fp_t));
+#endif /* defined(HAVE_FP_T_QUADRUPLE) */
+
+#if defined(HAVE_FP_T_SINGLE)
+/* Some systems lack one or more of these, either prototypes header
+   files, or functions in runtime libraries */
+EXTERN fp_t		(acoshf) ARGS((fp_t));
+EXTERN fp_t		(acosf) ARGS((fp_t));
+EXTERN fp_t		(asinhf) ARGS((fp_t));
+EXTERN fp_t		(asinf) ARGS((fp_t));
+EXTERN fp_t		(atanhf) ARGS((fp_t));
+EXTERN fp_t		(atanf) ARGS((fp_t));
+EXTERN fp_t		(cbrtf) ARGS((fp_t));
+EXTERN fp_t		(ceilf) ARGS((fp_t));
+EXTERN fp_t		(copysignf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(coshf) ARGS((fp_t));
+EXTERN fp_t		(cosf) ARGS((fp_t));
+EXTERN fp_t		(erfcf) ARGS((fp_t));
+EXTERN fp_t		(erff) ARGS((fp_t));
+EXTERN fp_t		(expf) ARGS((fp_t));
+EXTERN fp_t		(expm1f) ARGS((fp_t));
+EXTERN fp_t		(fabsf) ARGS((fp_t));
+EXTERN fp_t		(floorf) ARGS((fp_t));
+EXTERN fp_t		(fmodf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(hypotf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(j0f) ARGS((fp_t));
+EXTERN fp_t		(j1f) ARGS((fp_t));
+EXTERN fp_t		(jnf) ARGS((int, fp_t));
+EXTERN fp_t		(ldexpf) ARGS((fp_t, int));
+EXTERN fp_t		(lgammaf) ARGS((fp_t));
+EXTERN fp_t		(log10f) ARGS((fp_t));
+EXTERN fp_t		(logf) ARGS((fp_t));
+EXTERN fp_t		(nextafterf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(powf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(remainderf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(rintf) ARGS((fp_t));
+EXTERN fp_t		(scalbf) ARGS((fp_t, fp_t));
+EXTERN fp_t		(sinhf) ARGS((fp_t));
+EXTERN fp_t		(sinf) ARGS((fp_t));
+EXTERN fp_t		(sqrtf) ARGS((fp_t));
+EXTERN fp_t		(tanhf) ARGS((fp_t));
+EXTERN fp_t		(tanf) ARGS((fp_t));
+EXTERN fp_t		(truncf) ARGS((fp_t));
+EXTERN fp_t		(y0f) ARGS((fp_t));
+EXTERN fp_t		(y1f) ARGS((fp_t));
+EXTERN fp_t		(ynf) ARGS((int, fp_t));
+EXTERN int		(ilogbf) ARGS((fp_t));
+#endif /* defined(HAVE_FP_T_SINGLE) */
+
+#if defined(__APPLE__)
+EXTERN double		(trunc) ARGS((double)); /* missing from system headers, but in -lm */
+#endif
+@
+
+
+1.26
+log
+@Remove declarations of functions that, through recent changes, can now
+be static.  Add declarations of concat6(), SymtoN(), and SymtoS().
+@
+text
+@d304 1
+a304 1
+extern fp_t		StoN ARGS((const char *));
+@
+
+
+1.25
+log
+@Add function prototype for new is_local() function.
+@
+text
+@d186 1
+a191 2
+extern const char *	first_matching_symbol_name ARGS((const char *));
+extern const char *	first_symbol_name ARGS((void));
+a208 2
+extern const char *	next_matching_symbol_name ARGS((const char *));
+extern const char *	next_symbol_name ARGS((void));
+d221 1
+a223 1
+extern const char *	xinttos ARGS((fp_t));
+d305 1
+a344 1
+extern Symbol *		set_number ARGS((Symbol *, fp_t));
+a420 1
+extern void		run ARGS((void));
+d428 1
+a428 4
+extern void		str_concat_nn ARGS((void));
+extern void		str_concat_ns ARGS((void));
+extern void		str_concat_sn ARGS((void));
+extern void		str_concat_ss ARGS((void));
+a435 2
+extern void		str_to_symnum ARGS((void));
+extern void		str_to_symstr ARGS((void));
+@
+
+
+1.24
+log
+@Add new typedefs for F1i_t, F2s_t, SF2sn_t, and SF3snn_t, and
+corresponding declarations in the Symbol union.  Remove or replace
+declarations of Abort(), abort_user(), Defined(), Delete(), hex(),
+hexfp(), hexint(), numtostr(), str_index(), str_length(),
+str_strftime(), and str_substr().  Add declarations of FtoS(), Hex(),
+Hexfp(), Hexint(), Substr(), Index(), Length(), StoN(), bltin1i(),
+bltin2s(), strbltin2sn(), and strbltin3snn().
+@
+text
+@d328 1
+d331 1
+a331 1
+extern int		match ARGS((const char *s, const char *pattern));
+@
+
+
+1.23
+log
+@Add definition of STREQUAL() and declarations of Msg_Translate() and
+free_symbol_table(), and change protect() to Protect().
+@
+text
+@d29 14
+a42 8
+typedef fp_t (*F0_t) ARGS((void));
+typedef fp_t (*F1_t) ARGS((fp_t));
+typedef fp_t (*F1s_t) ARGS((const char *));
+typedef fp_t (*F2_t) ARGS((fp_t,fp_t));
+typedef const char *(*SF0_t) ARGS((void));
+typedef const char *(*SF1_t) ARGS((const char *));
+typedef const char *(*SF1n_t) ARGS((fp_t));
+typedef const char *(*SF2_t) ARGS((const char *, const char *));
+d61 1
+d63 1
+d68 2
+d179 1
+d196 1
+d199 3
+d221 1
+a229 1
+extern fp_t		Abort ARGS((const char *));
+d244 2
+d261 1
+d275 1
+d307 1
+a352 1
+extern void		abort_user ARGS((void));
+d366 1
+d369 1
+a377 2
+extern void		Defined ARGS((void));
+extern void		Delete ARGS((void));
+a390 3
+extern void		hex ARGS((void));
+extern void		hexfp ARGS((void));
+extern void		hexint ARGS((void));
+a405 1
+extern void		numtostr ARGS((void));
+a437 1
+extern void		str_index ARGS((void));
+a438 1
+extern void		str_length ARGS((void));
+a440 2
+extern void		str_strftime ARGS((void));
+extern void		str_substr ARGS((void));
+d449 2
+@
+
+
+1.22
+log
+@Add declarations of sprexpr(), sprfmt(), sprjoin(), and sprstr().
+@
+text
+@d151 2
+d192 1
+d201 1
+a201 1
+extern const char *	protect ARGS((const char *));
+d368 1
+@
+
+
+1.21
+log
+@Add declarations of FtoH() and HtoF().
+@
+text
+@d407 4
+@
+
+
+1.20
+log
+@Add declarations of breakstmt() and continuestmt().
+@
+text
+@d182 1
+d237 1
+@
+
+
+1.19
+log
+@Include prototype for snprintf() if HAVE_SNPRINTF_PROTOTYPE is not
+defined.
+@
+text
+@d344 1
+d350 1
+@
+
+
+1.18
+log
+@Add new typedefs for F1s_t and SF1n_t, and corresponding union members
+ptr1s and sptr1n.  Add prototypes for Char(), Ichar(), bltin1s(), and
+strbltin1n().
+@
+text
+@d439 4
+@
+
+
+1.17
+log
+@Add declarations of match(), prfmt(), and prsep().
+@
+text
+@d31 1
+d35 1
+d52 8
+a59 13
+#if 0
+		fp_t	(*ptr0) ARGS((void));	/* BLTIN0 */
+		fp_t	(*ptr1) ARGS((fp_t));	/* BLTIN1 */
+		fp_t	(*ptr2) ARGS((fp_t,fp_t));	/* BLTIN2 */
+#else
+		F0_t ptr0;	/* BLTIN0 */
+		F1_t ptr1;	/* BLTIN1 */
+		F2_t ptr2;	/* BLTIN2 */
+		SF0_t sptr0;	/* STRBLTIN0 */
+		SF1_t sptr1;	/* STRBLTIN1 */
+		SF2_t sptr2;	/* STRBLTIN2 */
+#endif
+
+d168 1
+d237 1
+d342 1
+d424 1
+@
+
+
+1.16
+log
+@Update store() prototype.
+@
+text
+@d306 1
+d390 1
+d396 1
+@
+
+
+1.15
+log
+@Revise SNPRINTFn() definitions to report an error if snprintf() returns an error.
+@
+text
+@d284 1
+a284 1
+extern fp_t		store ARGS((fp_t));
+@
+
+
+1.14
+log
+@Add prototypes for Double() and Single().
+@
+text
+@d436 8
+a443 6
+#define SNPRINTF4(s,n,fmt,a)		(snprintf)((s),(n),(fmt),(a))
+#define SNPRINTF5(s,n,fmt,a,b)		(snprintf)((s),(n),(fmt),(a),(b))
+#define SNPRINTF6(s,n,fmt,a,b,c)	(snprintf)((s),(n),(fmt),(a),(b),(c))
+#define SNPRINTF7(s,n,fmt,a,b,c,d)	(snprintf)((s),(n),(fmt),(a),(b),(c),(d))
+#define SNPRINTF8(s,n,fmt,a,b,c,d,e)	(snprintf)((s),(n),(fmt),(a),(b),(c),(d),(e))
+#define SNPRINTF9(s,n,fmt,a,b,c,d,e,f)	(snprintf)((s),(n),(fmt),(a),(b),(c),(d),(e),(f))
+d445 6
+a450 6
+#define SNPRINTF4(s,n,fmt,a)		(sprintf )((s),    (fmt),(a))
+#define SNPRINTF5(s,n,fmt,a,b)		(sprintf )((s),    (fmt),(a),(b))
+#define SNPRINTF6(s,n,fmt,a,b,c)	(sprintf )((s),    (fmt),(a),(b),(c))
+#define SNPRINTF7(s,n,fmt,a,b,c,d)	(sprintf )((s),    (fmt),(a),(b),(c),(d))
+#define SNPRINTF8(s,n,fmt,a,b,c,d,e)	(sprintf )((s),    (fmt),(a),(b),(c),(d),(e))
+#define SNPRINTF9(s,n,fmt,a,b,c,d,e,f)	(sprintf )((s),    (fmt),(a),(b),(c),(d),(e),(f))
+@
+
+
+1.13
+log
+@Add prototypes for strlcat() and strlcpy().
+Add macros SNPRINTFn() to allow use of safe snprintf() when
+available.
+@
+text
+@d227 1
+d280 1
+@
+
+
+1.12
+log
+@Add new variable declarations moved from fp_t.h.  Add new typedefs
+DP_Parts, QP_Parts, SP_Parts.  Revise lcc-specific code block, so that
+we properly handle --with-long-double builds.  Parenthesize function
+names in prototypes to protect against macro expansion.
+@
+text
+@d308 3
+d432 16
+@
+
+
+1.11
+log
+@Change DoubleParts to FP_Parts.  Add support for three precisions.
+Define the CLASS_xxx constants.  Rename xdbltos() to xfptos().  Add
+prototypes for Class(), MaxSubnormal(), Unordered(), ltgt(), and
+workarounds for deficiencies in system header files.
+@
+text
+@d19 1
+d22 7
+d93 4
+a96 2
+typedef union FP_Parts { /* access to floating-point bits as integers */
+	fp_t v;
+d99 1
+a99 5
+	unsigned int i[2];
+#endif
+
+#if defined(HAVE_FP_T_QUADRUPLE)
+	unsigned int i[4];
+d103 2
+d106 2
+d110 7
+a116 1
+} FP_Parts;
+d393 1
+d432 190
+a621 32
+   1989 Standard C are omitted from lcc's header files, even though they
+   are present in the runtime library. */
+extern double		acosh ARGS((double));
+extern double		asinh ARGS((double));
+extern double		atanh ARGS((double));
+extern double		cbrt ARGS((double));
+extern double		copysign ARGS((double, double));
+extern double		erf ARGS((double));
+extern double		erfc ARGS((double));
+extern double		expm1 ARGS((double));
+extern double		hypot ARGS((double, double));
+extern double		j0 ARGS((double));
+extern double		j1 ARGS((double));
+extern double		jn ARGS((int, double));
+extern double		lgamma ARGS((double));
+extern double		log1p ARGS((double));
+extern double		nextafter ARGS((double, double));
+extern double		remainder ARGS((double, double));
+extern double		rint ARGS((double));
+extern double		scalb ARGS((double, double));
+extern double		significand ARGS((double));
+extern double		y0 ARGS((double));
+extern double		y1 ARGS((double));
+extern double		yn ARGS((int, double));
+
+#include <sys/types.h>
+
+extern char *		getcwd ARGS((char *, size_t));
+extern gid_t		getgid();
+extern pid_t		getpid ARGS((void));
+extern uid_t		getuid ARGS((void));
+#endif
+d629 1
+a629 1
+#endif
+d634 41
+a674 41
+EXTERN fp_t		acoshl ARGS((fp_t));
+EXTERN fp_t		acosl ARGS((fp_t));
+EXTERN fp_t		asinhl ARGS((fp_t));
+EXTERN fp_t		asinl ARGS((fp_t));
+EXTERN fp_t		atanhl ARGS((fp_t));
+EXTERN fp_t		atanl ARGS((fp_t));
+EXTERN fp_t		cbrtl ARGS((fp_t));
+EXTERN fp_t		ceill ARGS((fp_t));
+EXTERN fp_t		copysignl ARGS((fp_t, fp_t));
+EXTERN fp_t		coshl ARGS((fp_t));
+EXTERN fp_t		cosl ARGS((fp_t));
+EXTERN fp_t		erfcl ARGS((fp_t));
+EXTERN fp_t		erfl ARGS((fp_t));
+EXTERN fp_t		expl ARGS((fp_t));
+EXTERN fp_t		expm1l ARGS((fp_t));
+EXTERN fp_t		fabsl ARGS((fp_t));
+EXTERN fp_t		floorl ARGS((fp_t));
+EXTERN fp_t		fmodl ARGS((fp_t, fp_t));
+EXTERN fp_t		hypotl ARGS((fp_t, fp_t));
+EXTERN fp_t		j0l ARGS((fp_t));
+EXTERN fp_t		j1l ARGS((fp_t));
+EXTERN fp_t		jnl ARGS((int, fp_t));
+EXTERN fp_t		ldexpl ARGS((fp_t, int));
+EXTERN fp_t		lgammal ARGS((fp_t));
+EXTERN fp_t		log10l ARGS((fp_t));
+EXTERN fp_t		logl ARGS((fp_t));
+EXTERN fp_t		nextafterl ARGS((fp_t, fp_t));
+EXTERN fp_t		powl ARGS((fp_t, fp_t));
+EXTERN fp_t		remainderl ARGS((fp_t, fp_t));
+EXTERN fp_t		rintl ARGS((fp_t));
+EXTERN fp_t		scalbl ARGS((fp_t, fp_t));
+EXTERN fp_t		sinhl ARGS((fp_t));
+EXTERN fp_t		sinl ARGS((fp_t));
+EXTERN fp_t		sqrtl ARGS((fp_t));
+EXTERN fp_t		tanhl ARGS((fp_t));
+EXTERN fp_t		tanl ARGS((fp_t));
+EXTERN fp_t		truncl ARGS((fp_t));
+EXTERN fp_t		y0l ARGS((fp_t));
+EXTERN fp_t		y1l ARGS((fp_t));
+EXTERN fp_t		ynl ARGS((int, fp_t));
+EXTERN int		ilogbl ARGS((fp_t));
+d680 41
+a720 41
+EXTERN fp_t		acoshf ARGS((fp_t));
+EXTERN fp_t		acosf ARGS((fp_t));
+EXTERN fp_t		asinhf ARGS((fp_t));
+EXTERN fp_t		asinf ARGS((fp_t));
+EXTERN fp_t		atanhf ARGS((fp_t));
+EXTERN fp_t		atanf ARGS((fp_t));
+EXTERN fp_t		cbrtf ARGS((fp_t));
+EXTERN fp_t		ceilf ARGS((fp_t));
+EXTERN fp_t		copysignf ARGS((fp_t, fp_t));
+EXTERN fp_t		coshf ARGS((fp_t));
+EXTERN fp_t		cosf ARGS((fp_t));
+EXTERN fp_t		erfcf ARGS((fp_t));
+EXTERN fp_t		erff ARGS((fp_t));
+EXTERN fp_t		expf ARGS((fp_t));
+EXTERN fp_t		expm1f ARGS((fp_t));
+EXTERN fp_t		fabsf ARGS((fp_t));
+EXTERN fp_t		floorf ARGS((fp_t));
+EXTERN fp_t		fmodf ARGS((fp_t, fp_t));
+EXTERN fp_t		hypotf ARGS((fp_t, fp_t));
+EXTERN fp_t		j0f ARGS((fp_t));
+EXTERN fp_t		j1f ARGS((fp_t));
+EXTERN fp_t		jnf ARGS((int, fp_t));
+EXTERN fp_t		ldexpf ARGS((fp_t, int));
+EXTERN fp_t		lgammaf ARGS((fp_t));
+EXTERN fp_t		log10f ARGS((fp_t));
+EXTERN fp_t		logf ARGS((fp_t));
+EXTERN fp_t		nextafterf ARGS((fp_t, fp_t));
+EXTERN fp_t		powf ARGS((fp_t, fp_t));
+EXTERN fp_t		remainderf ARGS((fp_t, fp_t));
+EXTERN fp_t		rintf ARGS((fp_t));
+EXTERN fp_t		scalbf ARGS((fp_t, fp_t));
+EXTERN fp_t		sinhf ARGS((fp_t));
+EXTERN fp_t		sinf ARGS((fp_t));
+EXTERN fp_t		sqrtf ARGS((fp_t));
+EXTERN fp_t		tanhf ARGS((fp_t));
+EXTERN fp_t		tanf ARGS((fp_t));
+EXTERN fp_t		truncf ARGS((fp_t));
+EXTERN fp_t		y0f ARGS((fp_t));
+EXTERN fp_t		y1f ARGS((fp_t));
+EXTERN fp_t		ynf ARGS((int, fp_t));
+EXTERN int		ilogbf ARGS((fp_t));
+d724 1
+a724 1
+EXTERN double		trunc ARGS((double)); /* missing from system headers, but in -lm */
+@
+
+
+1.10
+log
+@Change extern to EXTERN in declaration of yyparse.  This solves a problem
+with failing builds on IBM AIX 4.x.
+@
+text
+@a12 2
+#include "fp_t.h"
+
+d19 2
+d85 1
+a85 1
+typedef union DoubleParts { /* access to floating-point bits as integers */
+d87 2
+d90 24
+a113 1
+} DoubleParts;
+d191 1
+a191 1
+extern const char *	xdbltos ARGS((fp_t));
+d206 1
+d243 1
+d272 1
+d350 1
+d454 96
+@
+
+
+1.9
+log
+@Add more conditionalized code for lcc.
+@
+text
+@d262 1
+a262 1
+extern int		yyparse ARGS((void));
+@
+
+
+1.8
+log
+@Add new member, builtin, to Symbol structure.
+@
+text
+@d410 7
+@
+
+
+1.7
+log
+@Remove definitions of MAX_NAME and MAX_STRING, since their
+associated arrays are now dynamically resized.
+
+Extend Datum to include a type flag (needed for proper support
+of character data).
+
+Add several new function prototypes.
+
+Change prog from array to pointer, since it is now dynamically resized.
+
+Add definition of HOCPATH.
+@
+text
+@d59 3
+a61 2
+	long	type;
+	long	immutable;
+@
+
+
+1.6
+log
+@Routine update
+@
+text
+@a14 16
+#if !defined(MAX_NAME)
+#define MAX_NAME	1024
+#endif
+#if (MAX_NAME + 0) < 63			/* avoid silly small values */
+#undef MAX_NAME
+#define MAX_NAME	63
+#endif
+
+#if !defined(MAX_STRING)
+#define MAX_STRING	32767
+#endif
+#if (MAX_STRING + 0) < 1024		/* avoid silly small values */
+#undef MAX_STRING
+#define MAX_STRING	1024
+#endif
+
+d67 1
+d73 10
+d108 4
+d120 2
+a121 1
+extern Inst		prog[];
+d128 1
+d137 1
+d143 1
+d155 1
+d157 2
+d193 1
+d254 1
+d256 1
+d273 2
+d364 3
+d379 1
+d381 1
+d415 1
+a415 1
+single preprocessor symbol that we can cleanly test, sigh... */,
+@
+
+
+1.5
+log
+@Major update to standardize and order declarations, and add
+a few new ones.
+@
+text
+@d244 1
+d289 1
+a289 1
+extern void		delete_symbol ARGS((Symbol *));
+@
+
+
+1.4
+log
+@Add prototype for new strton() function.
+@
+text
+@d113 6
+d121 40
+a160 28
+extern	fp_t Fgetd ARGS((int));
+extern	int moreinput ARGS((void));
+extern	void define ARGS((Symbol *));
+extern	void initcode ARGS((void)), xpop ARGS((void)), constpush ARGS((void));
+extern	void varpush ARGS((void));
+extern	void eval ARGS((void)), add ARGS((void)), sub ARGS((void)), mul ARGS((void)), divop ARGS((void)), mod ARGS((void));
+extern	void negate ARGS((void)), power ARGS((void));
+extern	void addeq ARGS((void)), subeq ARGS((void)), muleq ARGS((void)), diveq ARGS((void)), modeq ARGS((void));
+
+extern	Inst *progp, *progbase, prog[], *code ARGS((Inst));
+extern	void assign ARGS((void)), varread ARGS((void));
+extern	void prexpr ARGS((void)), prnl ARGS((void)), prstr ARGS((void));
+extern	void gt ARGS((void)), lt ARGS((void)), eq ARGS((void)), ge ARGS((void)), le ARGS((void)), ne ARGS((void));
+extern	void And ARGS((void)), Or ARGS((void)), Not ARGS((void));
+extern	void ifcode ARGS((void)), whilecode ARGS((void)), forcode ARGS((void));
+extern	void call ARGS((void)), arg ARGS((void)), argassign ARGS((void));
+extern	void funcret ARGS((void)), procret ARGS((void));
+extern	void preinc ARGS((void)), predec ARGS((void)), postinc ARGS((void)), postdec ARGS((void));
+extern	void argaddeq ARGS((void)), argsubeq ARGS((void)), argmuleq ARGS((void));
+extern	void argdiveq ARGS((void)), argmodeq ARGS((void));
+extern	void execute ARGS((Inst*));
+extern	void init_builtins ARGS((void));
+extern	void printtop ARGS((void));
+extern	void run ARGS((void));
+extern	int yyparse ARGS((void));
+extern	void execerror ARGS((const char *, const char *));
+extern	void efree ARGS((void *));
+extern	void *emalloc ARGS((size_t));
+d164 201
+a364 171
+extern fp_t	Abort ARGS((const char *));
+extern fp_t	Abs ARGS((fp_t));
+extern fp_t	Acos ARGS((fp_t));
+extern fp_t	Acosh ARGS((fp_t));
+extern fp_t	Asin ARGS((fp_t));
+extern fp_t	Asinh ARGS((fp_t));
+extern fp_t	Atan ARGS((fp_t));
+extern fp_t	Atanh ARGS((fp_t));
+extern fp_t	Cbrt ARGS((fp_t));
+extern fp_t	Ceil ARGS((fp_t));
+extern fp_t	Copysign ARGS((fp_t, fp_t));
+extern fp_t	Cos ARGS((fp_t));
+extern fp_t	Cosh ARGS((fp_t));
+extern fp_t	CPULimit ARGS((fp_t));
+extern fp_t	Erf ARGS((fp_t));
+extern fp_t	Erfc ARGS((fp_t));
+extern fp_t	Exp ARGS((fp_t));
+extern fp_t	Expm1 ARGS((fp_t));
+extern fp_t	Exponent ARGS((fp_t));
+extern fp_t	Floor ARGS((fp_t));
+extern fp_t	Fmod ARGS((fp_t, fp_t));
+extern fp_t	Gamma ARGS((fp_t));
+extern fp_t	Hypot ARGS((fp_t, fp_t));
+extern fp_t	Ilogb ARGS((fp_t));
+extern fp_t	Infinity ARGS((void));
+extern fp_t	Integer ARGS((fp_t));
+extern fp_t	IsFinite ARGS((fp_t));
+extern fp_t	IsInf ARGS((fp_t));
+extern fp_t	IsNaN ARGS((fp_t));
+extern fp_t	IsNormal ARGS((fp_t));
+extern fp_t	IsQNaN ARGS((fp_t));
+extern fp_t	IsSNaN ARGS((fp_t));
+extern fp_t	IsSubnormal ARGS((fp_t));
+extern fp_t	J0 ARGS((fp_t));
+extern fp_t	J1 ARGS((fp_t));
+extern fp_t	Jn ARGS((fp_t, fp_t));
+extern fp_t	Ldexp ARGS((fp_t, fp_t));
+extern fp_t	Lgamma ARGS((fp_t));
+extern fp_t	Log ARGS((fp_t));
+extern fp_t	Log10 ARGS((fp_t));
+extern fp_t	Log1p ARGS((fp_t));
+extern fp_t	Log2 ARGS((fp_t));
+extern fp_t	Macheps ARGS((fp_t));
+extern fp_t	MaxNormal ARGS((void));
+extern fp_t	MinNormal ARGS((void));
+extern fp_t	MinSubnormal ARGS((void));
+extern fp_t	NaN ARGS((void));
+extern fp_t	Nearest ARGS((fp_t, fp_t));
+extern fp_t	Nextafter ARGS((fp_t, fp_t));
+extern fp_t	Nint ARGS((fp_t));
+extern fp_t	Pow ARGS((fp_t, fp_t));
+extern fp_t	QNaN ARGS((void));
+extern fp_t	Remainder ARGS((fp_t, fp_t));
+extern fp_t	Rand ARGS((void));
+extern fp_t	RandInt ARGS((fp_t, fp_t));
+extern fp_t	Randl ARGS((fp_t));
+extern fp_t	Rint ARGS((fp_t));
+extern fp_t	Rsqrt ARGS((fp_t));
+extern fp_t	Scalb ARGS((fp_t, fp_t));
+extern fp_t	Second ARGS((void));
+extern fp_t	SetRandSeed ARGS((fp_t));
+extern fp_t	Significand ARGS((fp_t));
+extern fp_t	Sin ARGS((fp_t));
+extern fp_t	Sinh ARGS((fp_t));
+extern fp_t	SNaN ARGS((void));
+extern fp_t	Sqrt ARGS((fp_t));
+extern fp_t	Systime ARGS((void));
+extern fp_t	Tan ARGS((fp_t));
+extern fp_t	Tanh ARGS((fp_t));
+extern fp_t	Trunc ARGS((fp_t));
+extern fp_t	Y0 ARGS((fp_t));
+extern fp_t	Y1 ARGS((fp_t));
+extern fp_t	Yn ARGS((fp_t, fp_t));
+
+extern int	IsBigEndian ARGS((void));
+extern int	default_precision ARGS((void));
+extern int	get_precision ARGS((void));
+extern int	is_hidden ARGS((const char *, const char *));
+extern int	is_match ARGS((const char *, const char *));
+extern int	set_precision ARGS((int));
+
+extern fp_t	store ARGS((fp_t));
+
+extern Symbol	*install_const_number ARGS((const char *, fp_t));
+extern Symbol	*install_const_string ARGS((const char *, const char *));
+extern Symbol	*install_number ARGS((const char *, fp_t));
+extern Symbol	*install_string ARGS((const char *, const char *));
+extern Symbol	*set_number ARGS((Symbol *, fp_t));
+extern Symbol	*set_string ARGS((Symbol *, const char *));
+extern Symbol	*update_number ARGS((const char *, fp_t));
+extern Symbol	*update_string ARGS((const char *, const char *));
+
+extern const char * concat2 ARGS((const char *, const char *));
+extern const char * concat3 ARGS((const char *, const char *, const char *));
+extern const char * concat4 ARGS((const char *, const char *, const char *, const char *));
+extern const char * concat5 ARGS((const char *, const char *, const char *, const char *, const char *));
+extern const char * dupstr ARGS((const char *));
+extern const char * Evalcommands ARGS((const char *));
+extern const char * fmtnum ARGS((fp_t));
+extern const char * Getenv ARGS((const char *));
+extern const char * Inf_string ARGS((fp_t));
+extern const char * Load ARGS((const char *));
+extern const char * Logfile ARGS((const char *));
+extern const char * Logoff ARGS((void));
+extern const char * Logon ARGS((void));
+extern const char * NaN_string ARGS((fp_t));
+extern const char * Now ARGS((void));
+extern const char * Printenv ARGS((const char *));
+extern const char * Putenv ARGS((const char *, const char *));
+extern const char * Save ARGS((const char *, const char *));
+extern const char * Strftime ARGS((const char *, fp_t));
+extern const char * Tolower ARGS((const char *));
+extern const char * Toupper ARGS((const char *));
+extern const char * Who ARGS((const char *));
+
+extern const char * first_matching_symbol_name ARGS((const char *));
+extern const char * first_symbol_name ARGS((void));
+extern const char * first_symbol_pname ARGS((void));
+extern const char * msg_translate ARGS((const char *));
+extern const char * next_matching_symbol_name ARGS((const char *));
+extern const char * next_symbol_name ARGS((void));
+extern const char * next_symbol_pname ARGS((void));
+extern const char * xdbltos ARGS((fp_t));
+extern const char * xinttos ARGS((fp_t));
+extern fp_t	    strton ARGS((const char *, char **));
+extern fp_t	    xstrtod ARGS((const char *, char **));
+extern int	    decval ARGS((int));
+extern int	    hexval ARGS((int));
+
+extern Symbol *	first_symbol ARGS((void));
+extern Symbol *	next_symbol ARGS((void));
+
+extern void	abort_user ARGS((void));
+extern void	bltin0 ARGS((void));
+extern void	bltin1 ARGS((void));
+extern void	bltin2 ARGS((void));
+extern void	const_assign ARGS((void));
+extern void	const_str_assign ARGS((void));
+extern void	const_str_push ARGS((void));
+extern void	dump_syms ARGS((const char *));
+extern void	hex ARGS((void));
+extern void	hexfp ARGS((void));
+extern void	hexint ARGS((void));
+extern void	make_immutable ARGS((Symbol *));
+extern void	noop ARGS((void));
+extern void	numtostr ARGS((void));
+extern void	printtopstring ARGS((void));
+extern void	prnum ARGS((fp_t));
+extern void	prtext ARGS((const char *));
+extern void	prtext2 ARGS((const char *, int));
+extern void	set_filename ARGS((const char *));
+extern void	str_assign ARGS((void));
+extern void	str_concat_nn ARGS((void));
+extern void	str_concat_ns ARGS((void));
+extern void	str_concat_sn ARGS((void));
+extern void	str_concat_ss ARGS((void));
+extern void	str_eq ARGS((void));
+extern void	str_ge ARGS((void));
+extern void	str_gt ARGS((void));
+extern void	str_index ARGS((void));
+extern void	str_le ARGS((void));
+extern void	str_length ARGS((void));
+extern void	str_lt ARGS((void));
+extern void	str_ne ARGS((void));
+extern void	str_strftime ARGS((void));
+extern void	str_substr ARGS((void));
+extern void	str_to_num ARGS((void));
+extern void	strbltin0 ARGS((void));
+extern void	strbltin1 ARGS((void));
+extern void	strbltin2 ARGS((void));
+extern void	streval ARGS((void));
+d370 22
+a391 22
+extern double acosh ARGS((double));
+extern double asinh ARGS((double));
+extern double atanh ARGS((double));
+extern double cbrt ARGS((double));
+extern double copysign ARGS((double, double));
+extern double erf ARGS((double));
+extern double erfc ARGS((double));
+extern double expm1 ARGS((double));
+extern double hypot ARGS((double, double));
+extern double j0 ARGS((double));
+extern double j1 ARGS((double));
+extern double jn ARGS((int, double));
+extern double lgamma ARGS((double));
+extern double log1p ARGS((double));
+extern double nextafter ARGS((double, double));
+extern double remainder ARGS((double, double));
+extern double rint ARGS((double));
+extern double scalb ARGS((double, double));
+extern double significand ARGS((double));
+extern double y0 ARGS((double));
+extern double y1 ARGS((double));
+extern double yn ARGS((int, double));
+d395 4
+@
+
+
+1.3
+log
+@Major update.
+@
+text
+@d270 1
+@
+
+
+1.2
+log
+@New features:
+
+        ** Typedefs F0_t, F1_t, and F2_t for functions of 0, 1, and 2
+           arguments, to avoid messy and ugly casts.
+
+        ** Function prototypes for several dozen new functions.
+
+        ** Changes in some existing function prototypes, usually to add
+           const modifiers.
+
+        ** Addition of new members in the Symbol structure and Datum
+           union.
+
+        ** When the C long long data type is available (true in many C
+           and C++ compilers in 2001, even if they implement it in
+           software), it is used in preference to long for
+           floating-point <-> integer conversions, to increase the
+           available number range.
+@
+text
+@d3 27
+a29 3
+typedef double (*F0_t)();
+typedef double (*F1_t)(double);
+typedef double (*F2_t)(double,double);
+d31 14
+a44 1
+typedef void (*Inst)(void);
+d49 1
+d52 1
+d57 1
+a57 1
+		double	val;		/* VAR */
+d59 3
+a61 3
+		double	(*ptr0)(void);	/* BLTIN0 */
+		double	(*ptr1)(double);	/* BLTIN1 */
+		double	(*ptr2)(double,double);	/* BLTIN2 */
+d66 3
+d79 3
+a81 1
+Symbol	*install(const char*, int, double), *lookup(const char*);
+d84 1
+a84 1
+	double	val;
+d88 55
+a142 28
+extern	double Fgetd(int);
+extern	int moreinput(void);
+extern	void define(Symbol*), verify(Symbol*);
+extern	Datum pop(void);
+extern	void initcode(void), push(Datum), xpop(void), constpush(void);
+extern	void varpush(void);
+extern	void eval(void), add(void), sub(void), mul(void), divop(void), mod(void);
+extern	void negate(void), power(void);
+extern	void addeq(void), subeq(void), muleq(void), diveq(void), modeq(void);
+
+extern	Inst *progp, *progbase, prog[], *code(Inst);
+extern	void assign(void), varread(void);
+extern	void prexpr(void), prstr(void);
+extern	void gt(void), lt(void), eq(void), ge(void), le(void), ne(void);
+extern	void And(void), Or(void), Not(void);
+extern	void ifcode(void), whilecode(void), forcode(void);
+extern	void call(void), arg(void), argassign(void);
+extern	void funcret(void), procret(void);
+extern	void preinc(void), predec(void), postinc(void), postdec(void);
+extern	void argaddeq(void), argsubeq(void), argmuleq(void);
+extern	void argdiveq(void), argmodeq(void);
+extern	void execute(Inst*);
+extern	void printtop(void);
+
+extern	void init(void);
+extern	int yyparse(void);
+extern	void execerror(const char*, const char*);
+extern	void *emalloc(unsigned);
+d146 202
+a347 91
+extern double	Abort(const char *);
+extern double	Abs(double);
+extern double	Acos(double);
+extern double	Acosh(double);
+extern double	Asin(double);
+extern double	Asinh(double);
+extern double	Atan(double);
+extern double	Atanh(double);
+extern double	Cbrt(double);
+extern double	Ceil(double);
+extern double	Copysign(double, double);
+extern double	Cos(double);
+extern double	Cosh(double);
+extern double	Erf(double);
+extern double	Erfc(double);
+extern double	Exp(double);
+extern double	Expm1(double);
+extern double	Floor(double);
+extern double	Fmod(double, double);
+extern double	Gamma(double);
+extern double	Hypot(double, double);
+extern double	Ilogb(double);
+extern double	Infinity(void);
+extern double	Integer(double);
+extern double	IsFinite(double);
+extern double	IsInf(double);
+extern double	IsNaN(double);
+extern double	IsNormal(double);
+extern double	IsQNaN(double);
+extern double	IsSNaN(double);
+extern double	IsSubnormal(double);
+extern double	J0(double);
+extern double	J1(double);
+extern double	Jn(double, double);
+extern double	Ldexp(double, double);
+extern double	Lgamma(double);
+extern double	Log(double);
+extern double	Log10(double);
+extern double	Log1p(double);
+extern double	Log2(double);
+extern double	NaN(void);
+extern double	Nearest(double, double);
+extern double	Nextafter(double, double);
+extern double	Nint(double);
+extern double	Pow(double, double);
+extern double	Remainder(double, double);
+extern double	Ran(void);
+extern double	Randl(double);
+extern double	Rint(double);
+extern double	Rsqrt(double);
+extern double	Scalb(double, double);
+extern double	SetRanSeed(double);
+extern double	Significand(double);
+extern double	Sin(double);
+extern double	Sinh(double);
+extern double	Sqrt(double);
+extern double	Tan(double);
+extern double	Tanh(double);
+extern double	Trunc(double);
+extern double	Y0(double);
+extern double	Y1(double);
+extern double	Yn(double, double);
+
+extern int	default_precision(void);
+extern int	get_precision(void);
+extern int	set_precision(int);
+extern double	store(double);
+
+extern Symbol	*install_const_number(const char*, double);
+extern Symbol	*install_const_string(const char*, const char *);
+extern Symbol	*install_number(const char*, double);
+extern Symbol	*install_string(const char*, const char *);
+extern Symbol	*set_string(Symbol *, const char*);
+
+extern const char * dupstr(const char *);
+
+extern void	abort_user(void);
+extern void	bltin0(void);
+extern void	bltin1(void);
+extern void	bltin2(void);
+extern void	const_assign(void);
+extern void	const_str_assign(void);
+extern void	const_str_push(void);
+extern void	dump_syms(void);
+extern void	hex(void);
+extern void	noop(void);
+extern void	printtopstring(void);
+extern void	str_assign(void);
+extern void	str_concat(void);
+extern void	streval(void);
+extern void	who(void);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+d8 7
+a14 1
+#define	STOP	(Inst) 0
+a16 2
+	char	*name;
+	long	type;
+d19 10
+a28 1
+		double	(*ptr)(double);	/* BLTIN */
+d30 1
+a30 1
+		char	*str;		/* STRING */
+d32 3
+d37 1
+a37 1
+Symbol	*install(char*, int, double), *lookup(char*);
+d41 1
+a45 1
+extern	void execerror(char*, char*);
+d55 1
+a55 1
+extern	void assign(void), bltin(void), varread(void);
+d58 1
+a58 1
+extern	void and(void), or(void), not(void);
+a67 4
+extern double	Log(double), Log10(double), Gamma(double), Sqrt(double), Exp(double);
+extern double	Asin(double), Acos(double), Sinh(double), Cosh(double), integer(double);
+extern double	Pow(double, double);
+
+d70 1
+a70 1
+extern	void execerror(char*, char*);
+d73 93
+a165 2
+extern	void defnonly(char *);
+extern	void warning(char *s, char *t);
+@

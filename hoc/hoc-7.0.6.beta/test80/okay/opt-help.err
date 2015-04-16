@@ -1,0 +1,16 @@
+Usage:
+	../hoc	[ --author ] [ --? ] [ --copyright] [ --Dname ]
+		[ --Dname=number ] [ --Dname="string" ]
+		[ --Dname=symbol ] [ --help ] [ --no-banner ]
+		[ --no-cd ] [ --no-help-file ] [ --no-load ]
+		[ --no-logfile ] [ --no-readline ] [ --no-save ]
+		[ --no-site-file ] [ --no-translation-file ]
+		[ --no-user-file ] [ --quick ] [ --secure ]
+		[ --silent ] [ --trace-file-opening ][ --Uname ]
+		[ --version ]
+		input-file(s) [ -- ] more-input-file(s)
+
+Options may be prefixed with either one or two hyphens.
+
+For additional help, try hoc's help() command, or in a shell,
+use the UNIX manual page command, man hoc.

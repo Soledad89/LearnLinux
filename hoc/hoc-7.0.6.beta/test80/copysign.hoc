@@ -1,0 +1,67 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the handling of copysign().  The companion zerosign.hoc test
+### program makes numerous tests with signed zeros but has to assume
+### that copysign() is correct.
+### [18-Jul-2002]
+### ====================================================================
+
+__TEST__ = "copysign(1,0) == 1"
+__assert   (copysign(1,0) == 1)
+
+__TEST__ = "copysign(1,-0) == -1"
+__assert   (copysign(1,-0) == -1)
+
+__TEST__ = "copysign(1,Inf) == 1"
+__assert   (copysign(1,Inf) == 1)
+
+__TEST__ = "copysign(1,-Inf) == -1"
+__assert   (copysign(1,-Inf) == -1)
+
+__TEST__ = "copysign(1,NaN) == 1"
+__assert   (copysign(1,NaN) == 1)
+
+__TEST__ = "copysign(1,-NaN) == -1"
+__assert   (copysign(1,-NaN) == -1)
+
+__TEST__ = "copysign(1,QNaN) == 1"
+__assert   (copysign(1,QNaN) == 1)
+
+__TEST__ = "copysign(1,-QNaN) == -1"
+__assert   (copysign(1,-QNaN) == -1)
+
+__TEST__ = "copysign(1,SNaN) == 1"
+__assert   (copysign(1,SNaN) == 1)
+
+__TEST__ = "copysign(1,-SNaN) == -1"
+__assert   (copysign(1,-SNaN) == -1)
+
+__TEST__ = "copysign(2,1) == 2"
+__assert   (copysign(2,1) == 2)
+
+__TEST__ = "copysign(2,-1) == -2"
+__assert   (copysign(2,-1) == -2)
+
+__TEST__ = "copysign(8192,MAXNORMAL) == 8192"
+__assert   (copysign(8192,MAXNORMAL) == 8192)
+
+__TEST__ = "copysign(8192,-MAXNORMAL) == -8192"
+__assert   (copysign(8192,-MAXNORMAL) == -8192)
+
+__TEST__ = "copysign(8192,MINNORMAL) == 8192"
+__assert   (copysign(8192,MINNORMAL) == 8192)
+
+__TEST__ = "copysign(8192,-MINNORMAL) == -8192"
+__assert   (copysign(8192,-MINNORMAL) == -8192)
+
+__TEST__ = "copysign(8192,MAXSUBNORMAL) == 8192"
+__assert   (copysign(8192,MAXSUBNORMAL) == 8192)
+
+__TEST__ = "copysign(8192,-MAXSUBNORMAL) == -8192"
+__assert   (copysign(8192,-MAXSUBNORMAL) == -8192)
+
+__TEST__ = "copysign(8192,MINSUBNORMAL) == 8192"
+__assert   (copysign(8192,MINSUBNORMAL) == 8192)
+
+__TEST__ = "copysign(8192,-MINSUBNORMAL) == -8192"
+__assert   (copysign(8192,-MINSUBNORMAL) == -8192)

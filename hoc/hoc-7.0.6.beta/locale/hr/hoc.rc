@@ -1,0 +1,91 @@
+### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.1.beta/hr/hoc.rc, Mon Jan  7 10:27:39 2002
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+### NB: This file is in ISO8859-2 (Latin-2) encoding.
+###
+### This is hr/hoc.rc, with Croatian translations of hoc functions.
+### If requested by the settings of the environment variables LC_ALL,
+### LC_MESSAGES, or LANG (in that order of priority), this file will be
+### loaded AFTER hoc.rc.  This means that it can gradually be augmented
+### with translations of messages, leaving the original English text as
+### a fallback.
+###
+### [07-Jan-2002]
+### ====================================================================
+
+### Croatian synonyms for some commands: the function name is Croatian,
+### but the resulting help will be in English until more work is done.
+
+proc izlaz()		exit($$1)
+proc novosti()		news()
+
+___sada_lc_time = ""
+
+proc sada() \
+{
+	___sada_lc_time = putenv("LC_TIME", "hr")
+	print strftime("%c",systime()), "\n"
+	___sada_lc_time = putenv("LC_TIME", ___sada_lc_time)
+}
+
+proc pomoc_sada() \
+{
+	print "sada() daje vrijeme u ovom trenutku.\n\n"
+}
+
+proc pomoæ_sada()	pomoc_sada()
+
+proc autor() \
+{
+	_internal_help_hrule()
+	print "hoc je opisan u nizu verzija sa sve veèim brojem moguènosti u knjizi:\n\n"
+
+	print "\tBrian W. Kernighan i Rob Pike\n"
+	print "\tThe UNIX Programming Environment\n"
+	print "\tPrentice-Hall\n"
+	print "\t1984\n"
+	print "\tpp. xii + 357\n"
+	print "\tISBN 0-13-937699-2 (hardcover), 0-13-937681-X (paperback)\n"
+	print "\tLCCN: QA76.76.O63 K48 1984\n\n"
+
+	print "Pro¹irenja za IEEE 754 aritmetiku, pomoæ, dodatne konstante, naredbe i\n"
+	print "funkcije, inicializirajuæe datoteke, vi¹ejeziènu podr¹ku i GNU readline\n"
+	print "je dodao:\n\n"
+
+	print "\tNelson H. F. Beebe <beebe@math.utah.edu>\n\n"
+
+	print "Najnovija verzija pro¹irivog hoc raèunala se moze dobiti sa:\n\n"
+
+	print "\tftp://ftp.math.utah.edu/pub/hoc\n"
+	print "\thttp://www.math.utah.edu/pub/hoc/\n"
+	_internal_help_hrule()
+}
+
+### For now, we provide only a few sample translations.  The welcome
+### banner will be printed both in English (from hoc.rc) and in Croatian
+### (from this file).
+
+proc _internal_welcome_hr() \
+{	## welcome = Dobrodo¹li
+	_internal_help_hrule()
+	print "Dobrodo¹li u pro¹irivo raèunalo vi¹eg reda, hoc.\n"
+	print "Ovo je hoc verzija 7.0.0.beta od 15. prosinca 2001.\n"
+	print "Utipkaj pomoè() za pomoè, novosti() za novosti, i autor() za podatke o\n"
+	print "autoru.\n"
+	if (__IEEE_754__) \
+		print "Ovaj program podr¾ava IEEE 754 aritmetiku pomiènog zareza.\n\n" \
+	else \
+		print "Ovaj program ne podr¾ava IEEE 754 aritmetiku pomiènog zareza.\n\n"
+
+	print "\t****************************************************************\n"
+	print "\tPRIMJEDBA: Prijevod uputa za upotrebu hoc na hrvatski jo¹ nije\n"
+	print "\tpotpun. Odr¾avatelj programa æe zato biti zahvalan ako mu\n"
+	print "\tkorisnici po¹salju nadopune i sugestije o moguèim pobolj¹anjima\n"
+	print "\tprevoda a i samog programa. Unaprijed zahvaljujem!\n"
+	print "\t****************************************************************\n"
+	_internal_help_hrule()
+}
+
+### Print a welcome banner if option --no-banner was not specified:
+if (__BANNER__) _internal_welcome_hr()

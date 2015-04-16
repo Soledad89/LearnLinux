@@ -1,0 +1,195 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.36;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the <, <>, <=, >, and >= relational operators for Infinity, 
+### NaN, and finite.
+### [25-Jan-2002]
+### ====================================================================
+
+### Test (signed) NaN vs (signed) NaN
+
+__TEST__ = "!(NaN < NaN)"
+__assert   (!(NaN < NaN))
+
+__TEST__ = "!(NaN <= NaN)"
+__assert   (!(NaN <= NaN))
+
+__TEST__ = "!(NaN > NaN)"
+__assert   (!(NaN > NaN))
+ 
+__TEST__ = "!(NaN >= NaN)"
+__assert   (!(NaN >= NaN))
+ 
+__TEST__ = "!(NaN < -NaN)"
+__assert   (!(NaN < -NaN))
+
+__TEST__ = "!(NaN <= -NaN)"
+__assert   (!(NaN <= -NaN))
+
+__TEST__ = "!(NaN > -NaN)"
+__assert   (!(NaN > -NaN))
+ 
+__TEST__ = "!(NaN >= -NaN)"
+__assert   (!(NaN >= -NaN))
+
+__TEST__ = "!(-NaN < NaN)"
+__assert   (!(-NaN < NaN))
+
+__TEST__ = "!(-NaN <= NaN)"
+__assert   (!(-NaN <= NaN))
+
+__TEST__ = "!(-NaN > NaN)"
+__assert   (!(-NaN > NaN))
+ 
+__TEST__ = "!(-NaN >= NaN)"
+__assert   (!(-NaN >= NaN))
+
+__TEST__ = "!(-NaN < -NaN)"
+__assert   (!(-NaN < -NaN))
+
+__TEST__ = "!(-NaN <= -NaN)"
+__assert   (!(-NaN <= -NaN))
+
+__TEST__ = "!(-NaN > -NaN)"
+__assert   (!(-NaN > -NaN))
+ 
+__TEST__ = "!(-NaN >= -NaN)"
+__assert   (!(-NaN >= -NaN))
+ 
+### Test (signed) Infinity vs (signed) Infinity
+
+__TEST__ = "-Inf < Inf"
+__assert   (-Inf < Inf)
+
+__TEST__ = "-Inf <= -Inf"
+__assert   (-Inf <= -Inf)
+
+__TEST__ = "-Inf <= Inf"
+__assert   (-Inf <= Inf)
+
+__TEST__ = "Inf > -Inf"
+__assert   (Inf > -Inf)
+ 
+__TEST__ = "Inf >= -Inf"
+__assert   (Inf >= -Inf)
+ 
+__TEST__ = "Inf >= Inf"
+__assert   (Inf >= Inf)
+ 
+### Test (signed) Infinity vs (signed) finite
+
+__TEST__ = "-MAXNORMAL < Inf"
+__assert   (-MAXNORMAL < Inf)
+
+__TEST__ = "-MAXNORMAL <= Inf"
+__assert   (-MAXNORMAL <= Inf)
+
+__TEST__ = "Inf > -MAXNORMAL"
+__assert   (Inf > -MAXNORMAL)
+ 
+__TEST__ = "Inf >= -MAXNORMAL"
+__assert   (Inf >= -MAXNORMAL)
+ 
+__TEST__ = "MAXNORMAL < Inf"
+__assert   (MAXNORMAL < Inf)
+
+__TEST__ = "MAXNORMAL <= Inf"
+__assert   (MAXNORMAL <= Inf)
+
+__TEST__ = "Inf > MAXNORMAL"
+__assert   (Inf > MAXNORMAL)
+ 
+__TEST__ = "Inf >= MAXNORMAL"
+__assert   (Inf >= MAXNORMAL)
+
+### Test (signed) finite vs (signed) finite 
+
+__TEST__ = "-MINNORMAL < MAXNORMAL"
+__assert   (-MINNORMAL < MAXNORMAL)
+
+__TEST__ = "-MINNORMAL <= MAXNORMAL"
+__assert   (-MINNORMAL <= MAXNORMAL)
+
+__TEST__ = "MAXNORMAL > -MINNORMAL"
+__assert   (MAXNORMAL > -MINNORMAL)
+ 
+__TEST__ = "MAXNORMAL >= -MINNORMAL"
+__assert   (MAXNORMAL >= -MINNORMAL)
+ 
+__TEST__ = "MINNORMAL < MAXNORMAL"
+__assert   (MINNORMAL < MAXNORMAL)
+
+__TEST__ = "MINNORMAL <= MAXNORMAL"
+__assert   (MINNORMAL <= MAXNORMAL)
+
+__TEST__ = "MAXNORMAL > MINNORMAL"
+__assert   (MAXNORMAL > MINNORMAL)
+ 
+__TEST__ = "MAXNORMAL >= MINNORMAL"
+__assert   (MAXNORMAL >= MINNORMAL)
+
+__TEST__ = "0 <> 2"
+__assert   (0 <> 2)
+__TEST__ = "0 <> Inf"
+__assert   (0 <> Inf)
+__TEST__ = "!(0 <> NaN)"
+__assert   (!(0 <> NaN))
+
+__TEST__ = "0 <> -2"
+__assert   (0 <> -2)
+__TEST__ = "0 <> -Inf"
+__assert   (0 <> -Inf)
+__TEST__ = "!(0 <> -NaN)"
+__assert   (!(0 <> -NaN))
+
+__TEST__ = "Inf <> 2"
+__assert   (Inf <> 2)
+__TEST__ = "!(Inf <> Inf)"
+__assert   (!(Inf <> Inf))
+__TEST__ = "!(Inf <> NaN)"
+__assert   (!(Inf <> NaN))
+
+__TEST__ = "Inf <> -2"
+__assert   (Inf <> -2)
+__TEST__ = "Inf <> -Inf"
+__assert   (Inf <> -Inf)
+__TEST__ = "!(Inf <> -NaN)"
+__assert   (!(Inf <> -NaN))
+
+__TEST__ = "!(NaN <> 2)"
+__assert   (!(NaN <> 2))
+__TEST__ = "!(NaN <> Inf)"
+__assert   (!(NaN <> Inf))
+__TEST__ = "!(NaN <> NaN)"
+__assert   (!(NaN <> NaN))
+
+__TEST__ = "!(NaN <> -2)"
+__assert   (!(NaN <> -2))
+__TEST__ = "!(NaN <> -Inf)"
+__assert   (!(NaN <> -Inf))
+__TEST__ = "!(NaN <> -NaN)"
+__assert   (!(NaN <> -NaN))
+@

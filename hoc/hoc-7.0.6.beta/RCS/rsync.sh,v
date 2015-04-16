@@ -1,0 +1,347 @@
+head	1.5;
+access;
+symbols;
+locks
+	beebe:1.5; strict;
+comment	@# @;
+
+
+1.5
+date	2002.08.08.22.24.07;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.08.08.01.25.52;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.07.30.20.38.48;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.07.28.01.36.55;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.07.27.17.42.43;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.5
+log
+@Routine update
+@
+text
+@#! /bin/sh
+### ====================================================================
+### Update the hoc build directories on remote hosts, in parallel.
+###
+### Usage:
+###	[env [FILES="..."] [DIRS="..."] ] ./rsync.sh [targets]
+###	./rsync.sh [targets]
+###
+### [23-Jul-2002] -- Update FILES and TARGETS, and change code to
+###		     use RSYNC.TIMESTAMP to significantly speedup
+###		     transfers by eliminating consideration of files
+###		     that have not changed since the last run of this
+###		     script.
+### [29-Jan-2002] -- Add support for setting FILES and DIRS from
+###		     environment.
+### [16-Jan-2002] -- Add HOCVER to make this work for any version.
+### [19-Dec-2001] -- Original version.
+### ====================================================================
+
+SRCDIR=$PWD
+HOCVER=`basename $SRCDIR`
+BUILDDIR=/local/build/$HOCVER/
+
+RSYNC=rsync
+
+RSYNCFLAGS="--rsh ssh --links --times --update --ignore-times --cvs-exclude"
+## RSYNCFLAGS="--rsh ssh1 --links --times --update --ignore-times --cvs-exclude"
+unset DISPLAY
+
+make -s clean-test TAGS update-save 2>/dev/null
+
+args="$@@"
+if test -z "$args"
+then
+	TARGETS="
+		amr.math.utah.edu:$BUILDDIR
+		amr.math.utah.edu:/nue$BUILDDIR
+		blab02.math.utah.edu:$BUILDDIR
+		darwin.math.utah.edu:$BUILDDIR
+		deepcreek.math.utah.edu:$BUILDDIR
+		eilat.math.utah.edu:$BUILDDIR
+		henry.math.utah.edu:build/henry.math.utah.edu/$HOCVER
+		house.math.utah.edu:$BUILDDIR
+		mosso.math.utah.edu:$BUILDDIR
+		rhapsody.math.utah.edu:$BUILDDIR
+		sunfire.math.utah.edu:$BUILDDIR
+		sunlight.math.utah.edu:$BUILDDIR
+		uinta.math.utah.edu:$BUILDDIR
+		uinta.math.utah.edu:/nue$BUILDDIR
+		wasatch.math.utah.edu:$BUILDDIR
+		wasatch.math.utah.edu:/nue$BUILDDIR
+		wombat.math.utah.edu:$BUILDDIR
+
+		mthnhb@@rocky.chpc.utah.edu:alpha/build/$HOCVER
+		mthnhb@@rocky.chpc.utah.edu:ppc/build/$HOCVER
+
+		top.physics.utah.edu:build/$HOCVER
+
+		ee.elen.utah.edu:i386/build/$HOCVER
+		ee.elen.utah.edu:9000_712/build/$HOCVER
+
+		fokine.hec.utah.edu:ppc/build/$HOCVER
+	"
+	TARGETS="
+		darwin.math.utah.edu:$BUILDDIR
+		deepcreek.math.utah.edu:$BUILDDIR
+		eilat.math.utah.edu:$BUILDDIR
+		henry.math.utah.edu:$BUILDDIR
+		house.math.utah.edu:$BUILDDIR
+		mosso.math.utah.edu:$BUILDDIR
+		suncore.math.utah.edu:$BUILDDIR
+		suncore.math.utah.edu:/var/tmp/build/hoc-7.0.6.beta/
+		suncore.math.utah.edu:/var/tmp/build2/hoc-7.0.6.beta/
+		sunfire.math.utah.edu:$BUILDDIR
+		sunlight.math.utah.edu:$BUILDDIR
+		uinta.math.utah.edu:$BUILDDIR
+		uinta.math.utah.edu:/nue$BUILDDIR
+		wasatch.math.utah.edu:$BUILDDIR
+		wasatch.math.utah.edu:/nue$BUILDDIR
+		wombat.math.utah.edu:$BUILDDIR
+
+		mthnhb@@rocky.chpc.utah.edu:alpha/build/$HOCVER/
+
+		top.physics.utah.edu:build/$HOCVER/
+		nova.physics.utah.edu:$BUILDDIR
+
+		ee.elen.utah.edu:i386/build/$HOCVER/
+	"
+	## Add home machine if it is up
+	ping 12.254.169.232 1 >/dev/null &&
+		TARGETS="$TARGETS 12.254.169.231:/usr/local/src/hoc/hoc-7.0.5.beta"
+else
+	TARGETS="$@@"
+fi
+
+if test -z "$FILES"
+then
+	FILES="
+		Makefile.in TAGS ansi2knr.1 ansi2knr.c
+		c-mode-hook.el config.hin configure
+		configure.in configure.sed BUG-REPORTS ChangeLog
+		COPYRIGHT INSTALL PROBLEMS PROJECTS README
+		README.NaN README.UTAH TO-DO hoc.el annuity.hoc expm1.hoc
+		fortune.hoc log1pa.hoc log1pb.hoc log1pc.hoc pushd.hoc
+		primes.hoc require.hoc show-strftime.hoc
+		hoc.html help.hoc hoc.rc hoc.1 chkctype.c chkgamma.c
+		chkieee.c chklocale.c chkscalb.c chkstore.c
+		chkstrtod.c code.c fp_arch.h fp_t.h hoc.y hoc.h hoc.ssh ieee754.c init.c
+		io.c match.c math.c random.c readline.c readline.h stdc.h store.c
+		string.c sunmath.hoc symbol.c time.c hoc.pdf hoc.ps
+		check-help.sh hoc.sok hoc.txt index.html translations.hoc
+		chkdplib1.c chkdplib2.c chkqplib1.c chkqplib2.c
+		chksplib1.c chksplib2.c
+	"
+	FILES="
+		BUG-REPORTS
+		COPYRIGHT
+		ChangeLog
+		INSTALL
+		Makefile.in
+		PROBLEMS
+		PROJECTS
+		README
+		README.NEW-VERSION
+		README.NaN
+		README.UTAH
+		SYSBUGS
+		TAGS
+		TEST-FAILURES
+		TO-DO
+		WHERE-FROM
+		altceil.hoc
+		annuity.hoc
+		ansi2knr.1
+		ansi2knr.c
+		ascii-to-msg.awk
+		c-mode-hook.el
+		check-help.sh
+		chkctype.c
+		chkdplib1.c
+		chkdplib2.c
+		chkgamma.c
+		chkieee.c
+		chklocale.c
+		chkqplib1.c
+		chkqplib2.c
+		chkscalb.c
+		chksplib1.c
+		chksplib2.c
+		chkstore.c
+		chkstrtod.c
+		code.c
+		config.hin
+		configure
+		configure.in
+		configure.sed
+		crypto.hoc
+		decrypt.hoc
+		encrypt.hoc
+		expm1.hoc
+		find-missing-help.awk
+		find-missing-help.sh
+		foreign.c
+		fortune.hoc
+		fp_arch.h
+		fp_t.h
+		help.hoc
+		hoc.1
+		hoc.el
+		hoc.h
+		hoc.html
+		hoc.notes
+		hoc.pdf
+		hoc.ps
+		hoc.rc
+		hoc.sok
+		hoc.ssh
+		hoc.txt
+		hoc.y
+		i18n-sample.ps
+		i18n-sample.txt
+		ieee754.c
+		index.html
+		init.c
+		install-okay.sh
+		io.c
+		log1pa.hoc
+		log1pb.hoc
+		log1pc.hoc
+		match.c
+		math.c
+		primes.hoc
+		pushd.hoc
+		random.c
+		readline.c
+		readline.h
+		require.hoc
+		rsync.sh
+		show-strftime.hoc
+		stdc.h
+		store.c
+		string.c
+		strlcat.c
+		strlcpy.c
+		sunmath.hoc
+		symbol.c
+		test-altceil.hoc
+		test-ceil.hoc
+		test-grammar-0.y
+		test-grammar-1.y
+		test-grammar-2.y
+		test-grammar-3.y
+		test-grammar-4.y
+		test-grammar-5.y
+		test-grammar-6.y
+		test-grammar-7.y
+		test-grammar.y
+		time.c
+		translations.hoc
+		update-test-output-version.sh
+	"
+	test -f RSYNC.TIMESTAMP && FILES="`find $FILES -newer RSYNC.TIMESTAMP | grep -v /RCS/ ` WHERE-FROM"
+fi
+
+if test -z "$DIRS"
+then
+	DIRS="locale save test32 test64 test80 test128"
+fi
+
+echo "Begin rsync: `date`"
+for target in $TARGETS
+do
+	$RSYNC $RSYNCFLAGS    $FILES $target &
+	if test -f RSYNC.TIMESTAMP
+	then
+		morefiles="`find $DIRS -type f -newer RSYNC.TIMESTAMP | grep -v /RCS/ ` WHERE-FROM"
+		$RSYNC --relative $RSYNCFLAGS $morefiles $target &
+	else
+		$RSYNC $RSYNCFLAGS -r $DIRS  $target &
+	fi
+done
+
+wait
+touch RSYNC.TIMESTAMP
+echo "End rsync: `date`"
+@
+
+
+1.4
+log
+@Routine update
+@
+text
+@d22 1
+a22 1
+BUILDDIR=/local/build/$HOCVER
+d72 2
+d82 1
+a82 1
+		mthnhb@@rocky.chpc.utah.edu:alpha/build/$HOCVER
+d84 1
+a84 1
+		top.physics.utah.edu:build/$HOCVER
+d87 1
+a87 1
+		ee.elen.utah.edu:i386/build/$HOCVER
+@
+
+
+1.3
+log
+@Routine update
+@
+text
+@d220 1
+a220 1
+	test -f RSYNC.TIMESTAMP && FILES="`find $FILES -newer RSYNC.TIMESTAMP` WHERE-FROM"
+d225 1
+a225 1
+	DIRS="locale save test32 test64 test80 test128 RCS"
+d234 1
+a234 1
+		morefiles="`find $DIRS -type f -newer RSYNC.TIMESTAMP` WHERE-FROM"
+@
+
+
+1.2
+log
+@Routine update
+@
+text
+@d68 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d70 1
+d82 1
+@

@@ -1,0 +1,73 @@
+### -*-hoc-*-
+### ====================================================================
+### Check certain relations for tan() that can only be satisfied by
+### that function, without requiring explicit high-precision numerical
+### values.
+###
+### [30-Jan-2002]
+### ====================================================================
+
+__MAXULPS = 6			# allow almost 3 bits (2^3 ULPs) of error
+
+### Tests with infinite arguments
+
+__TEST__ = "isnan(tan(-Inf))"
+__assert   (isnan(tan(-Inf)))
+
+__TEST__ = "isnan(tan(Inf))"
+__assert   (isnan(tan(Inf)))
+
+### Tests with NaN arguments
+
+__TEST__ = "isnan(tan(NaN))"
+__assert   (isnan(tan(NaN)))
+
+__TEST__ = "isnan(tan(-NaN))"
+__assert   (isnan(tan(-NaN)))
+
+### Tests at 0, PI/4, PI/2, 3*PI/4, PI
+
+__TEST__ = "tan(0) == 0"
+__match    (tan(0),   0)
+
+__TEST__ = "tan(PI/4) == 1"
+__match    (tan(PI/4),   1)
+
+__TEST__ = "tan(PI/8) == sqrt(2) - 1"
+__match    (tan(PI/8),   sqrt(2) - 1)
+
+__TEST__ = "tan(3*PI/4) == -1"
+__match    (tan(3*PI/4),   -1)
+
+__TEST__ = "abs(tan(PI/2)) > 1.0e7"
+__assert   (abs(tan(PI/2)) > 1.0e7)
+
+__TEST__ = "tan(7*PI/8) == 1 - sqrt(2)"
+__match    (tan(7*PI/8),   1 - sqrt(2))
+
+__TEST__ = "tan(PI) == 0"
+__match    (tan(PI),   0)
+
+__TEST__ = "tan(5*PI/4) == 1"
+__match    (tan(5*PI/4),   1)
+
+__TEST__ = "abs(tan(3*PI/2)) > 1.0e7"
+__assert   (abs(tan(3*PI/2)) > 1.0e7)
+
+__TEST__ = "tan(7*PI/4) == -1"
+__match    (tan(7*PI/4),   -1)
+
+
+### tan-cos-sin relationship tests with exact numerical arguments
+
+for (k = -52; k <= 8; ++k) \
+{
+	__TEST__ = "sin(1 + 2^k) / cos(1 + 2^k) == tan(1 + 2^k)"
+	__match    (sin(1 + 2^k) / cos(1 + 2^k),   tan(1 + 2^k))
+}
+
+for (k = -52; k <= 8; ++k) \
+{
+	__TEST__ = "sin(1 - 2^k) / cos(1 - 2^k) == tan(1 - 2^k)"
+	__match    (sin(1 - 2^k) / cos(1 - 2^k),   tan(1 - 2^k))
+}

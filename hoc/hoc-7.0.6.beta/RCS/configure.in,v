@@ -1,0 +1,1319 @@
+head	1.20;
+access;
+symbols;
+locks
+	beebe:1.20; strict;
+comment	@# @;
+
+
+1.20
+date	2002.07.31.17.24.06;	author beebe;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2002.07.27.17.36.35;	author beebe;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2002.07.24.19.19.29;	author beebe;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2002.07.23.01.41.00;	author beebe;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2002.07.20.23.33.23;	author beebe;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2002.07.20.23.02.01;	author beebe;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2002.06.23.17.53.04;	author beebe;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2002.06.15.22.52.43;	author beebe;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2002.06.15.22.40.35;	author beebe;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2002.02.19.01.06.14;	author beebe;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2002.01.30.16.26.26;	author beebe;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2002.01.28.17.54.10;	author beebe;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2002.01.28.13.17.31;	author beebe;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.01.27.18.03.23;	author beebe;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.01.16.18.45.15;	author beebe;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.01.11.19.39.29;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.01.11.02.17.07;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.01.04.17.55.21;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.01.01.14.48.19;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.19.28;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.20
+log
+@Update PACKAGE_DATE and PACKAGE_VERSION.
+@
+text
+@dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(hoc,7.0.6.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="09-Aug-2002"
+AC_SUBST(PACKAGE_DATE)
+
+AC_CONFIG_SRCDIR(hoc.y)
+
+AH_TEMPLATE(PACKAGE_BUGREPORT,	[Package bug-reporting address])
+AH_TEMPLATE(PACKAGE_DATE,	[Package date])
+AH_TEMPLATE(PACKAGE_NAME,	[Package name])
+AH_TEMPLATE(PACKAGE_STRING,	[Package string])
+AH_TEMPLATE(PACKAGE_TARNAME,	[Package tarname])
+AH_TEMPLATE(PACKAGE_VERSION,	[Package version])
+
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT,	"$PACKAGE_BUGREPORT")
+AC_DEFINE_UNQUOTED(PACKAGE_DATE,	"$PACKAGE_DATE")
+AC_DEFINE_UNQUOTED(PACKAGE_NAME,	"$PACKAGE_NAME")
+AC_DEFINE_UNQUOTED(PACKAGE_STRING,	"$PACKAGE_STRING")
+AC_DEFINE_UNQUOTED(PACKAGE_TARNAME,	"$PACKAGE_TARNAME")
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION,	"$PACKAGE_VERSION")
+
+AH_TEMPLATE(HAVE_ACOSH,			[Define if acosh() is available.])
+AH_TEMPLATE(HAVE_ASINH,			[Define if asinh() is available.])
+AH_TEMPLATE(HAVE_ATANH,			[Define if atanh() is available.])
+AH_TEMPLATE(HAVE_CBRT,			[Define if cbrt() is available.])
+AH_TEMPLATE(HAVE_CEIL,			[Define if ceil() is available.])
+AH_TEMPLATE(HAVE_COPYSIGN,		[Define if copysign() is available.])
+AH_TEMPLATE(HAVE_ERF,			[Define if erf() is available.])
+AH_TEMPLATE(HAVE_ERFC,			[Define if erfc() is available.])
+AH_TEMPLATE(HAVE_EXPM1,			[Define if expm1() is available.])
+AH_TEMPLATE(HAVE_FLOOR,			[Define if floor() is available.])
+AH_TEMPLATE(HAVE_FMOD,			[Define if fmod() is available.])
+AH_TEMPLATE(HAVE_GAMMA,			[Define if gamma() is available.])
+AH_TEMPLATE(HAVE_GETGID,		[Define if getgid() is available.])
+AH_TEMPLATE(HAVE_GETPID,		[Define if getpid() is available.])
+AH_TEMPLATE(HAVE_GETPPID,		[Define if getppid() is available.])
+AH_TEMPLATE(HAVE_GETUID,		[Define if getuid() is available.])
+AH_TEMPLATE(HAVE_HYPOT,			[Define if hypot() is available.])
+AH_TEMPLATE(HAVE_ILOGB,			[Define if ilogb() is available.])
+AH_TEMPLATE(HAVE_J0,			[Define if j0() is available.])
+AH_TEMPLATE(HAVE_J1,			[Define if j1() is available.])
+AH_TEMPLATE(HAVE_JN,			[Define if jn() is available.])
+AH_TEMPLATE(HAVE_LONG_LONG_FORMAT_L,	[Define if printf for long long requires %L[diouxX].])
+AH_TEMPLATE(HAVE_LONG_LONG_FORMAT_LL,	[Define if printf for long long requires %ll[diouxX].])
+AH_TEMPLATE(HAVE_LDEXP,			[Define if ldexp() is available.])
+AH_TEMPLATE(HAVE_LGAMMA,		[Define if lgamma() is available.])
+AH_TEMPLATE(HAVE_LOG1P,			[Define if log1p() is available.])
+AH_TEMPLATE(HAVE_NEAREST,		[Define if nearest() is available.])
+AH_TEMPLATE(HAVE_NEXTAFTER,		[Define if nextafter() is available.])
+AH_TEMPLATE(HAVE_REMAINDER,		[Define if remainder() is available.])
+AH_TEMPLATE(HAVE_RINT,			[Define if rint() is available.])
+AH_TEMPLATE(HAVE_RSQRT,			[Define if rsqrt() is available.])
+AH_TEMPLATE(HAVE_SCALB,			[Define if scalb() is available.])
+AH_TEMPLATE(HAVE_SIGNIFICAND,		[Define if significand() is available.])
+AH_TEMPLATE(HAVE_SNPRINTF_PROTOTYPE,	[Define if snprintf() has a prototype in stdio.h.])
+AH_TEMPLATE(HAVE_STRTOLD,		[Define if strtold() is available.])
+AH_TEMPLATE(HAVE_TRUNC,			[Define if trunc() is available.])
+AH_TEMPLATE(HAVE_Y0,			[Define if y0() is available.])
+AH_TEMPLATE(HAVE_Y1,			[Define if y1() is available.])
+AH_TEMPLATE(HAVE_YN,			[Define if yn() is available.])
+
+AH_TEMPLATE(HAVE_GNU_READLINE,		[Define if GNU readline support is available])
+AH_TEMPLATE(HAVE_IEEE_754,		[Define if host arithmetic is IEEE 754])
+AH_TEMPLATE(HAVE_FP_T_DOUBLE,		[Define if hoc is to be compiled with double precision])
+AH_TEMPLATE(HAVE_FP_T_QUADRUPLE,	[Define if hoc is to be compiled with quadruple precision])
+AH_TEMPLATE(HAVE_FP_T_SINGLE,		[Define if hoc is to be compiled with single precision])
+AH_TEMPLATE(HAVE_UNIX_HOME_DIRECTORY,	[Define if host file system is UNIX(-like)])
+AH_TEMPLATE(_ALL_SOURCE,		[Define if needed to expose erf(), erfc() in <math.h>])
+AH_TEMPLATE(_XOPEN_SOURCE,		[Define if needed to expose erf(), erfc() in <math.h>])
+AH_TEMPLATE(_XPG4_2,			[Define if needed to expose struct timeval in <time.h>])
+AH_TEMPLATE(__EXTENSIONS__,		[Define if needed to expose significand() in <math.h>])
+
+AC_CONFIG_HEADER(config.h:config.hin)
+
+dnl Set defaults for normal double-precision computation
+HAVE_FP_T_DOUBLE=
+HAVE_FP_T_QUADRUPLE=
+HAVE_FP_T_SINGLE=
+HOCSUFFIX=
+TESTFP=
+
+AC_ARG_WITH(double,
+	[  --with-double           use double floating-point precision (DEFAULT)],
+	[
+		AC_DEFINE(HAVE_FP_T_DOUBLE)
+		HAVE_FP_T_DOUBLE=1
+		HOCSUFFIX=64
+		TESTFP=test64
+	])
+
+AC_ARG_WITH(float,
+	[  --with-float            use float floating-point precision],
+	[
+		AC_DEFINE(HAVE_FP_T_SINGLE)
+		HAVE_FP_T_SINGLE=1
+		HOCSUFFIX=32
+		TESTFP=test32
+	])
+
+dnl Try to protect the user on broken systems, reverting to --with-double if
+dnl we know that --with-long-double will not work properly.
+AC_ARG_WITH(long-double,
+	[  --with-long-double      use long double floating-point precision],
+	[
+		case "`uname -m || true`" in
+		i386 | i486 | i586 | i686 )
+			AC_DEFINE(HAVE_FP_T_QUADRUPLE)
+			HAVE_FP_T_QUADRUPLE=1
+			HOCSUFFIX=80
+			TESTFP=test80
+			;;
+		ppc )
+			AC_MSG_WARN(reverting to --with-double on this system, because long double is a synonym for double, sigh...)
+			AC_DEFINE(HAVE_FP_T_DOUBLE)
+			HAVE_FP_T_DOUBLE=1
+			HOCSUFFIX=64
+			TESTFP=test64
+			;;
+		*)	case "`uname -s || true`" in
+			AIX | IRIX* )
+				AC_MSG_WARN(reverting to --with-double on this system, because long double is a broken implementation using paired doubles, sigh...)
+				AC_DEFINE(HAVE_FP_T_DOUBLE)
+				HAVE_FP_T_DOUBLE=1
+				HOCSUFFIX=64
+				TESTFP=test64
+				;;
+			Darwin* | Rhapsody* )
+				AC_MSG_WARN(reverting to --with-double on this system, because long double is not implemented, sigh...)
+				AC_DEFINE(HAVE_FP_T_DOUBLE)
+				HAVE_FP_T_DOUBLE=1
+				HOCSUFFIX=64
+				TESTFP=test64
+				;;
+			*)
+				AC_DEFINE(HAVE_FP_T_QUADRUPLE)
+				HAVE_FP_T_QUADRUPLE=1
+				HOCSUFFIX=128
+				TESTFP=test128
+				;;
+			esac
+			;;
+		esac
+	])
+
+dnl Default to --with-double if precision not set yet.
+if test -z "$HAVE_FP_T_DOUBLE" -a -z "$HAVE_FP_T_QUADRUPLE" -a -z "$HAVE_FP_T_SINGLE"
+then
+	AC_DEFINE(HAVE_FP_T_DOUBLE)
+	HAVE_FP_T_DOUBLE=1
+	HOCSUFFIX=64
+	TESTFP=test64
+fi
+
+AC_SUBST(HOCSUFFIX)
+AC_SUBST(TESTFP)
+
+dnl Set a default so that we try to use readline by default, but --without-readline
+dnl will prevent its use:
+
+ac_cv_use_readline=yes
+AC_ARG_WITH(readline,
+	AC_HELP_STRING([--with-readline],
+			[use GNU readline package for input editing and history (default is automatic determination)]),
+			ac_cv_use_readline=$withval, ac_cv_use_readline=yes)
+dnl AC_CACHE_CHECK(whether to use readline, ac_cv_use_readline, ac_cv_use_readline=yes)
+
+dnl Checks for support programs
+
+dnl We want a copy command that has the -p (preserve time stamp) flag,
+dnl but older cp implementations lack it.  scp and rcp always have it,
+dnl but some sites disable rcp when scp is installed, so we must use
+dnl scp if it is available.
+
+AC_CHECK_PROG(CP,		scp,scp -p,,[/bin:/usr/bin:$PATH])
+AC_CHECK_PROG(CP,		rcp,rcp -p,,[/bin:/usr/bin:$PATH])
+AC_CHECK_PROG(CP,		cp,cp,,[/bin:/usr/bin:$PATH])
+
+AC_CHECK_PROGS(AUTOHEADER,	autoheader)
+AC_CHECK_PROGS(AUTOCONF,	autoconf)
+AC_CHECK_PROGS(AWK,		[nawk gawk mawk awk tawk])
+AC_CHECK_PROGS(CHMOD,		chmod)
+AC_CHECK_PROGS(CMP,		cmp)
+AC_CHECK_PROGS(COL,		col)
+AC_CHECK_PROGS(DEROFF,		deroff)
+AC_CHECK_PROGS(ETAGS,		[etags tags])
+AC_CHECK_PROGS(FIND,		find)
+AC_CHECK_PROGS(FGREP,		fgrep)
+AC_CHECK_PROGS(GROFF,		[groff ditroff troff nroff])
+AC_CHECK_PROGS(LN,		ln,,[/bin:/usr/bin:$PATH])
+AC_CHECK_PROGS(LS,		ls,,[/bin:/usr/bin:$PATH])
+AC_CHECK_PROGS(MAN2HTML,	man2html)
+AC_CHECK_PROGS(MKDIR,		mkdir)
+AC_CHECK_PROGS(MV,		mv,,[/bin:/usr/bin:$PATH])
+AC_CHECK_PROGS(PSTOPDF,		[distill ps2pdf])
+AC_CHECK_PROGS(RMDIR,		rmdir)
+AC_CHECK_PROGS(SED,		sed)
+AC_CHECK_PROGS(SORT,		sort)
+AC_CHECK_PROGS(SPELL,		spell)
+AC_CHECK_PROGS(STRIP,		strip)
+AC_CHECK_PROGS(TEST,		test)
+AC_CHECK_PROGS(TOUCH,		touch)
+AC_CHECK_PROGS(TRUE,		true)
+AC_CHECK_PROGS(YACC,		[yacc byacc "bison -y"])
+
+AC_PATH_PROGS(GUNZIP,		gunzip)
+AC_PATH_PROGS(GZIP,		gzip)
+AC_PATH_PROGS(JAR,		jar)
+AC_PATH_PROGS(LCLINT,		[splint lclint], [echo No lclint or splint available:])
+AC_PATH_PROGS(LINT,		lint, [echo No lint available:])
+AC_PATH_PROGS(RM,		rm,,[/bin:/usr/bin:$PATH])
+AC_PATH_PROGS(SHELL,		sh,,[/bin:/usr/bin:$PATH])
+AC_PATH_PROGS(TAR,		tar)
+AC_PATH_PROGS(UNZIP,		unzip)
+AC_PATH_PROGS(ZIP,		zip)
+AC_PATH_PROGS(ZOO,		zoo)
+
+dnl Checks for compiler.
+dnl
+dnl Setting CFLAGS first prevents autoconf from supplying the
+dnl obnoxious gcc-specific -g -O2 default.
+dnl
+dnl For maximal compilation testing on diverse platforms, we always
+dnl try native, and other, compilers before gcc.
+dnl
+dnl We set the -I option in both CFLAGS and CPPFLAGS so that
+dnl subsequent searches for the GNU readline header files do not fail
+dnl unnecessarily.
+dnl
+dnl Similarly, we must set the LIBS option too.
+
+if test "$prefix" = "NONE"
+then
+	CFLAGS="$CFLAGS -I${ac_default_prefix}/include"
+	CPPFLAGS="$CPPFLAGS -I${ac_default_prefix}/include"
+	LDFLAGS="$LDFLAGS -L${ac_default_prefix}/lib"
+	locallib=${ac_default_prefix}/lib
+else
+	CFLAGS="$CFLAGS -I${prefix}/include"
+	CPPFLAGS="$CPPFLAGS -I${prefix}/include"
+	LDFLAGS="$LDFLAGS -L${prefix}/lib"
+	locallib=${prefix}/lib
+fi
+AC_PROG_CC(c89 cc xlc lcc pgcc sgicc gcc)
+
+dnl Host-specific workarounds.  On IBM AIX, the type checks below for
+dnl long long and long double produce warnings that one long modifier
+dnl is being ignored, but the tests otherwise succeed.  Extra compiler
+dnl options for the native compilers fix this problem.  The GNU
+dnl compilers do not require extra options (although they currently
+dnl silently treat long double as double).  For now, we do not yet
+dnl need true long double support in hoc, so nothing special is done
+dnl for this case.
+
+case "`uname -s || true`" in
+AIX)
+	if test "$GCC" != "yes"
+	then
+		CFLAGS="$CFLAGS -qlongdouble -qlonglong"
+	fi
+	;;
+esac
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+AC_C_CONST
+AC_TYPE_SIZE_T
+
+dnl Checks for extended data types
+
+AC_CHECK_TYPES(long long)
+AC_CHECK_TYPES(long double)
+
+if test -n "$HAVE_FP_T_QUADRUPLE"
+then
+	dnl Some systems need additional compiler options or libraries
+	dnl for quadruple-precision support
+	case `uname -s || echo UNKNOWN` in
+	SunOS)
+		dnl Although the Sun native compilers know how to find
+		dnl <sunmath.h> and -lsunmath, other compilers do not,
+		dnl so we have to determine their locations and supply
+		dnl them in the Makefile.  We need to update BOTH
+		dnl CFLAGS and CPPFLAGS for AC_CHECK_HEADERS() to work
+		dnl properly!
+		tmpinc=`find /opt/SUNWspro/WS* -name sunmath.h | head -1`
+		test -n "$tmpinc" && CFLAGS="$CFLAGS -I`dirname $tmpinc`"
+		test -n "$tmpinc" && CPPFLAGS="$CPPFLAGS -I`dirname $tmpinc`"
+		LDFLAGS="$LDFLAGS -L/opt/SUNWspro/lib"
+		LIBS="$LIBS -lsunmath"
+		if test "$GCC" = "yes" -o "$ac_cv_c_compiler_gnu" = "yes"
+		then
+			LDFLAGS="$LDFLAGS -Wl,-rpath,/opt/SUNWspro/lib -Wl,-rpath,$locallib"
+		else
+			LDFLAGS="$LDFLAGS -R/opt/SUNWspro/lib:$locallib"
+		fi
+		;;
+	*)
+		;;
+	esac
+fi
+
+if test -n "$HAVE_FP_T_SINGLE"
+then
+	dnl Some systems need additional compiler options or libraries
+	dnl for single-precision support
+	case `uname -s || echo UNKNOWN` in
+	SunOS)
+		LIBS="$LIBS -lsunmath"
+		;;
+	*)
+		;;
+	esac
+fi
+
+dnl Checks for header files.  Make these AFTER the typedef checks,
+dnl because they break some of those with certain compilers, sigh...
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(ctype.h errno.h float.h inttypes.h limits.h locale.h \
+		 malloc.h math.h memory.h readline/history.h \
+		 readline/readline.h setjmp.h signal.h stddef.h \
+		 stdio.h stdlib.h string.h sunmath.h sys/resource.h \
+		 sys/time.h time.h unistd.h values.h)
+
+dnl On GNU/Linux with lcc, the test for readline/readline.h fails because
+dnl of non-Standard-C code in other system header files, but the test for
+dnl readline/history.h succeeds.  We `fix' this by overriding the header
+dnl check result for the former.
+${TEST}    "${ac_cv_use_readline}" = "yes" \
+	-a "${ac_cv_header_readline_history_h}" = "yes" && \
+	ac_cv_header_readline_readline_h=yes
+
+dnl Remove -g from CFLAGS if we are compiling with lcc because it
+dnl produces bad debug symbol tables on Sun Solaris 2.x.
+
+dnl This code is no longer needed, now that CFLAGS is under our
+dnl control (see above)!
+
+dnl if test "`basename $CC`" = "lcc"
+dnl then
+dnl 	CFLAGS="`echo $CFLAGS | sed -e 's/-g //g' -e 's/ -g$//g' -e 's/^-g$//'`"
+dnl fi
+
+dnl Check whether we are on a UNIX system and thus, can create
+dnl home-directory dot (hidden) initialization files:
+
+${TOUCH} ${HOME}/.hoc.tmp.$$ && \
+	${TEST} -f ${HOME}/.hoc.tmp.$$ && \
+		${RM} ${HOME}/.hoc.tmp.$$ && \
+			(AC_DEFINE(HAVE_UNIX_HOME_DIRECTORY))
+
+dnl If we found both a library and header files for GNU readline, and
+dnl its use was not suppressed by --without-readline, use it:
+
+AC_MSG_CHECKING(if GNU readline support is available)
+libreadline=
+${TEST}    "${ac_cv_use_readline}" = "yes" \
+	-a "${ac_cv_header_readline_history_h}" = "yes" \
+	-a "${ac_cv_header_readline_readline_h}" = "yes" && \
+	libreadline=-lreadline && \
+	(AC_DEFINE(HAVE_GNU_READLINE))
+
+if test -z "$libreadline"
+then
+	AC_MSG_RESULT(no)
+else
+	AC_MSG_RESULT(yes)
+fi
+
+dnl On Compaq/DEC Alpha systems, we need additional compilation
+dnl flags to get essential nonstop IEEE 754 behavior.
+
+case "`uname -m || true`" in
+alpha*)
+	AC_MSG_CHECKING(if extra compilation flags are needed for nonstop IEEE 754 behavior)
+	ieeeflags=
+	if test "$GCC" = "yes" -o "$ac_cv_c_compiler_gnu" = "yes"
+	then
+		ieeeflags=-mieee
+	else
+		cc=`echo $CC | awk '{print $1}'`
+		case `basename $cc` in
+		gcc | g++ )		ieeeflags=-mieee	;;
+		cc | cxx | c89 )	ieeeflags=-ieee		;;
+		esac
+	fi
+	CFLAGS="$CFLAGS $ieeeflags"
+	if test -z "$ieeeflags"
+	then
+		AC_MSG_RESULT(no)
+	else
+		AC_MSG_RESULT(yes)
+	fi
+	;;
+esac
+
+dnl Some C++ compilers need extra options to ensure that they compile
+dnl in C++ mode, instead of simply invoking the C compiler, when
+dnl presented with a .c file:
+
+cc=`echo $CC | awk '{print $1}'`
+case "`uname -s || true`" in
+AIX)
+	case `basename $cc` in
+	xlC* )	CC="$CC -+"	;;
+	esac
+	;;
+
+OSF1)
+	case `basename $cc` in
+	cxx )	CC="$CC -x cxx"	;;
+	esac
+	;;
+esac
+
+dnl Check for IEEE 754 arithmetic, using the report of a separate
+dnl special program to determine whether we have it or not.
+
+$RM -f a.out a.lst 2>/dev/null
+ieee_754=no
+AC_MSG_CHECKING(if IEEE 754 arithmetic is available)
+$CC $CFLAGS chkieee.c chkstore.c -o a.out >/dev/null 2>&1 && \
+	./a.out >./a.lst &&
+		ieee_754=yes
+AC_MSG_RESULT($ieee_754)
+test $ieee_754 = "yes" && \
+	(AC_DEFINE(HAVE_IEEE_754))
+if test -f ./a.lst
+then
+	echo "	chkieee test program reports for this system:"
+	cat ./a.lst && \
+		$RM -f ./a.lst
+fi
+$RM -f a.out 2>/dev/null
+
+dnl ====================================================================
+dnl Checks for libraries.  At least one UNIX system, Apple Macintosh
+dnl Rhapsody 5.5, does not have -lm.  We cannot use the simpler
+dnl AC_CHECK_LIB(m,sin), because that fails for C++.
+dnl
+dnl Originally, I used
+dnl	[double x; printf("sin(1.0) = %g\n", sin(1.0));]
+dnl as the test program, but at least one optimizing compiler
+dnl evaluated sin(1.0) at compile time, so the test failed to detect
+dnl that -lm was needed.  The rewrite below foiled the optimizer,
+dnl producing the correct conclusion about the need for -lm.
+dnl We have to turn off CFLAGS, because on Intel x86 systems, gcc -O2
+dnl uses hardware for the elementary function, and thus configure
+dnl concludes, erroneously, that -lm is unnecessary.
+SAVECFLAGS="$CFLAGS"
+CFLAGS=
+AC_CACHE_CHECK(if -lm needed for math functions,
+	my_ac_cv_need_libm,
+	AC_TRY_LINK([
+	#include <stdio.h>
+	#include <math.h>
+	],
+	[double x; x = 1.0; printf("sin(%g) = %g\n", x, sin(x));],
+	[my_ac_cv_need_libm=no],
+	[my_ac_cv_need_libm=yes]))
+CFLAGS="$SAVECFLAGS"
+
+if test "$my_ac_cv_need_libm" = yes
+then
+	LIBS="$LIBS -lm"
+fi
+
+dnl Determine which of three flavors of flags are needed for
+dnl requesting that the location of shared libraries be recorded in
+dnl the executable file.
+dnl ... to be completed ...
+
+AC_MSG_CHECKING(if _XOPEN_SOURCE needed to expose erfc() in <math.h>)
+AC_EGREP_CPP(erfc,
+	[#include <math.h>
+	], have_erfc=yes, have_erfc=no)
+
+if test $have_erfc = "no"
+then
+	AC_EGREP_CPP(erfc,
+		[#define _XOPEN_SOURCE
+		 #include <math.h>
+		], have_erfc=yes, have_erfc=no)
+	if test "$have_erfc" = "yes"
+	then
+	    AC_MSG_RESULT(yes)
+	    AC_DEFINE(_XOPEN_SOURCE)
+	else
+	    AC_MSG_RESULT(unknown)
+	fi
+else
+	AC_MSG_RESULT(no)
+fi
+
+if test $have_erfc != "yes"
+then
+	AC_MSG_CHECKING(if _ALL_SOURCE needed to expose erfc() in <math.h>)
+	AC_EGREP_CPP(erfc,
+		[#define _ALL_SOURCE
+		 #include <math.h>
+		], have_erfc=yes, have_erfc=no)
+	if test "$have_erfc" = "yes"
+	then
+	    AC_MSG_RESULT(yes)
+	    AC_DEFINE(_ALL_SOURCE)
+	else
+	    AC_MSG_RESULT(unknown)
+	fi
+fi
+
+dnl hoc uses several nonstandard, but commonly-provided, functions.
+dnl Find out whether they are available.  When they are not, the code
+dnl will generate a runtime error, or generate a stopgap, possibly less
+dnl accurate, answer.
+
+AC_SEARCH_LIBS(acosh,      [m], AC_DEFINE(HAVE_ACOSH))
+AC_SEARCH_LIBS(asinh,      [m], AC_DEFINE(HAVE_ASINH))
+AC_SEARCH_LIBS(atanh,      [m], AC_DEFINE(HAVE_ATANH))
+AC_SEARCH_LIBS(cbrt,       [m], AC_DEFINE(HAVE_CBRT))
+AC_SEARCH_LIBS(copysign,   [m], AC_DEFINE(HAVE_COPYSIGN))
+AC_SEARCH_LIBS(ceil,       [m], AC_DEFINE(HAVE_CEIL))
+AC_SEARCH_LIBS(erf,        [m], AC_DEFINE(HAVE_ERF))
+AC_SEARCH_LIBS(erf,        [m], AC_DEFINE(HAVE_ERF))
+AC_SEARCH_LIBS(erfc,       [m], AC_DEFINE(HAVE_ERFC))
+AC_SEARCH_LIBS(expm1,      [m], AC_DEFINE(HAVE_EXPM1))
+AC_SEARCH_LIBS(floor,      [m], AC_DEFINE(HAVE_FLOOR))
+AC_SEARCH_LIBS(fmod,       [m], AC_DEFINE(HAVE_FMOD))
+AC_SEARCH_LIBS(getgid,     [c], AC_DEFINE(HAVE_GETGID))
+AC_SEARCH_LIBS(getpid,     [c], AC_DEFINE(HAVE_GETPID))
+AC_SEARCH_LIBS(getppid,    [c], AC_DEFINE(HAVE_GETPPID))
+AC_SEARCH_LIBS(getuid,     [c], AC_DEFINE(HAVE_GETUID))
+AC_SEARCH_LIBS(gamma,      [m], AC_DEFINE(HAVE_GAMMA))
+AC_SEARCH_LIBS(hypot,      [m], AC_DEFINE(HAVE_HYPOT))
+AC_SEARCH_LIBS(ilogb,      [m], AC_DEFINE(HAVE_ILOGB))
+AC_SEARCH_LIBS(j0,         [m], AC_DEFINE(HAVE_J0))
+AC_SEARCH_LIBS(j1,         [m], AC_DEFINE(HAVE_J1))
+AC_SEARCH_LIBS(jn,         [m], AC_DEFINE(HAVE_JN))
+AC_SEARCH_LIBS(ldexp,      [m], AC_DEFINE(HAVE_LDEXP))
+AC_SEARCH_LIBS(lgamma,     [m], AC_DEFINE(HAVE_LGAMMA))
+AC_SEARCH_LIBS(log1p,      [m], AC_DEFINE(HAVE_LOG1P))
+
+if test "`uname -s`" = "AIX"
+then
+	dnl IBM RS/6000 AIX has an undocumented nearest() function
+	dnl with different arguments than the Cray/SGI version of
+	dnl nearest() that hoc uses.
+	true
+else
+	AC_SEARCH_LIBS(nearest,    [m], AC_DEFINE(HAVE_NEAREST))
+fi
+
+AC_SEARCH_LIBS(nextafter,  [m], AC_DEFINE(HAVE_NEXTAFTER))
+AC_SEARCH_LIBS(remainder,  [m], AC_DEFINE(HAVE_REMAINDER))
+AC_SEARCH_LIBS(rint,       [m], AC_DEFINE(HAVE_RINT))
+AC_SEARCH_LIBS(rsqrt,      [m], AC_DEFINE(HAVE_RSQRT))
+AC_SEARCH_LIBS(scalb,      [m], AC_DEFINE(HAVE_SCALB))
+if test "`uname -s`" != "Linux"
+then
+	dnl significandl(x) incorrectly returns exponentl(x) on all
+	dnl GNU/Linux systems tested on x86 (Redhat 6.0, 6.2, 7.2),
+	dnl but the bug is probably endemic to all architectures, so
+	dnl we use our own implementation, sigh...
+	AC_SEARCH_LIBS(significand,[m], AC_DEFINE(HAVE_SIGNIFICAND))
+fi
+AC_SEARCH_LIBS(strtold,    [m], AC_DEFINE(HAVE_STRTOLD))
+AC_SEARCH_LIBS(trunc,      [m], AC_DEFINE(HAVE_TRUNC))
+AC_SEARCH_LIBS(y0,         [m], AC_DEFINE(HAVE_Y0))
+AC_SEARCH_LIBS(y1,         [m], AC_DEFINE(HAVE_Y1))
+AC_SEARCH_LIBS(yn,         [m], AC_DEFINE(HAVE_YN))
+
+dnl Other library functions that are desirable, but which we can live
+dnl without:
+AC_CHECK_FUNCS(strftime)
+AC_CHECK_FUNCS(snprintf)
+AC_MSG_CHECKING(if snprintf() prototype is available in stdio.h)
+
+dnl IBM AIX 4.2 has snprintf() in -lc, but lacks a prototype in
+dnl <stdio.h>.  SGI IRIX 6.4 has a different prototype for snprintf().
+dnl We thus provide one only when it is not already visible.
+AC_EGREP_HEADER(snprintf, stdio.h, 
+	[
+		AC_MSG_RESULT(yes)
+		AC_DEFINE(HAVE_SNPRINTF_PROTOTYPE)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+dnl NB: This check must come last; otherwise, on FreeBSD 4.1.1, the addition
+dnl of the -R option to LDFLAGS causes failures of most of the subsequent
+dnl tests when CC=c89, sigh...
+if test -n "$libreadline"
+then
+	dnl Checks for two flavors of curses libraries needed when
+	dnl -lreadline is used
+
+	AC_LANG_PUSH(C)
+	dnl OLD: AC_CHECK_LIB(ncurses, tgoto, libcurses=-lncurses, libcurses=)
+	dnl OLD: test -z "$libcurses" && (AC_CHECK_LIB(curses, tgoto, libcurses=-lcurses, libcurses=))
+	dnl LIBS="$LIBS $libcurses"
+	AC_SEARCH_LIBS(tgoto, [ncurses curses])
+	AC_LANG_POP(C)
+
+	dnl Because AC_SEARCH_LIBS prepends libraries to LIBS, we need to put
+	dnl any -lreadline in FRONT of the curses library
+
+	LIBS="$libreadline $LIBS"
+
+	AC_MSG_CHECKING(if extra LDFLAGS are needed to record the location of shared libraries)
+	dnl We cannot use AC_TRY_RUN() here, because it gives no
+	dnl opportunity to provide a test input file, sigh...
+	cat >conftest.c <<"EOF"
+#include "confdefs.h"
+#include <stdio.h>
+#include <readline/readline.h>
+int main()
+{
+	(void)rl_alphabetic(0);
+	(void)readline((char *)NULL);
+	return (0);
+}
+EOF
+	dnl Sadly, UNIX implementations are incompatibly divided on
+	dnl how to inform the linker to record load library locations,
+	dnl so that LD_LIBRARY_PATH is not needed at run time.  The
+	dnl LDFLAGS settings change from O/S to OS, and compiler to
+	dnl compiler, and even the same compiler on different O/Ses
+	dnl may have different conventions.  What a mess!
+
+	dnl NB: "" is specified both at the start and the end: if none
+	dnl of them work, we fall back to ""
+	for extraldflags in \
+		"" \
+		"-R$locallib" \
+		"-Wl,-rpath $locallib" \
+		"-rpath $locallib" \
+		""
+	do
+		$RM -f ./a.out 2>/dev/null
+		$CC $CFLAGS conftest.c -o a.out $LDFLAGS $extraldflags $LIBS >&5 2>/dev/null && \
+			LD_LIBRARY_PATH= ./a.out < /dev/null >&5 2>/dev/null && \
+				break
+	done
+	$RM -f ./a.out 2>/dev/null
+	if test -z "$extraldflags"
+	then
+		AC_MSG_RESULT(no)
+	else
+		AC_MSG_RESULT(yes)
+		LDFLAGS="$LDFLAGS $extraldflags"
+	fi
+fi
+
+dnl ISO Standard C defines only EDOM and ERANGE in <errno.h>, and a
+dnl few compilers, like lcc, offer only those symbols.  However, EINTR
+dnl exists on all UNIX systems, and we need it, so use the native cc
+dnl compiler to try to find its value if the current C compiler cannot
+dnl do so.
+AC_MSG_CHECKING(if EINTR is defined in <errno.h> on this system)
+AC_EGREP_HEADER(EINTR,errno.h,eintr=yes,eintr=no)
+if test $eintr = no
+then
+	cat >conftest.c <<"EOF"
+	#include <errno.h>
+	int eintr = EINTR ;
+EOF
+	eintrvalue=`cc -E conftest.c | awk '/int *eintr/ {print $4}' `
+	if test -n "$eintrvalue" -a "$eintrvalue" != "EINTR"
+	then
+		AH_TEMPLATE(EINTR, [EINTR errno value])
+		AC_DEFINE_UNQUOTED(EINTR,$eintrvalue)
+		AC_MSG_RESULT(yes)
+	else
+		AC_MSG_RESULT(no)
+	fi
+else
+	AC_MSG_RESULT(yes)
+fi
+
+AC_MSG_CHECKING(if SIGXCPU is defined in <signal.h> on this system)
+AC_EGREP_HEADER(SIGXCPU,signal.h,sigxcpu=yes,sigxcpu=no)
+if test $sigxcpu = no
+then
+	cat >conftest.c <<"EOF"
+	#include <signal.h>
+	int sigxcpu = SIGXCPU ;
+EOF
+	sigxcpuvalue=`cc -E conftest.c | awk '/int *sigxcpu/ {print $4}' `
+	if test -n "$sigxcpuvalue" -a "$sigxcpuvalue" != "SIGXCPU"
+	then
+		AH_TEMPLATE(SIGXCPU, [SIGXCPU signal value])
+		AC_DEFINE_UNQUOTED(SIGXCPU,$sigxcpuvalue)
+		AC_MSG_RESULT(yes)
+	else
+		AC_MSG_RESULT(no)
+	fi
+else
+	AC_MSG_RESULT(yes)
+fi
+
+dnl c89 on Sun Solaris does not get struct timeval out of <sys/time.h>
+dnl unless either __EXTENSIONS__ or _XPG4_2 is defined, sigh...
+AC_MSG_CHECKING(if  _XPG4_2 needed to expose struct timeval in <sys/time.h>)
+AC_EGREP_CPP(timeval,
+	[#include <sys/time.h>
+	], have_timeval=yes, have_timeval=no)
+
+if test $have_timeval = "no"
+then
+	AC_EGREP_CPP(timeval,
+		[#define _XPG4_2
+		 #include <sys/time.h>
+		], have_timeval=yes, have_timeval=no)
+	if test "$have_timeval" = "yes"
+	then
+	    AC_MSG_RESULT(yes)
+	    AC_DEFINE(_XPG4_2)
+	else
+	    AC_MSG_RESULT(unknown)
+	fi
+else
+	AC_MSG_RESULT(no)
+fi
+
+dnl c89 on Sun Solaris does not get prototypes for significand(),
+dnl copysign(), and scalbn() out of <math.h> unless __EXTENSIONS__,
+dnl sigh...
+AC_MSG_CHECKING(if  __EXTENSIONS__ needed to expose significand() prototype in <math.h>)
+AC_EGREP_CPP(significand,
+	[#include <math.h>
+	], have_significand=yes, have_significand=no)
+
+if test $have_significand = "no"
+then
+	AC_EGREP_CPP(significand,
+		[#define __EXTENSIONS__
+		 #include <math.h>
+		], have_significand=yes, have_significand=no)
+	if test "$have_significand" = "yes"
+	then
+	    AC_MSG_RESULT(yes)
+	    AC_DEFINE(__EXTENSIONS__)
+	else
+	    AC_MSG_RESULT(unknown)
+	fi
+else
+	AC_MSG_RESULT(no)
+fi
+
+if test $ac_cv_type_long_long = "yes"
+then
+	AC_MSG_CHECKING(if long long format needs L modifier)
+	AC_TRY_RUN(
+	[
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+int main(void)
+{
+    char buf[50];
+    (void)sprintf(buf, "%Lu", ~0LLU);
+    exit (strcmp(buf,"18446744073709551615"));
+}
+	],
+	[
+	    AC_DEFINE(HAVE_LONG_LONG_FORMAT_L)
+	    AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)])
+
+	AC_MSG_CHECKING(if long long format needs ll modifier)
+	AC_TRY_RUN(
+	[
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+int main(void)
+{
+    char buf[50];
+    (void)sprintf(buf, "%llu", ~0LLU);
+    exit (strcmp(buf,"18446744073709551615"));
+}
+	],
+	[
+	    AC_DEFINE(HAVE_LONG_LONG_FORMAT_LL)
+	    AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)])
+fi
+
+dnl Discourage editing of generated files by making them read-only!
+
+AC_CONFIG_COMMANDS(dummy,[chmod a-w Makefile config.h || true])
+
+AH_BOTTOM([
+#include "stdc.h"
+])
+
+AC_OUTPUT(Makefile)
+@
+
+
+1.19
+log
+@Add search paths for CP, LN, LS, MV, RM, and SHELL.  The intent is to
+have save/Makefile be more portable.
+@
+text
+@d3 2
+a4 2
+AC_INIT(hoc,7.0.5.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="22-Jul-2002"
+@
+
+
+1.18
+log
+@Add test for HAVE_SNPRINTF_PROTOTYPE to resolve conflicts between
+vendor header files.
+@
+text
+@d175 3
+a177 3
+AC_CHECK_PROG(CP,		scp,scp -p)
+AC_CHECK_PROG(CP,		rcp,rcp -p)
+AC_CHECK_PROG(CP,		cp,cp)
+d190 2
+a191 2
+AC_CHECK_PROGS(LN,		ln)
+AC_CHECK_PROGS(LS,		ls)
+d194 1
+a194 1
+AC_CHECK_PROGS(MV,		mv)
+d211 2
+a212 2
+AC_PATH_PROGS(RM,		rm)
+AC_PATH_PROGS(SHELL,		sh)
+@
+
+
+1.17
+log
+@In the Sun-specific section, add code to find the location of the
+native compiler directory containing <sunmath.h>, and add suitable -I
+values to both CFLAGS and CPPFLAGS so that AC_CHECK_HEADERS() works
+properly.  Builds with gcc and g++ on Sun Solaris are now free of
+configuration problems.
+@
+text
+@d56 1
+d576 12
+@
+
+
+1.16
+log
+@Update PACKAGE_DATE.
+@
+text
+@d3 2
+a4 2
+AC_INIT(hoc,7.0.4.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="21-Jul-2002"
+d279 10
+d290 6
+@
+
+
+1.15
+log
+@Add HAVE_GETPPID, HAVE_LONG_LONG_FORMAT_L, HAVE_LONG_LONG_FORMAT_LL,
+ETAGS, and associated configure-time tests for the long long format
+descriptor length modifiers.
+@
+text
+@d4 1
+a4 1
+PACKAGE_DATE="16-Jul-2002"
+@
+
+
+1.14
+log
+@Update PACKAGE_DATE.
+@
+text
+@d4 1
+a4 1
+PACKAGE_DATE="22-Jun-2002"
+d37 1
+d44 2
+d185 1
+d514 1
+d721 41
+@
+
+
+1.13
+log
+@Update PACKAGE_DATE.
+@
+text
+@d4 1
+a4 1
+PACKAGE_DATE="15-Jun-2002"
+@
+
+
+1.12
+log
+@Add check for strtold and symbol HAVE_STRTOLD.
+@
+text
+@d4 1
+a4 1
+PACKAGE_DATE="30-Jan-2002"
+@
+
+
+1.11
+log
+@Add support for splint (new generation of lclint).
+Add check for snprintf().
+@
+text
+@d53 1
+d98 1
+a98 1
+dnl we know that --with-long-double will will not work properly.
+d544 1
+@
+
+
+1.10
+log
+@Add fix for readline header file test that fails with strict compilers
+because of non-Standard-C code in system header files.
+@
+text
+@d3 2
+a4 2
+AC_INIT(hoc,7.0.3.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="28-Jan-2002"
+d203 1
+a203 1
+AC_PATH_PROGS(LCLINT,		lclint, [echo No lclint available:])
+d551 1
+@
+
+
+1.9
+log
+@Update version to 7.0.3.beta, and add check for FGREP.
+@
+text
+@d304 8
+@
+
+
+1.8
+log
+@Fix oversight: default to --with-double if precision not set.
+@
+text
+@d3 2
+a4 2
+AC_INIT(hoc,7.0.2.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="24-Jan-2002"
+d182 1
+@
+
+
+1.7
+log
+@Update version number, and add support for --with-float,
+--with-double, and --with-long-double options.  Add workaround for
+broken significand() on GNU/Linux systems.
+@
+text
+@d72 1
+a72 1
+HAVE_FP_T_DOUBLE=1
+d75 2
+a76 2
+HOCSUFFIX=64
+TESTFP=test64
+d124 1
+a124 1
+				AC_MSG_WARN(reverting to --with-double on this system, because long double is implemented, sigh...)
+d140 9
+@
+
+
+1.6
+log
+@Update PACKAGE_DATE.
+@
+text
+@d3 2
+a4 2
+AC_INIT(hoc,7.0.1.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="16-Jan-2002"
+d59 4
+a62 1
+AH_TEMPLATE(HAVE_IEEE_754,		[Define is host arithmetic is IEEE 754])
+d71 73
+d150 1
+a150 1
+			[Use GNU readline package for input editing and history (default is automatic determination)]),
+d174 1
+d239 1
+a239 1
+case "`uname -s`" in
+d258 26
+d291 2
+a292 2
+		 stdio.h stdlib.h string.h sys/resource.h sys/time.h \
+		 time.h unistd.h values.h)
+d517 8
+a524 1
+AC_SEARCH_LIBS(significand,[m], AC_DEFINE(HAVE_SIGNIFICAND))
+@
+
+
+1.5
+log
+@Move checks for typedefs before checks for header files, to resolve
+a problem with size_t not being found for lcc.
+
+Add check for stddef.h, which defines size_t.
+@
+text
+@d4 1
+a4 1
+PACKAGE_DATE="08-Jan-2002"
+@
+
+
+1.4
+log
+@Update PACKAGE_DATE, and add support for HAVE_GETGID, HAVE_GETPID,
+HAVE_GETUID, _XPG4_2, and __EXTENSIONS__.
+
+Add code to handle C++ compilers that need special options to
+force C++ mode for .c files, instead of reverting to C mode.
+@
+text
+@a152 9
+dnl Checks for header files.
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(ctype.h errno.h float.h inttypes.h limits.h locale.h \
+		 malloc.h math.h memory.h readline/history.h \
+		 readline/readline.h setjmp.h signal.h stdio.h \
+		 stdlib.h string.h sys/resource.h sys/time.h time.h \
+		 unistd.h values.h)
+
+d180 10
+@
+
+
+1.3
+log
+@Update version number and date.
+@
+text
+@d4 1
+a4 1
+PACKAGE_DATE="03-Jan-2002"
+d35 3
+d63 2
+d156 5
+a160 4
+AC_CHECK_HEADERS(ctype.h errno.h float.h inttypes.h locale.h malloc.h \
+		 math.h memory.h readline/history.h readline/readline.h \
+		 setjmp.h signal.h stdio.h stdlib.h string.h \
+		 sys/resource.h sys/time.h time.h unistd.h values.h)
+d254 19
+d385 3
+d473 1
+a473 1
+		$RM -f ./a.out 2>/dev/null 
+d478 1
+a478 1
+	$RM -f ./a.out 2>/dev/null 
+d533 49
+@
+
+
+1.2
+log
+@Add several new preprocessor symbols and program tests.
+Add code for handling the location of shared libraries.
+Add code for defining EINTR and SIGXCPU when they are available,
+but unknown to some strict compilers (e.g., lcc).
+Add code to include stdc.h in config.h.
+@
+text
+@d3 2
+a4 2
+AC_INIT(hoc,7.0.0.beta,[Nelson H. F. Beebe <beebe@@math.utah.edu>])
+PACKAGE_DATE="27-Dec-2001"
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 2
+a5 1
+PACKAGE_DATE="10-Dec-2001"
+d15 1
+d27 1
+d32 1
+d86 1
+d89 2
+d92 1
+d94 1
+d97 1
+d101 1
+d111 2
+a112 1
+AC_PATH_PROGS(TAR,		tar)
+d115 1
+d153 2
+a154 2
+		 setjmp.h signal.h stdio.h stdlib.h string.h time.h \
+		 unistd.h values.h)
+a220 61
+if test -n "$libreadline"
+then
+	dnl Checks for two flavors of curses libraries needed when
+	dnl -lreadline is used
+
+	AC_LANG_PUSH(C)
+	dnl OLD: AC_CHECK_LIB(ncurses, tgoto, libcurses=-lncurses, libcurses=)
+	dnl OLD: test -z "$libcurses" && (AC_CHECK_LIB(curses, tgoto, libcurses=-lcurses, libcurses=))
+	dnl LIBS="$LIBS $libcurses"
+	AC_SEARCH_LIBS(tgoto, [ncurses curses])
+	AC_LANG_POP(C)
+
+	dnl Because AC_SEARCH_LIBS prepends libraries to LIBS, we need to put
+	dnl any -lreadline in FRONT of the curses library
+
+	LIBS="$libreadline $LIBS"
+
+	AC_MSG_CHECKING(if extra LDFLAGS are needed to record the location of shared libraries)
+	dnl We cannot use AC_TRY_RUN() here, because it gives no
+	dnl opportunity to provide a test input file, sigh...
+	cat >conftest.c <<"EOF"
+#include "confdefs.h"
+#include <stdio.h>
+#include <readline/readline.h>
+int main()
+{
+	(void)readline((char *)NULL);
+	return (0);
+}
+EOF
+	dnl Sadly, UNIX implementations are incompatibly divided on
+	dnl how to inform the linker to record load library locations,
+	dnl so that LD_LIBRARY_PATH is not needed at run time.  The
+	dnl LDFLAGS settings change from O/S to OS, and compiler to
+	dnl compiler, and even the same compiler on different O/Ses
+	dnl may have different conventions.  What a mess!
+
+	dnl NB: "" is specified both at the start and the end: if none
+	dnl of them work, we fall back to ""
+	for extraldflags in \
+		"" \
+		"-R$locallib" \
+		"-Wl,-rpath $locallib" \
+		"-rpath $locallib" \
+		""
+	do
+		$RM -f ./a.out 2>/dev/null 
+		$CC $CFLAGS conftest.c -o a.out $LDFLAGS $extraldflags $LIBS >&5 2>/dev/null && \
+			LD_LIBRARY_PATH= ./a.out < /dev/null >&5 2>/dev/null && \
+				break
+	done
+	$RM -f ./a.out 2>/dev/null 
+	if test -z "$extraldflags"
+	then
+		AC_MSG_RESULT(no)
+	else
+		AC_MSG_RESULT(yes)
+		LDFLAGS="$LDFLAGS $extraldflags"
+	fi
+fi
+
+d353 1
+d358 1
+d369 11
+a379 1
+AC_SEARCH_LIBS(nearest,    [m], AC_DEFINE(HAVE_NEAREST))
+d395 112
+d510 4
+@

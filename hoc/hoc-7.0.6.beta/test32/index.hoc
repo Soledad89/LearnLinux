@@ -1,0 +1,11 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the index() function.
+### [20-Dec-2001]
+### ====================================================================
+
+for (k = 1; k <= 13; ++k) \
+{
+	__TEST__ = "index(\"ABCDEFGHIJKLM\",substr(\"ABCDEFGHIJKLM\"," k ",1)) == " k
+	__assert   (index("ABCDEFGHIJKLM",substr("ABCDEFGHIJKLM",k,1)) == k)
+}

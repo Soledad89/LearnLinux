@@ -1,0 +1,105 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.35;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the handling of nextafter(), assuming macheps() is reliable.
+### [26-Jan-2002]
+### ====================================================================
+
+if (MINSUBNORMAL < MINNORMAL) \
+{
+	__TEST__ = "nextafter(0,1) == MINSUBNORMAL"
+	__assert   (nextafter(0,1) == MINSUBNORMAL)
+
+	__TEST__ = "nextafter(0,-1) == -MINSUBNORMAL"
+	__assert   (nextafter(0,-1) == -MINSUBNORMAL)
+
+	__TEST__ = "nextafter(MINSUBNORMAL,0) == 0"
+	__assert   (nextafter(MINSUBNORMAL,0) == 0)
+
+	__TEST__ = "nextafter(-MINSUBNORMAL,0) == 0"
+	__assert   (nextafter(-MINSUBNORMAL,0) == 0)
+
+} \
+else \
+{
+	__TEST__ = "nextafter(0,1) == MINNORMAL"
+	__assert   (nextafter(0,1) == MINNORMAL)
+
+	__TEST__ = "nextafter(0,-1) == -MINNORMAL"
+	__assert   (nextafter(0,-1) == -MINNORMAL)
+
+	__TEST__ = "nextafter(MINNORMAL,0) == 0"
+	__assert   (nextafter(MINNORMAL,0) == 0)
+
+	__TEST__ = "nextafter(-MINNORMAL,0) == 0"
+	__assert   (nextafter(-MINNORMAL,0) == 0)
+}
+
+__TEST__ = "nextafter(1,2) == (1 + macheps(1))"
+__assert   (nextafter(1,2) == (1 + macheps(1)))
+
+__TEST__ = "nextafter(1,0) == (1 - macheps(1)/2)"
+__assert   (nextafter(1,0) == (1 - macheps(1)/2))
+
+__TEST__ = "nextafter(-1,0) == (-1 + macheps(1)/2)"
+__assert   (nextafter(-1,0) == (-1 + macheps(1)/2))
+
+__TEST__ = "nextafter(MAXNORMAL,Inf) == Inf"
+__assert   (nextafter(MAXNORMAL,Inf) == Inf)
+
+__TEST__ = "nextafter(-MAXNORMAL,-Inf) == -Inf"
+__assert   (nextafter(-MAXNORMAL,-Inf) == -Inf)
+
+__TEST__ = "isnan(nextafter(Inf,NaN))"
+__assert   (isnan(nextafter(Inf,NaN)))
+
+__TEST__ = "isnan(nextafter(NaN,Inf))"
+__assert   (isnan(nextafter(NaN,Inf)))
+
+__TEST__ = "isnan(nextafter(1,NaN))"
+__assert   (isnan(nextafter(1,NaN)))
+
+__TEST__ = "isnan(nextafter(NaN,1))"
+__assert   (isnan(nextafter(NaN,1)))
+
+__TEST__ = "isnan(nextafter(NaN,NaN))"
+__assert   (isnan(nextafter(NaN,NaN)))
+
+__TEST__ = "isnan(nextafter(NaN,NaN))"
+__assert   (isnan(nextafter(NaN,NaN)))
+
+__TEST__ = "nextafter(Inf,0) == MAXNORMAL"
+__assert   (nextafter(Inf,0) == MAXNORMAL)
+
+__TEST__ = "nextafter(-Inf,0) == -MAXNORMAL"
+__assert   (nextafter(-Inf,0) == -MAXNORMAL)
+
+__TEST__ = "nextafter(Inf,Inf) == Inf"
+__assert   (nextafter(Inf,Inf) == Inf)
+
+__TEST__ = "nextafter(-Inf,-Inf) == -Inf"
+__assert   (nextafter(-Inf,-Inf) == -Inf)
+@

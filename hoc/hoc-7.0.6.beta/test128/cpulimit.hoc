@@ -1,0 +1,13 @@
+### -*-hoc-*-
+### ====================================================================
+### Report on the cpulimit() test from cpulim00.hoc.
+### [30-Dec-2001]
+### ====================================================================
+
+if (n_factorial33_calls > n_factorial33_limit) \
+{
+	__NFAIL__ = 1
+	print "This system is either extremely fast, or lacks support for CPU time resource limits!\n"
+}
+
+## println n_factorial33_calls, n_factorial33_limit

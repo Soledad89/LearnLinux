@@ -1,0 +1,80 @@
+### -*-hoc-*-
+### ====================================================================
+### Initialize test variables for "make check" runs, and define
+### functions for logging successes and failures.
+### [10-Dec-2001]
+### ====================================================================
+
+__ABSRELERR = 0
+__ABSULPERR = 0
+__NFAIL__ = 0
+__NOKAY__ = 0
+__NTEST__ = 0
+__SCALE__ = 1
+__TEST__  = ""
+
+__MACHEPS = macheps(1)
+__MAXULPS = 1			# allow only 1 bit (1 ULP) of error
+
+proc __fail() \
+{
+	global __NFAIL__, __NTEST__, __SCALE__, __TEST__
+	__NFAIL__++
+	__NTEST__++
+	print "Test", __NTEST__, "failed: [" __TEST__ "]"
+	if (__SCALE__ != 1) print " argument scaled by", __SCALE__
+	print "\n"
+}
+
+proc __fail_relerr() \
+{
+	global __ABSULPERR, __NFAIL__, __NTEST__, __SCALE__, __TEST__
+	__NFAIL__++
+	__NTEST__++
+	print "Test", __NTEST__, "failed: [" __TEST__ "]"
+	print " error =", int(__ABSULPERR), "ulps =", ceil(log2(__ABSULPERR)), "bits"
+	if (__SCALE__ != 1) print " argument scaled by", __SCALE__
+	print "\n"
+}
+
+proc __okay() \
+{
+	global __NOKAY__, __NTEST__
+	__NOKAY__++
+	__NTEST__++
+}
+
+proc __assert(a)		{ if (a) __okay() else __fail() }
+
+proc __assert_small_relerr(a)	{ if (a) __okay() else __fail_relerr() }
+
+func __absrelerr(a,b) \
+{
+	global __ABSRELERR
+
+	if (b == 0) \
+		__ABSRELERR = 0 \
+	else \
+		__ABSRELERR = abs((a - b)/b)
+	return (__ABSRELERR)
+}
+
+func __absulperr(a,b) \
+{
+	global __ABSULPERR, __MACHEPS
+
+	__ABSULPERR = __absrelerr(a,b) / __MACHEPS
+	return (__ABSULPERR)
+}
+
+proc __match(a,b) \
+{
+	global __MAXULPS
+
+	if (isnan(a) || isnan(b)) \
+		__assert_small_relerr(0) \
+	else if (isinf(a) && isinf(b)) \
+		__assert_small_relerr(1) \
+	else \
+		__assert_small_relerr(__absulperr(a, b) <= __MAXULPS)
+}

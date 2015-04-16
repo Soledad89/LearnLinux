@@ -1,0 +1,73 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.34;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the hexadecimal floating-point feature in hoc.  Input is
+### recognized on all platforms, but output may default to decimal on
+### systems where the low-level bit layout of floating-point numbers
+### is unknown (or at least has not yet been programmed into hoc!).
+### Thus, we do NOT test the output strings, unless the arithmetic is
+### known to be IEEE 754 conformant, for which hoc has full support of
+### hexadecimal floating-point I/O.
+### [30-Dec-2001]
+### ====================================================================
+
+### Reduce precision to avoid bogus differences in the 7th and 8th
+### figures on some platforms.
+PREC = 6
+
+mult = 2
+
+for (x = MINSUBNORMAL; x < MINNORMAL; x *= mult) \
+	println x, __hex(x)
+
+for (x = MINNORMAL; x <= MAXNORMAL; x *= mult) \
+	println x, __hex(x)
+
+for (x = MINSUBNORMAL; x < MINNORMAL; x *= mult) \
+{
+	eps = macheps(x)
+	y = x + eps
+	println y, __hex(y)
+}
+
+### In the last two loops, we scale the starting point to ensure
+### that macheps(x) does not involve subnormals, so as to get
+### consistent results across platforms.
+
+for (x = MINNORMAL * 2^53; x < MAXNORMAL; x *= mult) \
+{
+	eps = macheps(x)
+	y = x + eps
+	println y, __hex(y)
+}
+
+for (x = MINNORMAL * 2^53; x <= MAXNORMAL; x *= mult) \
+{
+	eps = macheps(x)
+	y = x - eps / 2
+	println y, __hex(y)
+}
+@

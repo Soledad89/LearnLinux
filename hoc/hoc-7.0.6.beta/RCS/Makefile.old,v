@@ -1,0 +1,132 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	98.03.05.18.27.15;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	98.03.05.16.16.25;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Add GNU standard targets, and put targets in alphabetical order.
+@
+text
+@prefix          = /usr/local
+bindir          = $(prefix)/bin
+catdir          = $(prefix)/man/cat$(manext)
+mandir          = $(prefix)/man/man$(manext)
+manext          = 1
+
+RM		= /bin/rm -f
+SHELL           = /bin/sh
+YFLAGS          = -d
+CFLAGS          = -g -O
+
+HOC		= ../hoc
+
+SUBDIRS         = tests
+
+SRC             = hoc.y hoc.h code.c init.c math.c symbol.c
+OBJS            = hoc.o code.o init.o math.o symbol.o
+
+all:	hoc
+
+bundle:
+	@@bundle $(SRC) makefile README
+
+check:
+	(cd tests; $(MAKE) HOC=$(HOC) check)
+
+clean:
+	-$(RM) $(OBJS) [xy].tab.[ch] hoc
+	-$(RM) *.i *.o *~ \#* a.out core
+	-for f in $(SUBDIRS); do ( cd $$f ; $(MAKE) $@@) ; done
+
+hoc:	$(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -lm -o hoc
+
+hoc.o code.o init.o symbol.o:	hoc.h
+
+code.o init.o symbol.o:	x.tab.h
+
+x.tab.h:	y.tab.h
+	-cmp -s x.tab.h y.tab.h || cp y.tab.h x.tab.h
+
+pr:	$(SRC)
+	@@prcan $?
+	@@touch pr
+
+install:	hoc install-exe install-man
+
+install-exe:	uninstall-exe
+	cp hoc $(bindir)
+	strip $(bindir)/hoc
+	chmod 775 $(bindir)/hoc
+
+install-man:	uninstall-man
+	cp hoc.1 $(mandir)/hoc.$(manext)
+	chmod 664 $(mandir)/hoc.$(manext)
+
+maintainer-clean: distclean
+	@@echo "This command is intended for maintainers to use;"
+	@@echo "it deletes files that may require special tools to rebuild."
+
+mostlyclean distclean: clean
+	-for f in $(SUBDIRS); do ( cd $$f ; $(MAKE) $@@) ; done
+
+uninstall: uninstall-exe uninstall-man
+
+uninstall-exe:
+	-$(RM) $(bindir)/hoc
+
+uninstall-man:
+	-$(RM) $(mandir)/hoc.$(manext)
+	-$(RM) $(catdir)/hoc.$(manext)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 5
+a5 2
+YFLAGS = -d
+CFLAGS = -g
+d7 24
+a30 2
+SRC = hoc.y hoc.h code.c init.c math.c symbol.c
+OBJS = hoc.o code.o init.o math.o symbol.o
+d33 1
+a33 1
+	$(CC) $(CFLAGS) $(OBJS) -lstdio -lm -o hoc
+d46 17
+a62 3
+install:	hoc
+	cp hoc /usr/bin
+	strip /usr/bin/hoc
+d64 4
+a67 2
+clean:
+	rm -f $(OBJS) [xy].tab.[ch]  hoc
+d69 3
+a71 2
+bundle:
+	@@bundle $(SRC) makefile README
+@

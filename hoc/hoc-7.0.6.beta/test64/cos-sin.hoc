@@ -1,0 +1,86 @@
+### -*-hoc-*-
+### ====================================================================
+### Check certain relations for cos() and sin() that can only be
+### satisfied by these functions, without requiring explicit
+### high-precision numerical values.
+### [11-Dec-2001]
+### ====================================================================
+
+__MAXULPS = 2			# allow 1 bits (2^1 ULPs) of error
+
+### Tests with infinite arguments
+
+__TEST__ = "isnan(cos(-Inf))"
+__assert   (isnan(cos(-Inf)))
+
+__TEST__ = "isnan(cos(Inf))"
+__assert   (isnan(cos(Inf)))
+
+__TEST__ = "isnan(sin(-Inf))"
+__assert   (isnan(sin(-Inf)))
+
+__TEST__ = "isnan(sin(Inf))"
+__assert   (isnan(sin(Inf)))
+
+### Tests with NaN arguments
+
+__TEST__ = "isnan(cos(NaN))"
+__assert   (isnan(cos(NaN)))
+
+__TEST__ = "isnan(sin(NaN))"
+__assert   (isnan(sin(NaN)))
+
+__TEST__ = "isnan(cos(-NaN))"
+__assert   (isnan(cos(-NaN)))
+
+__TEST__ = "isnan(sin(-NaN))"
+__assert   (isnan(sin(-NaN)))
+
+### Tests at 0, PI/4, PI/2, 3*PI/4, PI
+
+__TEST__ = "cos(0) == 1"
+__match    (cos(0),   1)
+
+__TEST__ = "cos(PI/2) == 0"
+__match    (cos(PI/2),   0)
+
+__TEST__ = "1/cos(PI/4)^2 == 2"
+__match    (1/cos(PI/4)^2,   2)
+
+__TEST__ = "1/cos(3*PI/4)^2 == 2"
+__match    (1/cos(3*PI/4)^2,   2)
+
+__TEST__ = "cos(PI) == -1"
+__match    (cos(PI),   -1)
+
+__TEST__ = "sin(0) == 0"
+__match    (sin(0),   0)
+
+__TEST__ = "1/sin(PI/4)^2 == 2"
+__match    (1/sin(PI/4)^2,   2)
+
+__TEST__ = "sin(PI/2) == 1"
+__match    (sin(PI/2),   1)
+
+__TEST__ = "1/sin(3*PI/4)^2 == 2"
+__match    (1/sin(3*PI/4)^2,   2)
+
+__TEST__ = "sin(PI) == 0"
+__match    (sin(PI),   0)
+
+__TEST__ = "sin(3*PI/2) == -1"
+__match    (sin(3*PI/2),   -1)
+
+### cos-sin relationship tests with exact numerical arguments
+
+for (k = -52; k <= 8; ++k) \
+{
+	__TEST__ = "sin(1 + 2^k)^2 + cos(1 + 2^k)^2 == 1"
+	__match    (sin(1 + 2^k)^2 + cos(1 + 2^k)^2,   1)
+}
+
+for (k = -52; k <= 8; ++k) \
+{
+	__TEST__ = "sin(1 - 2^k)^2 + cos(1 - 2^k)^2 == 1"
+	__match    (sin(1 - 2^k)^2 + cos(1 - 2^k)^2,   1)
+}

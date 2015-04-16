@@ -1,0 +1,11 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the require() and provide() functions.
+### [07-Jan-2002]
+### ====================================================================
+
+load("../require.hoc")
+require("provide0")
+require("provide0")
+require("provide0")
+require("provide0")

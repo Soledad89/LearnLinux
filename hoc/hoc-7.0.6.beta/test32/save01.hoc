@@ -1,0 +1,17 @@
+### -*-hoc-*-
+
+println "This is from save01.hoc"
+
+PREC                   	= 9
+e_inverse              	= 1/E
+two_pi                 	= 2*PI
+
+t_e_inverse            	= "e_inverse = 1/E"
+t_two_pi               	= "two_pi = 2*PI"
+save("save01.dat","*")
+
+e_inverse              	*= e_inverse
+two_pi                 	/= two_pi
+
+save("save01.dat","*")
+

@@ -1,0 +1,16 @@
+### -*-hoc-*-
+### ====================================================================
+### Test the tolower() function.
+### [20-Dec-2001]
+### ====================================================================
+
+abc = "abcdefghijklmnopqrstuvwxyz"
+ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+for (k = 1; k <= 26; ++k) \
+{
+	for (m = 1; m <= (26 + 1 - k); ++m) \
+	{
+		__TEST__ = "tolower(substr(\"" ABC "\"," k "," m ")) == substr(\"" abc "\"," k "," m ")"
+		__assert   (tolower(substr(ABC,k,m)) == substr(abc,k,m))
+	}
+}

@@ -1,0 +1,75 @@
+### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.1.beta/es/help.hoc, Thu Jan  3 20:57:29 2002
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+###
+### This is es/hoc.hlp, with Spanish translations of hoc help
+### functions.
+###
+### If requested by the settings of the environment variables LC_ALL,
+### LC_MESSAGES, or LANG (in that order of priority), this file will be
+### loaded AFTER hoc.hlp.  This means that it can gradually be augmented
+### with translations of messages, leaving the original English text as
+### a fallback.
+###
+### [18-Dec-2001]
+### ====================================================================
+
+### Spanish synonyms for some commands: the function name is Spanish,
+### but the resulting help will be in English until more work is done.
+
+proc ayuda_todos()	help_all()
+
+### Spanish translations of new (or existing) commands
+
+proc ayuda() \
+{
+	__internal_help_hrule()
+
+	print "Informacíon adicional se encuentra a su disposicíon usando la\n"
+	print "funcion help_NAME(), donde NAME is cualquier constante\n"
+	print "predefinida o una funcíon ya programada o una una orden o un\n"
+	print "tópico:\n\n"
+
+	print "\tConstantes predefinidas:\n"
+	print "\t\tCATALAN, DEG, E, GAMMA, INF, Inf, Infinity, MAXNORMAL,\n"
+	print "\t\tMINNORMAL, MINSUBNORMAL, NAN, NaN, PHI, PI, QNAN,\n"
+	print "\t\tQNaN, SNAN, SNaN\n\n"
+
+	print "\tFunciónes numéricas ya programadas:\n"
+	print "\t\tabs(), acos(), acosh(), asin(), asinh(), atan(),\n"
+	print "\t\tatanh(), cbrt(), ceil(), cos(), cosd(), cosh(), erf(),\n"
+	print "\t\terfc(), exp(), expm1(), factorial(), floor(), gamma(),\n"
+	print "\t\tgcd(), hypot(), int(), J0(), J1(), Jn(), lcm(),\n"
+	print "\t\tlgamma(), ln(), log(), log10(), log1p(), log2(), logb(),\n"
+	print "\t\tmacheps(), max(), min(), nint(), rand(), randint(),\n"
+	print "\t\trandl(), rint(), rsqrt(), second(), setrand(), sin(),\n"
+	print "\t\tsind(), sinh(), sqrt(), systime(), tan(), tand(), tanh(),\n"
+	print "\t\ttrunc(), Y0(), Y1(), Yn()\n\n"
+
+	print "\tFunciónes lógicas de la IEEE 754 ya programadas:\n"
+	print "\t\tcopysign(), fmod(), ilogb(), isfinite(), isinf(),\n"
+	print "\t\tisnan(), isnormal(), isqnan(), issnan(), issubnormal(),\n"
+	print "\t\tldexp(), nearest(), nextafter(), remainder(), scalb(),\n"
+	print "\t\tsignificand()\n\n"
+
+	print "\tFunciónes lógicas de textos\n"
+	print "\t\tgetenv(), index(), length(), putenv(), strftime(),\n"
+	print "\t\tsubstr(), tolower(), toupper()\n\n"
+
+	print "\tOtras funcíones:\n"
+	print "\t\tabort(), eval(), load(), logfile(), logon(), logoff(),\n"
+	print "\t\tnow(), save(), who(), __msg_translate(), __set_locale()\n\n"
+
+	print "\tOrdenes:\n"
+	print "\t\tassignment expression for function if operator print\n"
+	print "\t\tprintf proc read statement while\n\n"
+
+	print "\tTópicos:\n"
+	print "\t\tconstants, environment, expressions, functions,\n"
+	print "\t\tieee_754, limits, locales, operators, random,\n"
+	print "\t\tstatements, string_functions, time\n\n"
+
+	print "\t[TO XLT]: Entre ayuda_todos() para detalhes completos.\n"
+	__internal_help_hrule()
+}

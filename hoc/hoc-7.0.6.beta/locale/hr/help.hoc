@@ -1,0 +1,79 @@
+### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.1.beta/hr/help.hoc, Sat Jan  5 05:32:20 2002
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+### NB: This file is in ISO8859-2 (Latin-2) encoding.
+###
+### This is hr/hoc.hlp, with Croation translations of hoc help functions.
+### If requested by the settings of the environment variables LC_ALL,
+### LC_MESSAGES, or LANG (in that order of priority), this file will be
+### loaded AFTER hoc.hlp.  This means that it can gradually be augmented
+### with translations of messages, leaving the original English text as
+### a fallback.
+###
+### [05-Jan-2002]
+### ====================================================================
+
+### Croation translations of new (or existing) commands
+
+proc pomoc() \
+{
+	__internal_help_hrule()
+
+	print "\tDodatna pomoè se moze dobiti kori{\ s}tenjem funkcije\n"
+	print "\tpomoè_IME(), gdje je IME bilo koja predefinirana konstanta,\n"
+	print "\tpredefinirana funkcija, ili naredba, ili tema:\n\n"
+
+	print "\tPredefinirane konstante:\n\n"
+	print "\t\tCATALAN, DEG, E, GAMMA, INF, Inf, Infinity, MAXNORMAL,\n"
+	print "\t\tMINNORMAL, MINSUBNORMAL, NAN, NaN, PHI, PI, QNAN,\n"
+	print "\t\tQNaN, SNAN, SNaN\n\n"
+
+	print "\tIndbyggede numeriske funktioner:\n"
+	print "\t\tabs(), acos(), acosh(), asin(), asinh(), atan(),\n"
+	print "\t\tatanh(), cbrt(), ceil(), cos(), cosd(), cosh(), erf(),\n"
+	print "\t\terfc(), exp(), expm1(), factorial(), floor(), gamma(),\n"
+	print "\t\tgcd(), hypot(), int(), J0(), J1(), Jn(), lcm(),\n"
+	print "\t\tlgamma(), ln(), log(), log10(), log1p(), log2(), logb(),\n"
+	print "\t\tmacheps(), max(), min(), nint(), rand(), randint(),\n"
+	print "\t\trandl(), rint(), rsqrt(), second(), setrand(), sin(),\n"
+	print "\t\tsind(), sinh(), sqrt(), systime(), tan(), tand(), tanh(),\n"
+	print "\t\ttrunc(), Y0(), Y1(), Yn()\n\n"
+
+	print "\tPredefinirane IEEE 754 test funkcije:\n"
+	print "\t\tcopysign(), fmod(), ilogb(), isfinite(), isinf(),\n"
+	print "\t\tisnan(), isnormal(), isqnan(), issnan(), issubnormal(),\n"
+	print "\t\tldexp(), nearest(), nextafter(), remainder(), scalb(),\n"
+	print "\t\tsignificand()\n\n"
+
+	print "\tString funkcije:\n"
+	print "\t\tgetenv(), index(), length(), putenv(), strftime(),\n"
+	print "\t\tsubstr(), tolower(), toupper()\n\n"
+
+	print "\tDruge funkcije:\n"
+	print "\t\tabort(), eval(), load(), logfile(), logon(), logoff(),\n"
+	print "\t\tnow(), save(), who(), __set_locale()\n\n"
+
+	print "\tNaredbe:\n"
+	print "\t\tassignment expression for function if operator print\n"
+	print "\t\tprintf proc read statement while\n\n"
+
+	print "\tEmner:\n"
+	print "\t\tconstants, environment, expressions, functions,\n"
+	print "\t\tieee_754, limits, locales, operators, random,\n"
+	print "\t\tstatements, string_functions, time\n\n"
+
+	print "\tUtipkaj pomoè_sve() za detaljnija obja¹njenja.\n"
+	__internal_help_hrule()
+
+}
+
+### Synonyms for alternative spellings or noninternationalized keyboards
+
+proc pomoè()		pomoc()
+proc pomoc_sve()	help_all()
+proc pomoè_sve()	pomoc_sve()
+
+### Locale-specific names for standard functions and procedures
+
+### NOT YET IMPLEMENTED: proc hvem()		who($1) 	# da: need translation to hr

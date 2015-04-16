@@ -1,0 +1,40 @@
+### -*-hoc-*-
+### ====================================================================
+### This file is loaded by the endinput.hoc test.
+### [07-Jan-2002]
+### ====================================================================
+
+println "Loaded endinp00.hoc: level = ", level
+
+k = 0
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 1
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 2
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 3
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 4
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 5
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 6
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+
+k = 7
+if (level <= k) endinput()
+println "Got past level ", k, " endinput()"
+

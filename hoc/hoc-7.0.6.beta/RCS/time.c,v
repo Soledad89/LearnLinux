@@ -1,0 +1,355 @@
+head	1.10;
+access;
+symbols;
+locks
+	beebe:1.10; strict;
+comment	@ * @;
+
+
+1.10
+date	2002.08.08.01.25.22;	author beebe;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2002.07.31.17.27.10;	author beebe;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2002.07.30.18.28.46;	author beebe;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.02.19.01.01.10;	author beebe;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.01.27.18.23.30;	author beebe;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.01.11.02.41.18;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.01.05.14.48.11;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.01.04.17.52.34;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.01.02.22.32.13;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.01.01.13.18.21;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.10
+log
+@Add another bounds check on rlim.rlim_cur to prevent it exceeding
+rlim.rlim_max; this is necessitated by behavior of the HP NUE IA-64
+emulator.
+@
+text
+@#include "hoc.h"
+
+#if defined(HAVE_LOCALE_H)
+#include <locale.h>
+#else
+#define setlocale(lc_xxx, value) 0
+#endif
+
+#if defined(HAVE_STRING_H)
+#include <string.h>
+#endif
+
+#if defined(HAVE_SYS_TIME_H)
+#include <sys/time.h>			/* needed by Apple Darwin (MacOS X) */
+#endif
+
+#if defined(HAVE_SYS_RESOURCE_H)
+#include <sys/resource.h>
+#endif
+
+#if defined(HAVE_SIGNAL_H)
+#include <signal.h>
+#endif
+
+#if defined(HAVE_TIME_H)
+#include <time.h>
+#endif
+
+#if defined(__cplusplus) || defined(c_plusplus)
+extern "C" void xcpucatch ARGS((int dummy));
+#else
+void xcpucatch ARGS((int dummy));
+#endif
+
+fp_t
+CPULimit(fp_t seconds)
+{
+	/* Allow up to `seconds' more time in the current process,
+	   and return the previous soft limit on CPU time use. */
+
+	fp_t old_seconds;
+
+	(void)update_number("__CPU_LIMIT__", seconds);
+
+#if defined(HAVE_SYS_RESOURCE_H) && defined(SIGXCPU)
+	{
+		struct rlimit rlim;
+		struct rusage ruse;
+
+		if (getrlimit(RLIMIT_CPU, &rlim) != 0)
+			return (NaN());
+		if (getrusage(RUSAGE_SELF, &ruse) != 0)
+			return (NaN());
+		old_seconds = rlim.rlim_cur;
+
+		if (IsNaN(seconds))
+			seconds = (fp_t)RLIM_INFINITY;
+		else if (IsInf(seconds))
+			seconds = (fp_t)RLIM_INFINITY;
+		else if (seconds <= FP(0.0))
+			seconds = (fp_t)RLIM_INFINITY;
+
+		if (seconds > (fp_t)RLIM_INFINITY)
+			seconds = (fp_t)RLIM_INFINITY;
+
+		seconds = Ceil(seconds
+			       + (fp_t)ruse.ru_utime.tv_sec
+			       + (fp_t)ruse.ru_utime.tv_usec / FP(1000000.0)
+			       + (fp_t)ruse.ru_stime.tv_sec
+			       + (fp_t)ruse.ru_stime.tv_usec / FP(1000000.0));
+
+		if (seconds > (fp_t)RLIM_INFINITY)
+			seconds = (fp_t)RLIM_INFINITY;
+
+		rlim.rlim_cur = (rlim_t)seconds;
+
+		/* On Apple Darwin, with seconds == Inf, that last
+		   assignment wraps to a large negative value, so
+		   guard against such nonsense.  Test against 1,
+		   rather than 0, to avoid warnings from compilers on
+		   systems where rlim_t is an unsigned type. */
+
+		if ((rlim.rlim_cur < (rlim_t)1) || (rlim.rlim_cur > rlim.rlim_max))
+			rlim.rlim_cur = rlim.rlim_max;
+
+		if (setrlimit(RLIMIT_CPU, &rlim) != 0)
+			old_seconds = NaN();
+		(void)signal(SIGXCPU, xcpucatch);
+	}
+#else
+	old_seconds = Infinity();
+#endif
+
+	return (old_seconds);
+}
+
+const char *
+Now(void)
+{
+	time_t	timeval;
+	char	timestring[26];		/* "Thu Dec 13 18:05:48 2001" */
+
+	timeval = time((time_t*)NULL);
+	(void)strlcpy(timestring,ctime(&timeval),sizeof(timestring));
+	timestring[24] = '\0';		/* clobber unwanted final newline */
+	return (dupstr((const char *)&timestring[0]));
+}
+
+fp_t
+Second(void)				/* CPU seconds since job start */
+{
+#if defined(HAVE_TIME_H)
+	return ((fp_t)clock()/(fp_t)CLOCKS_PER_SEC);
+#else
+	return (FP(0.0));
+#endif
+}
+
+const char *
+Strftime(const char *fmt, fp_t t)
+{	/* return a dynamic string containing the conversion of t according to strftime format fmt */
+	time_t tv;
+	static char sbuf[256];
+	const char *envloc;
+
+	envloc = Getenv("LC_TIME");
+	(void)setlocale(LC_TIME, (*envloc) ? envloc : "C");
+	tv = (time_t)t;
+	(void)strftime(sbuf, sizeof(sbuf), fmt, localtime(&tv));
+	efree((void*)envloc);
+	return (dupstr((const char *)&sbuf[0]));
+}
+
+fp_t
+Systime(void)				/* wall clock seconds since 1970.01.01 00:00:00 UTC */
+{
+#if defined(HAVE_TIME_H)
+	return ((fp_t)time((time_t *)NULL));
+#else
+	return (FP(0.0));
+#endif
+}
+
+void
+xcpucatch(int dummy)	/* catch SIGXCPU (CPU time exceeded) exceptions */
+{
+	execerror("CPU time exceeded",  (const char*)NULL);
+}
+@
+
+
+1.9
+log
+@Change Strftime() to return a dynamic string.
+@
+text
+@d83 1
+a83 1
+		if (rlim.rlim_cur < (rlim_t)1)
+@
+
+
+1.8
+log
+@Change Now() to return a dynamic string.
+@
+text
+@d121 1
+a121 1
+{
+d131 1
+a131 1
+	return ((const char *)&sbuf[0]);
+@
+
+
+1.7
+log
+@Use safe string routines, strlcat() and strlcpy().
+@
+text
+@d100 2
+a101 2
+	time_t		timeval;
+	static char	timestring[26];		/* "Thu Dec 13 18:05:48 2001" */
+d106 1
+a106 1
+	return ((const char *)&timestring[0]);
+@
+
+
+1.6
+log
+@Add FP() wrappers on floating-point constants.
+@
+text
+@d104 1
+a104 1
+	(void)strncpy(timestring,ctime(&timeval),sizeof(timestring));
+@
+
+
+1.5
+log
+@Test rlim.rlim_cur against 1 instead of 0 to remove warnings
+on systems where rlim_t is unsigned.
+@
+text
+@d60 1
+a60 1
+		else if (seconds <= 0.0)
+d67 4
+a70 4
+			      + (fp_t)ruse.ru_utime.tv_sec
+			      + (fp_t)ruse.ru_utime.tv_usec / 1000000.0
+			      + (fp_t)ruse.ru_stime.tv_sec
+			       + (fp_t)ruse.ru_stime.tv_usec / 1000000.0);
+d115 1
+a115 1
+	return (0.0);
+d140 1
+a140 1
+	return (0.0);
+@
+
+
+1.4
+log
+@Check return values of getrlimit(), getrusage(), and setrlimit(),
+and return NaN if they fail.
+@
+text
+@d79 3
+a81 1
+		   guard against such nonsense. */
+d83 1
+a83 1
+		if (rlim.rlim_cur < (rlim_t)0)
+@
+
+
+1.3
+log
+@Routine update
+@
+text
+@d50 4
+a53 3
+		getrlimit(RLIMIT_CPU, &rlim);
+		getrusage(RUSAGE_SELF, &ruse);
+
+d84 2
+a85 1
+		setrlimit(RLIMIT_CPU, &rlim);
+@
+
+
+1.2
+log
+@Revise CPULimit() to work around problem discovered on Apple Darwin:
+the cast conversions of RLIM_INFINITY produced a negative time
+value, which immediately terminates execution on startup with
+a SIGXCPU interrupt.
+@
+text
+@d77 1
+a77 1
+		   assignment wraps to a large negative value, so 
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d65 17
+a81 5
+		rlim.rlim_cur = (rlim_t)(Ceil(seconds
+					      + (fp_t)ruse.ru_utime.tv_sec
+					      + (fp_t)ruse.ru_utime.tv_usec / 1000000.0
+					      + (fp_t)ruse.ru_stime.tv_sec
+					      + (fp_t)ruse.ru_stime.tv_usec / 1000000.0));
+@

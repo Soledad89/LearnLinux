@@ -1,0 +1,102 @@
+head	1.4;
+access;
+symbols;
+locks
+	beebe:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2002.07.04.14.48.02;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.01.27.18.25.52;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.01.01.14.56.17;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.11.43;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version
+@
+
+
+1.4
+log
+@Change argument from fp_t to fp_t *.
+@
+text
+@#include "hoc.h"
+
+#if defined(DEBUG_MACHEPS)
+extern void Dump(const char *, fp_t);
+#endif
+
+
+fp_t
+store(fp_t *x)
+{
+	/* This external function is used to work around problems on
+	   architectures, such as HP/Intel IA-64, Intel IA-32 (== x86),
+	   and Motorola 68K, with registers that are longer than memory
+	   words.  It must NEVER be inlined, since its purpose is to
+	   shorten its argument to the size, and precision and range, of
+	   a memory word. */
+#if defined(DEBUG_MACHEPS)
+	Dump("store(): x = ", *x);
+#endif
+	return (*x);
+}
+@
+
+
+1.3
+log
+@Include hoc.h instead of fp_t.h.
+@
+text
+@d9 1
+a9 1
+store(fp_t x)
+d18 1
+a18 1
+	Dump("store(): x = ", x);
+d20 1
+a20 1
+	return (x);
+@
+
+
+1.2
+log
+@Add DEBUG_MACHEPS conditionals.
+@
+text
+@d1 1
+a1 1
+#include "fp_t.h"
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 9
+a9 2
+double
+store(double x)
+d17 3
+@

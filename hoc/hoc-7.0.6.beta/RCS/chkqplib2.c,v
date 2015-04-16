@@ -1,0 +1,103 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.02.19.01.03.06;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "config.h"
+
+#if defined(HAVE_STDIO_H)
+#include <stdio.h>
+#endif
+
+#if defined(HAVE_STDLIB_H)
+#include <stdlib.h>
+#endif
+
+#if defined(HAVE_FLOAT_H)
+#include <float.h>
+#endif
+
+#if defined(HAVE_MATH_H)
+#include <math.h>
+#endif
+
+#if defined(HAVE_SUNMATH_H)
+#include <sunmath.h>
+#endif
+
+typedef long double fp_t;
+
+int
+main(VOID_ARG)
+{
+	
+	fp_t w, x, y, z;
+
+	w = x = y = z = 0.1;
+
+	(void)printf("Begin test\n");
+	(void)acoshl (x);
+	(void)acosl (x);
+	(void)asinhl (x);
+	(void)asinl (x);
+	(void)atanhl (x);
+	(void)atanl (x);
+	(void)cbrtl (x);
+	(void)ceill (x);
+	(void)copysignl (y,z);
+	(void)coshl (x);
+	(void)cosl (x);
+	(void)erfcl (x);
+	(void)erfl (x);
+	(void)expl (x);
+	(void)expm1l (x);
+	(void)fabsl (x);
+	(void)floorl (x);
+	(void)fmodl (y,z);
+	(void)hypotl (y,z);
+	(void)j0l (x);
+	(void)j1l (x);
+	(void)jnl (0, w);
+	(void)ldexpl (x, 1);
+	(void)lgammal (x);
+	(void)log10l (x);
+	(void)logl (x);
+	(void)nextafterl (y,z);
+	(void)powl (y,z);
+	(void)remainderl (y,z);
+	(void)rintl (x);
+	(void)scalbl (y,z);
+	(void)sinhl (x);
+	(void)sinl (x);
+	(void)sqrtl (x);
+	(void)tanhl (x);
+	(void)tanl (x);
+	(void)truncl (x);
+	(void)y0l (x);
+	(void)y1l (x);
+	(void)ynl (0, w);
+	(void)ilogbl (x);
+
+	(void)printf("End test\n");
+	return (EXIT_SUCCESS);
+}
+@

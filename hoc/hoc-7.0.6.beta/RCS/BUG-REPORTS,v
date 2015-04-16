@@ -1,0 +1,48 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.01.01.13.21.53;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@=======================
+Bug and problem reports
+=======================
+
+Send bug and problem reports, comments, and kudos to the hoc 7
+developer (preferably via e-mail) at:
+
+ 	Nelson H. F. Beebe
+ 	Center for Scientific Computing
+ 	University of Utah
+ 	Department of Mathematics, 322 INSCC
+ 	155 S 1400 E RM 233
+ 	Salt Lake City, UT 84112-0090
+ 	USA
+ 	Email: beebe@@math.utah.edu, beebe@@acm.org,
+	       beebe@@computer.org, beebe@@ieee.org (Internet)
+ 	WWW URL: http://www.math.utah.edu/~beebe
+ 	Telephone: +1 801 581 5254
+ 	FAX: +1 801 585 1640, +1 801 581 4148
+
+Please do NOT bother the original hoc authors, Brian Kernighan and Rob
+Pike about hoc 7 issues.  Their job finished with the publication of
+their excellent 1984 book! (run "hoc --author" for details).
+@

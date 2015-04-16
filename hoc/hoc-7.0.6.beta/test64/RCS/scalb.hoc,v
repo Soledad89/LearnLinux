@@ -1,0 +1,110 @@
+head	1.2;
+access;
+symbols;
+locks
+	beebe:1.2; strict;
+comment	@# @;
+
+
+1.2
+date	2002.08.06.13.43.36;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.21.56;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.2
+log
+@Development snapshot.
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test scalb(x,y) == x * 2^int(y)
+### [10-Dec-2001]
+### ====================================================================
+
+
+__TEST__ = "isnan(scalb(+Infinity,+NaN))"
+__assert   (isnan(scalb(+Infinity,+NaN)))
+
+__TEST__ = "isnan(scalb(+Infinity,-NaN))"
+__assert   (isnan(scalb(+Infinity,-NaN)))
+
+__TEST__ = "isnan(scalb(+NaN,+Infinity))"
+__assert   (isnan(scalb(+NaN,+Infinity)))
+
+__TEST__ = "isnan(scalb(+NaN,-Infinity))"
+__assert   (isnan(scalb(+NaN,-Infinity)))
+
+__TEST__ = "isnan(scalb(-Infinity,+NaN))"
+__assert   (isnan(scalb(-Infinity,+NaN)))
+
+__TEST__ = "isnan(scalb(-Infinity,-NaN))"
+__assert   (isnan(scalb(-Infinity,-NaN)))
+
+__TEST__ = "isnan(scalb(-NaN,+Infinity))"
+__assert   (isnan(scalb(-NaN,+Infinity)))
+
+__TEST__ = "isnan(scalb(-NaN,-Infinity))"
+__assert   (isnan(scalb(-NaN,-Infinity)))
+
+
+__TEST__ = "isnan(scalb(+NaN,+NaN))"
+__assert   (isnan(scalb(+NaN,+NaN)))
+
+__TEST__ = "isnan(scalb(+NaN,-NaN))"
+__assert   (isnan(scalb(+NaN,-NaN)))
+
+__TEST__ = "isnan(scalb(-NaN,+NaN))"
+__assert   (isnan(scalb(-NaN,+NaN)))
+
+__TEST__ = "isnan(scalb(-NaN,-NaN))"
+__assert   (isnan(scalb(-NaN,-NaN)))
+
+
+__TEST__ = "isnan(scalb(NaN,1.0))"
+__assert   (isnan(scalb(NaN,1.0)))
+
+__TEST__ = "isnan(scalb(NaN,-1.0))"
+__assert   (isnan(scalb(NaN,-1.0)))
+
+
+__TEST__ = "scalb(Infinity,0) == Infinity"
+__assert   (scalb(Infinity,0) == Infinity)
+
+__TEST__ = "scalb(Infinity,-1) == Infinity"
+__assert   (scalb(Infinity,-1) == Infinity)
+
+__TEST__ = "scalb(0,Infinity) == Infinity"
+__assert   (scalb(0,Infinity) == Infinity)
+
+for (__k = -1022; k <= 1023; ++k)
+{
+	__TEST__ = "scalb(1,__k) == 2^__k"
+	__assert   (scalb(1,__k) == 2^__k)
+}
+
+__TEST__ = "scalb(1 - 2^(-53),1024) == (1 - 2^(-53)) * 2^1024"
+__assert   (scalb(1 - 2^(-53),1024) == (1 - 2^(-53)) * 2^1024)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d69 1
+a69 1
+__assert   (scalb(1 - 2^(-53),1024) == (1 - 2^(-53)) * 2^1024"
+@

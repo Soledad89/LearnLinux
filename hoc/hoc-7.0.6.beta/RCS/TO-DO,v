@@ -1,0 +1,3862 @@
+head	1.22;
+access;
+symbols;
+locks
+	beebe:1.22; strict;
+comment	@# @;
+
+
+1.22
+date	2002.08.08.00.58.38;	author beebe;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	2002.08.05.11.21.59;	author beebe;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2002.08.01.16.38.21;	author beebe;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2002.08.01.16.33.50;	author beebe;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2002.08.01.12.14.12;	author beebe;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2002.07.30.20.26.00;	author beebe;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2002.07.28.18.35.59;	author beebe;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2002.07.26.14.34.50;	author beebe;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2002.07.24.14.45.18;	author beebe;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2002.07.20.22.49.07;	author beebe;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2002.07.04.14.43.43;	author beebe;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2002.06.15.23.39.52;	author beebe;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2002.02.19.01.05.53;	author beebe;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2002.01.27.17.57.14;	author beebe;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2002.01.11.18.41.26;	author beebe;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.01.11.02.09.16;	author beebe;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.01.05.14.54.46;	author beebe;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.01.04.17.50.57;	author beebe;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.01.02.21.42.21;	author beebe;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.01.01.14.45.06;	author beebe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2001.12.12.01.21.41;	author beebe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.12.11.15.19.28;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.22
+log
+@Development snapshot.
+@
+text
+@## /usr/local/src/hoc/hoc-7.0.0.beta/TO-DO, Sat Dec  8 06:58:52 2001
+## Edit by Nelson H. F. Beebe <beebe@@math.utah.edu>
+------------------------------------------------------------------------
+
+This file records development problems and tasks for hoc version 7,
+time stamped (when I remembered to do so), numbered, and ordered from
+oldest to newest.
+
+As each item is resolved, it is prefixed by double right angle brackets,
+and followed by a time-stamped short description of the resolution.
+
+When all items are so resolved, the package will be ready for release.
+
+------------------------------------------------------------------------
+>> ...
+>> (1) The new := operator protects against repeated assignments with it,
+>>     but not with subsequent assignment by =.
+>>
+>> 	hoc> A := 123
+>> 	hoc> A := 456
+>> 	./hoc: illegal assignment to existing constant A near line 9
+>> 	hoc> A = 456
+>> 	hoc> A
+>> 	456
+>>     Prevent this!
+>> ...
+
+DONE: Fri Dec  7 11:16:18 2001
+
+Here is how it now works:
+
+	% hoc
+	...banner...
+	hoc> E
+	2.7182818284590451
+	hoc> E = 3
+	./hoc: illegal reassignment to immutable named constant E near line 3
+	hoc> x = E
+	hoc> x
+	2.7182818284590451
+	hoc> x = 3
+	hoc> y := 127
+	hoc> y
+	127
+	hoc> y = 3
+	./hoc: illegal reassignment to immutable named constant y near line 9
+	hoc> y := 153
+	./hoc: illegal reassignment to immutable named constant y near line 10
+------------------------------------------------------------------------
+>> ...
+>> (2) The built-in constants (DEG, E, PI, ...) can be reassigned by =.
+>>     Prevent this!
+>> ...
+
+DONE: Fri Dec  7 11:17:37 2001 [see above]
+------------------------------------------------------------------------
+>> ...
+>> (3) Can we extend to support long double type?  Are all of the needed
+>>     elementary functions available?
+>> ...
+
+RESOLUTION: Fri Dec  7 11:17:58 2001
+Long double support is possible, but only on AIX 4.x and OSF/1 5.0;
+other systems that have long double still lack the necessary
+elementary function library support.  See the PROJECTS file for
+details.
+------------------------------------------------------------------------
+>> ...
+>> (4) Add autoconf support, with automatic check for -lreadline, and
+>>     option "./configure --without-readline", and recognition of
+>>     which form of LDFLAGS is needed.
+>> ...
+
+DONE: Mon Dec 10 21:00:32 2001
+
+Almost all of the basic GNU autoconf work was completed on 4-Dec-2001,
+but today I finished the last part: the addition of the LDFLAGS tests
+in configure.in.
+------------------------------------------------------------------------
+>> ...
+>> (5) Add --help and --version and --quick (or --no-init-files) options.
+>> ...
+
+DONE: Wed Dec  5 23:01:26 2001
+
+Here is an example:
+
+	% ./hoc --help
+	Usage:
+		./hoc   [ --author ] [ --help ] [ --no-help-file ]
+			[ --no-site-file ] [ --no-user-file ] [ --silent ]
+			[ --version ]
+			input-file(s) [ -- ] more-input-file(s)
+
+	Options may be prefixed with either one or two hyphens.
+
+	For additional help, try hoc's help() command, or in a shell,
+	use the UNIX manual page command, man hoc.
+------------------------------------------------------------------------
+>> ...
+>> (6) Add command to include a file at run time, with filename
+>>     completion.  E.g., load("filename").  This should have a default
+>>     search path of ".", "$HOME/hoc", and "$(shrlibdir)", but this
+>>     should be settable via a HOCPATH environment variable.
+>>     This appears to be difficult with the current implementation of
+>>     the GNU readline package, since it doesn't provide any way to
+>>     preserve the current stdin, temporarily switching to another input
+>>     stream.
+>> ...
+
+PARTLY DONE: Thu Dec 27 14:59:29 2001
+The load(), save(), and logfile() commands are now fully operational,
+but there is no HOCPATH support yet.
+------------------------------------------------------------------------
+>> ...
+>> (7) Once constants are truly constant, then it should be possible to
+>>     move them out of compile-time code into run-time code (but that
+>>     would conflict with --quick option).
+>> ...
+
+RESOLVED: Mon Dec 10 06:42:58 2001
+
+Leave the code as it is, with embedded E, PI, DEG, ...: getting
+different behavior, depending on whether the system-wide hoc.rc file
+is loaded or not, is undesirable.  [However, hoc.rc currently contains
+10 functions that are documented in hoc.hlp: cosd(), factorial(),
+gcd(), lcm(), logb(), macheps(), max(), min(), sind(), tand().  Thus,
+running with --no-site-file leaves them undefined.]
+------------------------------------------------------------------------
+>> ...
+>> (8) Why does home machine and eilat, henry, mosso, wombat give this
+>>     (hundreds of them)?
+>>
+>> 	./hoc
+>> 	...
+>> 	readline: warning: rl_prep_terminal: cannot get terminal
+>> 	settingsreadline: warning: rl_prep_terminal: cannot get terminal
+>> 	settings....
+>>
+>>     uinta and suncore do not.  On home and uinta, TERM is vt100,
+>>     and readline libraries both are 4.2a.
+>>
+>>     Is there an option (function or variable) in the readline library
+>>     that can suppress the fancy input processing?  If so, we could
+>>     turn it on for noninteractive functions.  Otherwise, we have to
+>>     interpose yet another software layer between hoc and readline, or
+>>     else use a dynamically-assigned function pointer to holds either
+>>     the library readline function address, or a private one that just
+>>     returns a line at a time.
+>> ...
+
+DONE: Sun Dec 16 16:08:58 2001
+
+I solved this two days ago by rewriting readline.c to use GNU
+readline() only for interactive files.  Although the readline library
+works well, I have found several bugs and misfeatures that need to be
+fixed.
+------------------------------------------------------------------------
+>> ...
+>> (9) hoc> help_NaN()
+>>         NaN is the IEEE-754 floating-point Not-a-Number.  It is produced
+>>         when a numeric result is not predictable, even in a limiting
+>>         sense, such as from 0/0, sqrt(x) (when x < 0), Infinity - Infinity,
+>> 	...
+>> 	But:
+>> 	hoc> sqrt(-1)
+>> 	./hoc: sqrt argument out of domain near line 5
+>>
+>> 	Need to fix this, and probably other built-in functions with
+>> 	unhelpful range checks.
+>> ...
+
+DONE: Fri Dec  7 11:24:37 2001
+
+errcheck() now never calls execerror() in an IEEE 754 environment, so
+hoc now behaves like this:
+
+	% hoc
+	hoc> sqrt(-1)
+	NaN
+	hoc> sqrt(-0)
+	-0
+	hoc> sqrt(+0)
+	0
+------------------------------------------------------------------------
+
+>> ...
+>> (10) For autoconf:
+>> 	* R_OK not defined on OSF/1 4.0 unless _POSIX_SOURCE is
+>> 	specified, but then erf() and erfc() are not prototyped.
+>> 	I added a conditional to supply a definition of R_OK.
+>>
+>> 	* OSF/1 and IRIX need
+>> 		LDFLAGS='-rpath $(prefix)/lib'
+>>
+>> 	* on OSF/1 5.0, need
+>> 		make CC=c89 \
+>> 			OPT='-g -ieee' \
+>> 			prefix=$L \
+>> 			LDFLAGS='-rpath $(prefix)/lib' \
+>> 			LIBS='-L $(prefix)/lib -lreadline -lcurses'
+>>
+>> 	* Solaris does not have long long type with c89, and needs
+>> 	  -D_XOPEN_SOURCE to expose declarations of erf() and erfc().
+>>
+>> 	* Solaris needs -D_XOPEN_SOURCE or -D_POSIX_SOURCE to expose
+>> 	  declaration of fileno().
+>>
+>> 	* Solaris needs
+>> 		LDFLAGS='-R$(prefix)/lib'
+>> 	  or
+>> 		make CC=CC LDFLAGS='-R$(prefix)/lib' OPT='-g -D_XOPEN_SOURCE'
+>> 	  or
+>> 		make CC='g++ -ansi ' LDFLAGS='-Wl,-rpath $(prefix)/lib' \
+>> 			OPT='-g -D_XOPEN_SOURCE'
+>>
+>> 	* GNU/Linux needs with gcc
+>> 		LDFLAGS='-Wl,-rpath $(prefix)/lib'
+>>
+>> 	* GNU/Linux needs with pgcc (notice: no embedded space)
+>> 		LDFLAGS=-R$(prefix)/lib
+>>
+>> 	* GNU/Linux on Alpha needs -D_POSIX_SOURCE to expose fileno()
+>> 	  declaration, but that then conceals erf() and erfc(),
+>> 	  sigh...  Solution: use -D_XOPEN_SOURCE instead :^)!
+>> 	  Also, need -mieee to handle full IEEE 754 arithmetic.
+>>
+>> 	* GNU/Linux on SPARC needs
+>> 		make LDFLAGS='-Wl,-rpath $(prefix)/lib' \
+>> 			OPT=-g \
+>> 			CC='g++ -ansi -D_XOPEN_SOURCE'
+>> ...
+
+DONE: Mon Dec 10 21:04:56 2001
+
+See remarks in item (4) above.
+------------------------------------------------------------------------
+>> ...
+>> (11) Add an abort() function, which prints a message and does a
+>>      longjmp(), just like execerror().  That way, user-defined functions
+>>      can behave just like internal ones when given bad arguments.
+>> ...
+
+DONE: Mon Dec  3 11:04:40 2001
+------------------------------------------------------------------------
+Mon Dec  3 11:05:04 2001
+(12) Add a traceback() function to allow tracing the function call
+     stack from abort(), and any other user function needed.  It
+     should take a numeric argument that limits the number of messages
+     printed, probably with 0 meaning infinity.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec  3 12:48:00 2001
+>> (13) Add who() function (like Matlab) to list the names of
+>>      all named constants, variables, and functions, or specific ones:
+>> 	who() -> list everything
+>> 	who(PI) -> list PI only
+>> 	who(PI,E,CATALAN) -> list those three named constants
+>> ...
+
+DONE: Fri Dec  7 19:23:28 2001 [but only single argument form: who(prefix)]
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec  3 14:11:34 2001
+>> (14) Add remaining IEEE 754 and Standard C functions and constants:
+>>      nextafter(), maxfinite(), mininfinite(), smallest_normal(),
+>>      smallest_subnormal(), unordered(a,b), ...
+>>
+>> [Sun in "man 3 ieeesun" has these
+>>
+>>      #include <sunmath.h>
+>>
+>>      enum fp_class_type fp_class(double x);
+>>
+>>      int isinf(double x);
+>>
+>>      int isnormal(double x);
+>>
+>>      int issubnormal(double x);
+>>
+>>      int iszero(double x);
+>>
+>>      int signbit(double x);
+>>
+>>      void nonstandard_arithmetic(void);
+>>
+>>      void standard_arithmetic(void);
+>>
+>>      void ieee_retrospective(FILE *f);
+>> ...
+>>
+>>      Please    see    copysign(3M),     ilogb(3M),     isnan(3M),
+>>      nextafter(3M), remainder(3M), and scalbn(3M), for a descrip-
+>>      tion  of  a  few  more  commonly  used  (and   standardized)
+>>      ANSI/IEEE Std 754-1985 related functions.
+>> ...
+>>           isinf(x)       returns 1 if x is oo
+>>           isnormal(x)    returns 1 if x is normal
+>>           issubnormal(x) returns 1 if x is subnormal
+>>           iszero(x)      returns 1 if x is zero
+>>
+>>      copysign - return magnitude of first argument  and  sign  of
+>>      second argument
+>>
+>>      double copysign(double x, double y);
+>>
+>>
+>>      double nextafter(double x, double y);
+>>
+>> DESCRIPTION
+>>      The nextafter() function  computes  the  next  representable
+>>      double-precision  floating-point  value  following  x in the
+>>      direction of y. Thus, if  y  is  less  than  x,  nextafter()
+>>      returns the largest representable floating-point number less
+>>      than x.
+>> RETURN VALUES
+>>      The nextafter()  function  returns  the  next  representable
+>>      double-precision  floating-point  value  following  x in the
+>>      direction of y.
+>>
+>>      If x or y is NaN, then nextafter() returns NaN.
+>>
+>>      If x is finite and the correct function  value  would  over-
+>>      flow,  nextafter()  returns +HUGE_VAL (according to the sign
+>>      of x) and sets errno to ERANGE.
+>>
+>>      double remainder(double x, double y);
+>>
+>> DESCRIPTION
+>>      The  remainder()  function  returns   the   floating   point
+>>      remainder  r = x - ny when y is non-zero. The value n is the
+>>      integral value nearest the exact value x/y. When |n - x/y| =
+>>      1/2, the value n is chosen to be even.
+>>
+>>      The behavior of remainder() is independent of  the  rounding
+>>      mode.
+>>
+>> RETURN VALUES
+>>      The  remainder()  function  returns   the   floating   point
+>>      remainder r = x - ny when y is non-zero.
+>>
+>>      When y is 0, remainder() returns  NaN.  and  sets  errno  to
+>>      EDOM.
+>>
+>>      If the value of x is +Inf, remainder() returns NaN and  sets
+>>      errno to EDOM.
+>>
+>>
+>> DESCRIPTION
+>>      The copysign() function returns a value with  the  magnitude
+>>      of x and the sign of y. It produces a NaN with the sign of y
+>>      if x is a NaN.
+>>
+>>
+>>      int ilogb(double x);
+>>
+>> DESCRIPTION
+>>      The ilogb() function returns the exponent part of x.
+>>       Formally, the return value is the integral part of  logr|x|
+>>      as  a  signed integral value, for non-zero finite x, where r
+>>      is the radix of the machine's floating point arithmetic.
+>>
+>> RETURN VALUES
+>>      Upon successful completion,  ilogb()  returns  the  exponent
+>>      part of x.
+>>
+>>      If x is 0, ilogb() returns -INT_MAX.
+>>
+>>      If x is NaN or +Inf, ilogb() returns INT_MAX.
+>>
+>> NAME
+>>      scalbn - load exponent of a radix-independent floating-point
+>>      number
+>>
+>>      double scalbn(double x, int n);
+>>
+>> DESCRIPTION
+>>      The scalbn() function computes x * r**n ,  where  r  is  the
+>>      radix of the machine's floating point arithmetic.
+>>
+>> RETURN VALUES
+>>      Upon successful completion, the scalbn() function returns  x
+>>      * r**n.
+>>
+>>      If  the  correct  value  would  overflow,  scalbn()  returns
+>>      +HUGE_VAL (according to the sign of x).
+>>
+>>      The scalbn() function returns x when x is +Inf.
+>> ...
+
+DONE: Sat Dec  8 07:02:33 2001
+
+I examined the contents of the C math library all major UNIX
+platforms, collected a list of the union of all functions, and from
+that list, prepared this interface list of 27 new functions for hoc:
+
+	Acosh(double)			Log1p(double)
+	Asinh(double)			Log2(double)
+	Atanh(double)			Nearest(double,double)
+	Cbrt(double)			Nextafter(double,double)
+	Copysign(double,double)		Remainder(double,double)
+	Expm1(double)			Rint(double)
+	Fmod(double,double)		Rsqrt(double)
+	Hypot(double,double)		Scalb(double,double)
+	Ilogb(double)			Significand(double)
+	J0(double)			Trunc(double)
+	J1(double)			Y0(double)
+	Jn(double,double)		Y1(double)
+	Ldexp(double,double)		Yn(double,double)
+	Lgamma(double)
+
+Each library function is accessed through an internal function, since
+that opens the way to simple profiling support, and localization to
+exactly one point of reference for each library function.
+
+configure.in has been extended to check for these, and math.c will use
+the native version when available, and otherwise, will provide a
+simple private implementation, or will call execerror() if that seems
+too difficult for now.
+
+hoc.hlp has been extended to document each of the new functions.
+
+The Bessel functions in the C library are misnamed: they are called
+j0(x), j1(x), jn(n,x), y0(x), y1(x), yn(n,x).  Mathematically, those
+refer to spherical Bessel functions, but the C library versions are
+really the ordinary Bessel functions J0(x), J1(x), Jn(n,x), Y0(X),
+Y1(x), Yn(n,x).  hoc therefore uses the correct uppercase names.
+------------------------------------------------------------------------
+>> ...
+>> Wed Dec  5 10:04:44 2001
+>> (15) Find out whether we can use bison and byacc as well as yacc.
+>> ...
+
+DONE: Thu Dec  6 19:30:25 2001
+
+Both of these work just fine:
+
+	make YACC='byacc' or
+	make YACC='bison -y'
+
+configure.in has been extended to check for these alternatives to yacc.
+------------------------------------------------------------------------
+>> ...
+>> Thu Dec  6 19:35:35 2001
+>> (16) Enhance hoc language to allow string constants, with automatic
+>>      coercion to numbers when needed (a la awk), and vice versa.
+>>      This should permit string concatenation a la C89 as well:
+>> 	"hello, " "world" -> "hello, world"
+>> ...
+>> ...
+>> PARTLY DONE: Sun Dec  9 11:32:39 2001
+>> 	The grammar now supports concatenation of adjacent string
+>> 	expressions.  To be added is a rule for number with string,
+>> 	and string with number.
+>> ...
+
+DONE: Tue Dec 11 08:25:21 2001
+
+The hoc grammar has now been updated to handle those remaining
+concatenation cases.
+
+------------------------------------------------------------------------
+>> ...
+>> Thu Dec  6 19:37:52 2001
+>> (17) Implement __LINE__, __FILE__, __DATE__, and __TIME__
+>>      constants/variables a la c89.
+>> ...
+
+DONE: Fri Dec  7 19:21:38 2001
+
+I also added these soon-to-be-GNU-standard variables, introduced with
+autoconf-2.5x:
+
+	__PACKAGE_BUGREPORT__
+	__PACKAGE_DATE__
+	__PACKAGE_NAME__
+	__PACKAGE_STRING__
+	__PACKAGE_VERSION__
+------------------------------------------------------------------------
+>> ...
+>> Fri Dec  7 19:23:01 2001
+>> (18) The __FILE__ option is shown by the who() function twice.  This
+>>      means that it is being installed, instead of looked up.  Perhaps
+>>      we should keep a history: __FILE__[1], __FILE__[2]__, ....
+>> ...
+
+DONE: Sat Dec  8 18:41:28 2001
+
+hoc.y now creates an array-like __FILE__[*] variable, and reuses any
+existing __FILE__ symbol, so only one instance of __FILE__ exists.
+
+The who() command now produces output like this:
+
+	hoc> who()
+	Symbols:
+		Numeric named constants:
+	...
+		String named constants:
+			__DATE__               = "Dec  8 2001"
+			__FILE__               = "/dev/stdin"
+			__FILE__[1]            = "/usr/local/share/lib/hoc/hoc-7.0.0.beta/hoc.rc"
+			__FILE__[2]            = "/usr/local/share/lib/hoc/hoc-7.0.0.beta/hoc.hlp"
+			__FILE__[3]            = "/dev/stdin"
+			__PACKAGE_BUGREPORT__  = "Nelson H. F. Beebe <beebe@@math.utah.edu>"
+			__PACKAGE_DATE__       = "08-Dec-2001"
+			__PACKAGE_NAME__       = "hoc"
+			__PACKAGE_STRING__     = "hoc 7.0.0.beta"
+			__PACKAGE_VERSION__    = "7.0.0.beta"
+			__TIME__               = "18:36:33"
+	...
+------------------------------------------------------------------------
+>> ...
+>> Fri Dec  7 19:29:37 2001
+>> (19) Add support for all Standard C escape sequences in strings, plus
+>>      \E = \033
+>> ...
+
+DONE: Sat Dec  8 18:44:27 2001
+
+	The escape sequences recognized in function backslash() in hoc.y
+	now include: \a \b \f \n \r \t \v \ooo \xhhhhh... and a new one,
+	\E (== \033) for convenience in creating terminal escape
+	sequences, such as in the __PROMPT__ variable.
+------------------------------------------------------------------------
+>> ...
+>> Fri Dec  7 19:30:06 2001
+>> (20) Document new __xx__ variables in hoc.hlp.
+>> ...
+
+DONE: Sat Dec  8 10:52:00 2001
+
+	The who() command now reports these varaibles, and each has a
+	help_xxx() procedure.
+
+		__IEEE_754__           = 1
+		__LINE__               = 14
+		__VERBOSE__            = 1
+		...
+		__DATE__               = "Dec  8 2001"
+		__FILE__               = "/dev/stdin"
+		__FILE__[1]            = "/usr/local/share/lib/hoc/hoc-7.0.0.beta/hoc.rc"
+		__FILE__[2]            = "/usr/local/share/lib/hoc/hoc-7.0.0.beta/hoc.hlp"
+		__FILE__[3]            = "/dev/stdin"
+		__PACKAGE_BUGREPORT__  = "Nelson H. F. Beebe <beebe@@math.utah.edu>"
+		__PACKAGE_DATE__       = "08-Dec-2001"
+		__PACKAGE_NAME__       = "hoc"
+		__PACKAGE_STRING__     = "hoc 7.0.0.beta"
+		__PACKAGE_VERSION__    = "7.0.0.beta"
+		__TIME__               = "18:36:33"
+		...
+		__PROMPT__             = "hoc> "
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 07:02:06 2001
+>> (21) Add at least a simple test suite for all of the new library
+>>      functions: things like the Bessel functions should have
+>>      high-precision test values (about 40D) from Maple.  The others
+>>      could make correctness tests, reporting failures, and counting
+>>      successes, so that on completion, the user sees a brief report
+>>      like this:
+>>
+>> 	FAILED test 3: ....
+>> 	FAILED test 7: ....
+>> 	PASSED: 23 of 25 tests
+>>
+>>      There should be one test file for each library function, since
+>>      that cleanly separates the testing, and makes it easy to rerun
+>>      any particular test, which is very helpful while that test is
+>>      being modified and extended.
+>> ...
+
+PARTLY DONE: Mon Dec 10 21:06:26 2001
+	The test/Makefile now contains all of the original validation
+	tests (target check-a), plus new integrity tests for (mostly
+	numerical) functions (target check-b), and for command-line
+	options (target check-c).
+
+	More tests need to be added to the CHECK-B list, but the basic
+	strategy developed works very well, the test code is very
+	clean, and the reporting is uniform for all such tests.  Only
+	in the event of failures is anything more than the test name
+	printed.
+
+	I am holding back on further test file development until some
+	more hoc grammar extensions are completed that will allow
+	string arguments to functions and procedures.  This will
+	simplify the test code even more.
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 08:39:13 2001
+>> (22) Replace all double types by new typedefed type fp_t, to ease
+>>      the addition of support for long double.
+>> ...
+
+DONE: Wed Dec 26 2001
+------------------------------------------------------------------------
+Sat Dec  8 10:56:31 2001
+(23) Add a stats() function to report statistics at any time (program
+     memory (current and maximum), stack space (current and maximum),
+     flops, function calls, procedure calls, etc.)
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 10:56:57 2001
+>> (24) Add portable private implementations of functions for random number
+>>      generation, with seed setting, and support for logarithmic and
+>>      uniform distributions.
+>> ...
+
+DONE: Sat Dec  8 18:20:29 2001
+
+	New functions rand(), randl(), and setrand() provide this
+	facility.  For example,
+
+	hoc> PREC = 5
+
+	hoc> for (k = 0; k < 10; ++k ) print rand(0)
+	0.48681 0.34712 0.68861 0.60195 0.46095 0.34502 0.92655 0.38907 0.22042 0.056547
+
+	hoc> for (k = 0; k < 10; ++k ) print randl(ln(20))
+	12.191 1.0161 2.0393 11.678 13.682 9.0825 9.5649 8.4522 7.4251 13.324
+
+	hoc> for (k = 0; k < 10; ++k ) print 10*randl(ln(100/10))
+	57.343 18.952 20.706 12.512 45.862 17.725 19.285 44.28 10.427 82.676
+
+	hoc> PREC = 17
+
+	hoc> for (k = 0; k < 10; ++k ) print setrand(0)
+	100001 474090662 507940970 736413788 263658556 459389419 309697844 576982781 141233864 650776626
+
+	hoc> for (k = 0; k < 10; ++k ) print setrand(0)
+	989764137 911813016 219806422 113590326 890161059 302479335 886755989 82289044 611626078 822606057
+
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 18:46:26 2001
+>> (25) Document the syntax of hoc strings (including escape sequences),
+>>      and hoc string variable and expressions in new help_xxx()
+>>      functions.
+>> ...
+
+DONE: Sun Dec  9 11:29:51 2001
+
+	New functions: help_string(), help_string_expressions(),
+	help_strings()
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 19:02:12 2001
+>> (26) Complete implementation of zero- and two-argument primitive
+>>      functions.  Then maybe can offer arg-less setrand().
+>> ...
+
+DONE: Sun Dec  9 07:37:45 2001
+
+	rand() now takes no arguments.  There are now three function
+	types: BLTIN0, BLTIN1, and BLTIN2 for 0, 1, and 2 arguments.
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 19:04:33 2001
+>> (27) abort(msg) loses the message text:
+>> 	hoc> abort("test")
+>> 	./hoc:  near line 2
+>> ...
+
+DONE: Mon Dec 10 07:14:19 2001
+
+	There was an implementation error in code.c:abort_user().
+	What was on the execution stack was not a string pointer, but
+	a Symbol pointer.  The code now dereferences the latter to
+	find the string.
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 19:05:33 2001
+>> (28) Add cosd(), sind(), tand(), with arguments in degrees.
+>> ...
+
+DONE: Sat Dec  8 19:05:56 2001
+
+	The new code is in hoc.rc for now, with documentation functions
+	in hoc.hlp.
+------------------------------------------------------------------------
+>> ...
+>> Sat Dec  8 19:06:19 2001
+>> (29) Finish development of hoc.el: it should not modify non-empty
+>>      buffers, and it should mark empty ones unmodified after
+>>      inserting the boilerplate comments.
+>> ...
+
+DONE: Sun Dec  9 09:30:42 2001
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 10 06:14:48 2001
+>> (30) Consider the extra post-item space in this output:
+>>
+>> 	hoc> print "abc", 123, "xyz", sqrt(27), "\n\n"
+>> 	abc123_xyz5.196152422706632_
+>> 	## _ marks space
+>>
+>>      The extra space comes from code.c:prexpr(), which prints numeric
+>>      values with a "%.*g " format.
+>>
+>>      In awk, the convention is that a comma in an expression list produces
+>>      an inter-item space.
+>>
+>>      The inconsistency above arises because code.c:prstr() does not also
+>>      print a trailing space, but should.
+>>
+>>      Now that we have string expressions, if we extend the grammar to
+>>      include rules to coerce strings in numeric expressions to numbers
+>>
+>> 	expr : ...
+>> 		| expr + strexpr { ... }
+>> 		| strexpr + expr  { ... }
+>> 		| expr - strexpr { ... }
+>> 		| strexpr - expr  { ... }
+>> 		| expr * strexpr { ... }
+>> 		| strexpr * expr  { ... }
+>> 		| expr / strexpr { ... }
+>> 		| strexpr / expr  { ... }
+>> 		| expr ^ strexpr { ... }
+>> 		| strexpr ^ expr  { ... }
+>>
+>>      and numbers in string expressions to strings:
+>>
+>> 	strexpr : ...
+>> 		| expr strexpr { ... }
+>> 		| strexpr expr { ... }
+>>
+>>      then the print statement can take lists of items separated by space,
+>>      rather than comma, and thus avoid the output of unwanted extra space,
+>>      while retaining the convenience of getting separating space between
+>>      items from comma-separated lists.
+>>
+>>      The problem for implementing this is that the numeric grammar pushes
+>>      Datum values onto the stack, but Datum is just a union of double,
+>>      string pointer, and symbol pointer values, without an accompanying
+>>      flag that records what actually got stored there.
+>>
+>>      The only source file that contains references to Datum values is
+>>      code.c, but there are 60 such references.  Each may have to be changed
+>>      if we expand Datum to include a union and a type field.  It might be
+>>      cleanest to replace inline references to Datum fields by access
+>>      functions, a la C++/Java classes, but this makes code for things like
+>>      "a += b" in addeq() messier, since we would need both get_xxx() and
+>>      set_xxx() access functions.  Otherwise a careful global substitution
+>>      of .var, .str, and .sym with .u.var, .u.str, and .u.sym, with
+>>      associated typechecks, can keep the code simple.
+>>
+>>      Eventually the post-item space from prexpr() and prstr() should be
+>>      replaced by an interitem space from the prlist grammar, to avoid an
+>>      unnecessary trailing space.
+>> ...
+
+DONE: Thu Jul 18 10:37:27 2002
+
+The necessary grammar extensions noted above were completed some time
+ago.  The grammar in hoc.y for print and println has now been modified
+so that I/O list-separating commas generate code for a call to the new
+prsep() function, which outputs a user-definable separator (the
+built-in variable __OFS__) whose default value is a space.  There is
+not longer any separator difference between numbers and strings in
+print and println output, nor is there any trailing space output after
+the last number.  This change required modification of several of the
+test*/*.hoc programs to remove explicit separators; their output
+remains unchanged.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 10 07:12:11 2001
+>> (31) hoc.y:warning() outputs messages in old style form
+>> 		program:message [in file] near line nnn
+>>      Change to GNU- and UNIX-standard
+>> 		file:lineno:message
+>>	which is more familiar to users, and also lets smart editors
+>>	like emacs and extended vi parse the error and jump to the
+>>	location.
+>> ...
+
+DONE: Mon Dec 10 07:13:27 2001
+
+Here is an example:
+	% hoc
+	...
+	hoc> func foo() {
+	hoc> abort("This is foo")
+	hoc> return 0 }
+	hoc> foo()
+	/dev/stdin:5:execution aborted: This is foo
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 10 08:10:54 2001
+>> (32) The handling of PREC is messy: clean it up.
+>> ...
+
+DONE: Mon Dec 10 08:11:11 2001
+
+	New functions default_precision(), get_precision(), and
+	set_precision() hide access to PREC.  symbol.c:dump_syms(),
+	which implements the hoc who() function, now uses these to
+	temporarily reset the precision to report numeric values to
+	the default precision, rather using than the current value of
+	PREC.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 10 09:22:17 2001
+>> (33) On Apple Darwin, "man scalb" reports:
+>>
+>>      double
+>>      scalb(double x, double n);
+>>
+>> but math.h contains
+>>
+>> 	extern __pure double scalb __P((double, int));
+>>
+>> A small test program, chkscalb.c, shows that math.h matches what
+>> the library function arguments really are.
+>>
+>> The man page is in agreement with other vendors, but the library is
+>> not!
+>> ...
+
+DONE: Mon Dec 10 09:35:33 2001
+
+In math.c:Scalb(), we invoke scalb(x,y): this produces a warning on
+Apple Darwin:
+
+	math.c: In function `double Scalb(double, double)':
+	math.c:754: warning: `double' used for argument 2 of `scalb(double, int)'
+
+However, the compiler coerces the second argument result to int, and
+gets the right answer.
+
+Sun Solaris and GNU/Linux scalb() return a NaN when the second
+argument is not an integer value, while Apple Darwin, Compaq/DEC
+OSF/1, FreeBSD, IBM AIX, and SGI IRIX return scalb(x,(int)y).
+
+Therefore, we change Scalb() to invoke scalb(x,(int)y), and document
+in help_scalb() that the second argument is always coerced to an
+integer value.  The IEEE 754 committee needs to clarify what this
+function really does for nonintegral arguments.
+------------------------------------------------------------------------
+Mon Dec 10 11:57:59 2001
+
+>> ...
+>> (34) Correct hypot() to follow W. Kahan's intentions.  Correspondence on
+>> the IEEE 754 Standard committee's mailing list on 10-Dec-2001 contained
+>> this comment:
+>>
+>> >> ...
+>> >> .. [from] the 4.3BSD man page for hypot:
+>> >>
+>> >> NOTES
+>> >>      As might be expected, hypot(v,NaN) and hypot(NaN,v) are  NaN
+>> >>      for all finite v; with "reserved operand" in place of "NaN",
+>> >>      the same is true on a  VAX.   But  programmers  on  machines
+>> >>      other  than a VAX (it has no infinity) might be surprised at
+>> >>      first to discover  that  hypot(+infinity,NaN)  =  +infinity.
+>> >>      This  is intentional; it happens because hypot(infinity,v) =
+>> >>      +infinity  for   all   v,   finite   or   infinite.    Hence
+>> >>      hypot(infinity,v)  is independent of v.  Unlike the reserved
+>> >>      operand on a VAX, the IEEE NaN is designed to disappear when
+>> >>      it   turns   out   to   be   irrelevant,   as   it  does  in
+>> >>      hypot(infinity,NaN).
+>> >> ...
+>> ...
+
+DONE: Mon Dec 10 12:00:53 2001
+
+Tests showed that vendors handle this case inconsistently, so
+math.c:Hypot() has been changed to test for this case before evaluating
+the function, giving the same results across all platforms on which hoc
+runs.  hoc.hlp:help_hypot() has been updated accordingly.
+
+Further correspondence on the committee list produced arguments for
+different choices, so it is possible that hypot() will have to be
+changed again in the future to bring it into agreement with the revised
+IEEE 754 Standard.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 10 21:12:41 2001
+>> (35) Earlier today, the "make check" validation suite uncovered a
+>>      problem on Sun Solaris: the gamma() and lgamma() functions do not
+>>      correctly set the side-effect variable, signgam, when shared
+>>      libraries are used.
+>> ...
+
+DONE: Mon Dec 10 21:14:00 2001
+
+math.c:Gamma() has been modified, with system-independent code, to
+check for signgam == 0, and correct its value.
+------------------------------------------------------------------------
+>> ...
+>> Tue Dec 11 18:05:30 2001
+>> (36) Add a getenv() function to lookup environment variables.
+>> ...
+
+DONE: Sun Dec 16 20:10:07 2001
+
+The strexpr portion of the grammar in hoc.y has been extended to
+handle built-in functions with string arguments, three new functions
+(strbltin0(), strbltin1(), and strbltin2()) have been added to math.c,
+and the strbuiltins_1[] and strbuiltins_2[] tables and corresponding
+initialization loops have been added to init.c.  Here is how two of
+the functions work (with blank lines inserted for readability):
+
+	% hoc
+
+	hoc> getenv("HOME")
+	/u/sy/beebe
+
+	hoc> now()
+	Sun Dec 16 20:13:21 2001
+
+	hoc> tnow = now()
+
+	hoc> println "[", tnow, "]"
+	[Sun Dec 16 20:13:52 2001]
+
+------------------------------------------------------------------------
+>> ...
+>> Tue Dec 11 18:06:01 2001
+>> (37) Add QNaN() and SNaN() functions to return quiet and signaling
+>>      NaNs.
+>> ...
+
+DONE: Sun Dec 16 16:12:36 2001
+
+I did this several days ago. The new functions are in math.c, and are
+used to initialize the hoc QNaN and SNaN named constants.
+------------------------------------------------------------------------
+>> ...
+>> Tue Dec 11 18:06:43 2001
+>> (38) Internationalize all internal strings that can be seen by users.
+>>
+>>      While this could be done with the X/Open message catalog
+>>      facilities (gencat(1), catclose(3C), catgets(3C), catopen(3C),
+>>      gettext(3C), and setlocale(3C)), or the GNU gettext library, a
+>>      cleaner, simpler, and more portable solution is to use the new
+>>      hoc extensible multilingual help system instead.  That is, each
+>>      embedded output string should be produced by a function call,
+>>      where that function is defined in the hoc source code, but is not
+>>      immutable, and thus can be redefined by dynamically-loaded code.
+>> ...
+
+DONE: Wed Dec 26 2001
+
+The new translations.hoc and ./*/translations.hoc files, and the
+msg_name() and msg_translate() functions in symbol.c, provide this
+support.  Complete translations have been written for Danish and
+French as proof-of-concept.
+------------------------------------------------------------------------
+Sun Dec 16 07:19:23 2001
+
+(39) __DATE__ is "Dec 16 2001", while __PACKAGE_DATE__ is
+    "15-Dec-2001".  Perhaps they should be made consistent?
+------------------------------------------------------------------------
+>> ...
+>> Sun Dec 16 16:10:27 2001
+>>
+>> (40) It would be very nice if the readline() library could be given
+>>      a list of words on which it could allow completion.  This would
+>>      ease input of long function names.  It already has a completion
+>>      facility for file names.  Look at the sample program in info
+>>      node A Short Completion Example, in particular, the function
+>>      command_generator().
+>> ...
+
+DONE: Sun Dec 16 19:46:37 2001
+
+The completion support was reasonably easy: it took longer to read the
+documentation than it did to write the code.  There are two new
+functions (first_symbol_name() and next_symbol_name()) of about 15
+lines in symbol.c to traverse the symbol table, and about two new
+functions (irl_word_generator() and irl_completion()) of about 30
+lines in readline.c.  Here is how it works (blank lines added for
+readability):
+
+	% hoc
+
+	hoc> help_<ESC><ESC>
+	Display all 130 possibilities? (y or n)
+	n
+
+	hoc> help_a<ESC><ESC>
+	help_abs         help_all         help_asinh       help_atanh
+	help_acos        help_arithmetic  help_assignment  help_author
+	help_acosh       help_asin        help_atan
+
+	hoc> help_ac<ESC><ESC>
+
+	hoc> help_acos<ESC><ESC>
+	help_acos   help_acosh
+
+	hoc> help_acosh()
+		acosh(x) returns the inverse hyperbolic cosine of x.
+		x must be outside the interval (-1.0,1.0).
+
+------------------------------------------------------------------------
+>> ...
+>> Sun Dec 16 16:13:29 2001
+>>
+>> (41) Today I added MAXNORMAL, MINNORMAL, and MINSUBNORMAL.  Are
+>>      there other such named constants that should be provided,
+>>      such as these values from float.h?
+>>
+>> 	#define	DBL_MANT_DIG	53
+>> 	#define	DBL_EPSILON	2.2204460492503131E-16
+>> 	#define	DBL_DIG		15
+>> 	#define	DBL_MIN_EXP	(-1021)
+>> 	#define	DBL_MIN		2.2250738585072014E-308
+>> 	#define	DBL_MIN_10_EXP	(-307)
+>> 	#define	DBL_MAX_EXP	(+1024)
+>> 	#define	DBL_MAX		1.7976931348623157E+308
+>> 	#define	DBL_MAX_10_EXP	(+308)
+>> ...
+
+RESOLVED: Wed Jul 31 11:59:16 2002
+
+The changes of 27-Jan-2002 added BASE, CLASS_xxx, EBIAS, EBITS, EMAX,
+EMIN, and P, changes of 11-Dec-2001 added MAXNORMAL, MINNORMAL,
+MAXSUBNORMAL, and MINSUBNORMAL. These provide analogues of
+xxx_MANT_DIG, xxx_MIN_EXP, xxx_MAX_EXP, DBL_MIN, and DBL_MAX.
+
+xxx_DIG can be obtained from int(log10(1/macheps(1))), xxx_EPSILON
+from macheps(1), xxx_MIN_10_EXP from int(log10(MINNORMAL)), and
+xxx_MAX_10_EXP from int(log10(MAXNORMAL)), so I see no reason to add
+further named constants in this subject area.
+
+------------------------------------------------------------------------
+Thu Dec 20 09:52:05 2001
+
+(42) With today's cleanup of string expressions in the grammar in
+     hoc.y, the bothersome reduce/reduce conflicts have been resolved.
+     Now hoc behaves like this:
+
+	hoc> a = "XXX"
+	hoc> a "YYY"
+	XXXYYY
+	hoc> a + "YYYY"
+	/dev/stdin:3:syntax error
+	hoc> a 123
+	XXX123
+	hoc> a - 123
+	XXX-123
+	hoc> a + 123
+	XXX123
+	hoc> a * 123
+	/dev/stdin:7:syntax error
+
+     The cases with plus and minus get interpreted as unary operators
+     in front of a number, reducing to the STRING NUMBER concatenation
+     case.
+
+     However, this blows awk-style coercion of strings to numbers by
+     adding them to zero:
+
+	hoc> a = "123"
+	hoc> a + 0
+	1230
+
+     Resolve this by further fixes to the grammar.
+
+     Here is another problem:
+
+	hoc> {x = now(); println x}
+	/dev/stdin:2:attempt to evaluate non-variable x
+
+     The error goes away if x is assigned a string value outside the
+     compound statement.  Debugging shows that x has the correct type
+     STRVAR after the assignment "x = now()", but eval() gets called
+     instead of streval() when println is evaluated.  However, when x
+     is assigned a string value before the compound statement, then
+     println's evaluation correctly calls streval().
+
+     This experience seems to suggest that we may have to go to a more
+     involved Datum that carries a type flag, and everywhere do
+     dynamic conversions.  awk seems to do this:
+
+	% awk 'BEGIN{print "ABC"^3}'
+	0
+	% awk 'BEGIN{print "10ABC"^3}'
+	1000
+------------------------------------------------------------------------
+
+>> ...
+>> Thu Dec 20 15:59:24 2001
+>>
+>> (43) The new strftime() function does not show up in the who() display
+>>      because it is not a member of the built-in function tables: its
+>>      argument list signature doesn't match any of them, so it is
+>>      handled specially.  A similar problem applies to the new
+>>      index(s,sub), length(s), and substr(s,m,n) functions.  This can
+>>      be solved by special code for the who() command that reports
+>>      miscellaneous functions.
+>> ...
+
+DONE: [date unrecorded]
+
+who("*") now reports something like this:
+
+	Miscellaneous built-in functions:
+		index                  		length
+		strftime               		substr
+
+------------------------------------------------------------------------
+>> ...
+>> Sun Dec 23 08:30:51 2001
+>>
+>> (44) To reduce clutter from the logfile facility, we really need a
+>>      private replacement for printf(), using stdarg.h.  That way,
+>>      all printing can be made to go through a single interface.
+>>
+>>      Unfortunately, general use of <stdarg.h> would require parsing
+>>      the format, and that is a very big job.  Fortunately, most of
+>>      hoc's calls to fprintf() and printf() involve only one or two
+>>      items beyond the format, and the items are always strings or
+>>      doubles, so we could probably make just four interface functions,
+>>
+>> 	hoc_fprintf_ss(fpout,fmt,s,t)
+>> 	hoc_fprintf_sn(fpout,fmt,s,d)
+>> 	hoc_fprintf_ns(fpout,fmt,d,s)
+>> 	hoc_fprintf_nn(fpout,fmt,d,e)
+>>
+>>      to handle the four possible variants.  There are about 67 total
+>>      calls to printf() or fprintf(), of which 15 are to fplog, and it
+>>      is only those 30 calls that need substitution.
+>> ...
+
+DONE: Fri Dec 28 17:16:16 2001
+
+A somewhat different solution has been implemented in code.c:
+conversion of all floating-point data to text is now handled by
+fmtnum(), and printing of numbers and text to stdout, and optionally,
+to fplog, is handled by prnum(), prtext(), and prtext2().  There are
+now only 5 calls to fprintf(fplog,...) in the entire source code.
+
+fmtnum() handles Inf and NaN specially, so as to get consistent output
+across all platforms, and avoid nonsense like HP-UX 10.01 producing
+"++" for Infinity, and "?"  for NaN.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 24 09:23:03 2001
+>>
+>> (45) It might be helpful to have pwd, cd, and ls commands in hoc; some
+>>      other interactive programs (e.g., matlab) do.  Alternatively, or
+>>      additionally, !command could escape to subshell and execute that
+>>      command.   This would need a -no-shell command-line option for
+>>      security.
+>> ...
+
+PARTLY DONE: Sun Jan 6 xx:xx:xx 2002
+Added cd("dir") and pwd() kernel functions, and create pushd.hoc
+library to supply pushd("dir"), popd(), xd(), and dirs() functions.
+
+Subshell access is on hold until the string type is fully integrated
+into the hoc language.
+
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 24 12:24:30 2001
+>>
+>> (46) The new __MAX_xxx___ options make the compile-time dimension
+>>      choices visible to the user, and the help_limits() function
+>>      is provided to display them.  However, the manual pages in hoc.1
+>>      note a TO-DO item for the future:
+>>
+>> 	A design goal for future versions of hoc is to eliminate these
+>> 	limits entirely, making them subject only to available memory.
+>> ...
+
+DONE: Tue Jan 08 xx:xx:xx 2002
+
+All fixed-size arrays in hoc are now dynamic.  Their current sizes are
+recorded in hoc variables like this:
+
+	hoc> who("__MAX*")
+	Symbols matching "__MAX":
+
+		Numeric named constants:
+			__MAX_FRAME__           = 16
+			__MAX_LINE__            = 0
+			__MAX_NAME__            = 128
+			__MAX_PROG__            = 32767
+			__MAX_PUSHBACK__        = 16
+			__MAX_STACK__           = 16
+			__MAX_STRING__          = 128
+			__MAX_TOKEN__           = 16
+
+There remains one single restriction: prog[__MAX_PROG__] is not yet
+growable, because there are several pointer variables that point into
+it, preventing reallocation after the first allocation (which is
+dynamic).  This can probably be eliminated by finding all of those
+pointers, and replacing them by indexes into prog[].
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 24 15:07:36 2001
+>>
+>> (47) Code about line 290 of string.c contains this comment:
+>>
+>> 		/* TO-DO: What we really need here is a test for
+>> 		   predefined, NOT immutable.  However, the symbol
+>> 		   table does not yet contain that information, so for
+>> 		   now, we just assume immutable means built-in, which
+>> 		   is not true in general. */
+>>
+>>       Fix that blemish.
+>> ...
+
+DONE: Fri Jan 11 11:37:34 2002
+
+The symbol table has been extended with an additional flag, builtin,
+and the code in io.c:save_symbols() omits symbols whose builtin flag
+is set.  The code in init.c has been extended to set that flag.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 24 15:09:35 2001
+>> (48) Code about line 25 of ieee754.c contains this comment:
+>>
+>> 	/* TO DO: Should Ceil(-Infinity) return a finite number or
+>> 	not? Sun's returns ceil(Infinity) as 2^63, and ceil(-Infinity)
+>> 	as -2^63, which both seem inconsistent. */
+>>
+>>      Resolve this.  [See also item (59) below.]
+>> ...
+
+RESOLVED: Wed Jul 31 12:08:23 2002
+
+In hoc, we consistently produce these results:
+
+hoc> ceil(Infinity)
+	+Inf
+hoc> floor(Infinity)
+	+Inf
+hoc> ceil(-Infinity)
+	-Inf
+hoc> floor(-Infinity)
+	-Inf
+
+------------------------------------------------------------------------
+Mon Dec 24 17:20:40 2001
+
+>> ...
+>> (49) C99 defines a hexadecimal floating-point constant in section
+>>      6.4.4.2 (pp. 57--f8) like this:
+>>
+>> 	hexadecimal-floating-constant:
+>> 		hexadecimal-prefix hexadecimal-fractional-constant
+>> 			binary-exponent-part floating-suffix_opt
+>>
+>> 		hexadecimal-prefix hexadecimal-digit-sequence
+>> 			binary-exponent-part floating-suffix_opt
+>>
+>> 	hexadecimal-prefix: one of
+>> 		0x 0X
+>>
+>> 	fractional-constant:
+>> 		digit-sequenceopt . digit-sequence
+>> 		digit-sequence .
+>>
+>> 	digit-sequence:
+>> 		digit
+>> 		digit-sequence digit
+>>
+>> 	binary-exponent-part:
+>> 		p signopt digit-sequence
+>> 		P signopt digit-sequence
+>>
+>> 	hexadecimal-digit-sequence:
+>> 		hexadecimal-digit
+>> 		hexadecimal-digit-sequence hexadecimal-digit
+>>
+>> 	floating-suffix: one of
+>> 		f l F L
+>>
+>>      Thus, 0x1.3p27 represents (1 + 3/16) * 2^27.
+>>
+>>      hoc should recognize these, and use them in the save() command,
+>>      e.g., outputting
+>>
+>> 	y = 0x1.3p27		# 159383552
+>>
+>>      to ensure identical bit patterns on later input, isolating the
+>>      user from variations in the accuracy of decimal<->binary
+>>      conversions.
+>> ...
+
+DONE: Thu Dec 27 17:39:08 2001
+
+This feature was implemented earlier today, with new functions
+string.c:xstrtod() and string.cxdbltos(), and extensions in
+readline.c:irl_fscanf() to handle the collection of both decimal and
+hexadecimal floating-point constants.
+------------------------------------------------------------------------
+>> ...
+>> Wed Dec 26 11:30:43 2001
+>> (50) The command line arguments are parsed before input files
+>>      are read.  This means that even though translations of the output
+>>      of --author, --help, --version, etc. may be available, they will
+>>      not have been read yet, so the output will be in English.
+>>
+>>      Figure out a clean way to solve this.
+>> ...
+
+DONE: Thu Dec 27 17:41:40 2001
+
+This problem was solved this morning by a rewrite of the file-handling
+and option-parsing code in hoc.y.  There are now two passes over the
+argument list, in do_pre_args() and do_post_args().  The first looks
+only for options that inhibit loading of initialization files.  The
+new functions do_init_files() and do_one_init_file() handle that
+loading.  Calls to additional init_xxx() functions clean up the code
+in main().  I also moved the call to init_lineno() into
+set_filename(), since the latter is now called for the string.c:Load()
+command.
+------------------------------------------------------------------------
+
+>> ...
+>> Sat Dec 29 14:49:51 2001
+>> (51) Sun's math library has these extra functions:
+>>
+>> 	annuity(r,n)		annuity(r,n) computes (1 -
+>> 				(1+r)**-n)/r, the present value of
+>> 				annuity factor.
+>> 	compound(r,n)		computes  (1+r)**n the  compound interest factor.
+>> 	cosp(x)			???
+>> 	cospi(x)		???
+>> 	exp10(x)		10**x
+>> 	exp2(x)			2**x
+>> 	irint() 		double-to-int using current rounding direction
+>> 	iszero()		returns 1 if x is zero
+>> 	max_normal()            IEEE largest positive normalized number
+>> 	max_subnormal()         IEEE largest positive subnormal number
+>> 	min_normal()            IEEE smallest positive normalized number
+>> 	min_subnormal()         IEEE smallest positive subnormal number
+>> 	quiet_nan()             IEEE quiet NaN
+>> 	signaling_nan()         IEEE signaling NaN
+>> 	signbit()               IEEE sign bit test
+>> 	sinp()                  ???
+>> 	sinpi()                 ???
+>> 	tanp()                  ???
+>> 	tanpi()			???
+>>
+>> Consider them for inclusion in hoc.  The max_*() and min_(*) and
+>> *_nan() functions already exist in hoc under other names.
+>> ...
+
+DONE: Thu Jan 17 11:33:42 2002
+
+Created two loadable libraries: sunmath.hoc and annuity.hoc
+(annuity(), compound(), and mortgage()).  These are installed in the
+hoc system directory, and all code works on all platforms, because no
+new primitives were needed to implement them accurately.  Neither is
+currently loaded by default at startup, but I may change that decision
+later.
+
+I also added a new builtin constant: MAXSUBNORMAL.  The sunmath.hoc
+library will define this correctly if it is used with hoc test
+releases prior to 7.0.2.beta.
+
+The only functions from the above list that are excluded are the
+trigonometric functions with the p and pi suffixes, whose arguments
+are multiples of PI or 1/PI; their accurate implementation is
+nontrivial, since it essentially requires the complete internals of
+the standard trigonometric functions, with the argument reduction step
+stripped out.
+------------------------------------------------------------------------
+
+>> ...
+>> Sun Dec 30 08:35:45 2001
+>> (52) Subnormals are output incorrectly by xdbltos():
+>>
+>> 4.9406564584124654e-324  0x00000000_00000001 == +0x0.0p-1074
+>> 1.2648080533535912e-321  0x00000000_00000100 == +0x0.0p-1066
+>> 3.2379086165851934e-319  0x00000000_00010000 == +0x0.0p-1058
+>> 8.289046058458095e-317  0x00000000_01000000 == +0x0.0p-1050
+>> 2.1219957909652723e-314  0x00000001_00000000 == +0x0.0p-1042
+>> 5.4323092248710971e-312  0x00000100_00000000 == +0x0.0p-1034
+>> 1.3906711615670009e-309  0x00010000_00000000 == +0x0.0p-1026
+>>
+>> They should be 0x1.... instead of 0x0....
+>>
+>> This was then fixed by changing IsNormal(x) to 1 at string.c:625.
+>> However, there are still differences on Intel x86 and Alpha
+>> architectures.  On the latter, the powers of 2 are coming out zero for
+>> subnormals:
+>>
+>> < 4.9406564584124654e-324  0x00000000_00000001 == +0x1.0p+0
+>> < 1.2648080533535912e-321  0x00000000_00000100 == +0x1.0p+0
+>> < 3.2379086165851934e-319  0x00000000_00010000 == +0x1.0p+0
+>> < 8.289046058458095e-317  0x00000000_01000000 == +0x1.0p+0
+>> < 2.1219957909652723e-314  0x00000001_00000000 == +0x1.0p+0
+>> < 5.4323092248710971e-312  0x00000100_00000000 == +0x1.0p+0
+>> < 1.3906711615670009e-309  0x00010000_00000000 == +0x1.0p+0
+>>
+>> SGI output has off-by-one exponents:
+>>
+>> 26c32
+>> < 1.396701497859909e-250  0x0c100000_00000000 == +0x1.0p-829
+>> ---
+>> > 1.396701497859909e-250  0x0c100000_00000000 == +0x1.0p-830
+>> 34c40
+>> < 2.576459507838853e-231  0x10100000_00000000 == +0x1.0p-765
+>> ---
+>> > 2.576459507838853e-231  0x10100000_00000000 == +0x1.0p-766
+>>
+>> and some that are off by 2:
+>>
+>> < 4.7527289157379e-212  0x14100000_00000000 == +0x1.0p-700
+>> < 1.216698602428902e-209  0x14900000_00000000 == +0x1.0p-692
+>> ---
+>> > 4.7527289157379e-212  0x14100000_00000000 == +0x1.0p-702
+>> > 1.216698602428902e-209  0x14900000_00000000 == +0x1.0p-694
+>> ...
+
+DONE: Wed Jan  2 12:14:11 2002
+
+xdbltos() was fixed on Monday, and output of subnormals on all
+systems is now correct.
+------------------------------------------------------------------------
+
+>> ...
+>> Sun Dec 30 11:38:34 2001
+>> (53) The function Macheps(x) in ieee754.c had code like this:
+>>
+>>
+>> 	while (store(x + epsilon/2.0) != x)
+>> 		epsilon /= 2.0;
+>>
+>>      The hexfp test revealed a discrepancy between Intel x86
+>>      architectures and others, as shown in this debug output:
+>>
+>>      Sun:
+>> 	hoc> macheps(MINSUBNORMAL)
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	macheps(): 1: x = : 4.94066e-324        0x00000000_00000001
+>> 	macheps(): 1: epsilon = : 4.94066e-324  0x00000000_00000001
+>> 	macheps(): 1: epsilon/2.0 = : 0 0x00000000_00000000
+>> 	store(): x = : 0        0x00000000_00000000
+>> 	macheps(): 1: temp = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 9.88131e-324     0x00000000_00000002
+>> 	store(): x = : 9.88131e-324     0x00000000_00000002
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	4.9406564584124654e-324
+>>
+>>      Intel:
+>> 	hoc> macheps(MINSUBNORMAL)
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	macheps(): 1: x = : 4.94066e-324        0x00000000_00000001
+>> 	macheps(): 1: epsilon = : 4.94066e-324  0x00000000_00000001
+>> 	macheps(): 1: epsilon/2.0 = : 0 0x00000000_00000000
+>> 	store(): x = : 9.88131e-324     0x00000000_00000002
+>> 	macheps(): 1: temp = : 9.88131e-324     0x00000000_00000002
+>> 	store(): x = : 9.88131e-324     0x00000000_00000002
+>> 	macheps(): 2: epsilon = : 0     0x00000000_00000000
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	macheps(): 2: temp = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 4.94066e-324     0x00000000_00000001
+>> 	store(): x = : 0        0x00000000_00000000
+>> 	store(): x = : 0        0x00000000_00000000
+>> 	0
+>>
+
+DONE: Sun Dec 30 11:38:34 2001
+
+The fix is to rewrite the code in ieee754.c:macheps() like this:
+
+	while (store(x + store(epsilon/2.0)) != x)
+		epsilon /= 2.0;
+------------------------------------------------------------------------
+Mon Dec 31 17:13:13 2001
+(54) Consider adding keywords eprint, eprintf, eprintln for output to
+     stderr.  I'm not inclined to do this, because hoc is intentionally
+     simple, and multiple output streams are a significant complexity
+     for novices.
+------------------------------------------------------------------------
+>> ...
+>> Mon Dec 31 19:16:11 2001
+>> (55) Since we generate unique signaling NaNs via SNaN() in ieee754.c,
+>>      perhaps we should make them available to user code via a new
+>>      function snan().  At present, except for the undocumented __hex()
+>>      function, there is no way for hoc code to examine the bits of
+>>      a NaN to be able to distinguish between different signaling NaNs.
+>>      Do we need some other primitive to fetch the raw bits, like
+>>      significand(), but without any special handling of NaN and Inf?
+>> ...
+
+DONE: Thu Aug  1 15:29:45 2002
+     The new ftoh() function (added 28-Jul-2002) provides access to
+     the raw native bits, and the new snan() function returns unique
+     SNaNs.
+------------------------------------------------------------------------
+Wed Jan  2 07:58:10 2002
+(56) read(x) (code.c:varread()) accepts as a value a number, a quoted
+     string, or the name of an existing variable or named constant,
+     and readline.c:irl_fscanf() has been extended to recognize
+     optionally-signed Inf, Infinity, NaN, QNaN, and SNaN, ignoring
+     lettercase.
+
+     This leads to the following inconsistency:
+
+	hoc> read(x)
+	hoc> +infinity
+	1
+	hoc> x
+	+Inf
+
+	hoc> read(x)
+	hoc> infinity
+	/dev/stdin:35:assignment from non-variable infinity
+
+     Should we do anything about this?
+------------------------------------------------------------------------
+>> ...
+>> Wed Jan  2 08:10:25 2002
+>> (57) Should the load() function search for its file on a search path
+>>      defined by an environment variable, say HOCINPUT or HOCPATH?
+>>      This is the only place where that might be useful: all other
+>>      files that are opened have known paths.
+>> ...
+
+DONE: Mon Jan 7 xx:xx:xx 2002
+
+There is now a HOCPATH environment variable whose default value is
+.:SYSHOCDIR, where SYSHOCDIR is the hoc system installation directory.
+As with recent TeX releases, the convention is that an empty element
+in the path stands for the hoc system path (in this case, just a
+single directory, SYSHOCDIR), so that a user can do
+
+	setenv HOCPATH .:$HOME/hoc:
+
+without having to embed knowledge of a specific system directory in
+a custom path.
+
+When a file is to be opened for input, whether from the command line,
+or the load("file") command, HOCPATH is traversed, and in each
+directory, an attempt is made to open the named file.  If that fails,
+and the file does not end with ".hoc", then ".hoc" is appended and a
+second open is attempted.  The first successful open terminates the
+search, as does end of HOCPATH.
+
+Thus, a user can do
+
+	hoc foo -
+
+or
+
+	hoc
+	hoc> load("foo")
+
+and get foo or foo.hoc loaded from HOCPATH.
+
+DONE: Thu Jan 10 11:43:25 2002
+
+Changed the default HOCPATH value from .:SYSHOCDIR to
+.:SYSHOCDIR/site:SYSHOCDIR/../site:SYSHOCDIR, following the emacs
+practice of allowing files from site-specific directories for the
+particular version of hoc, and any version of hoc, to override the
+standard installation files.
+------------------------------------------------------------------------
+>> ...
+>> Wed Jan  2 08:11:59 2002
+>> (58) Should there be a delete(var) function to delete a variable from
+>>      the symbol table?  awk has one.  And if we add it, should it be
+>>      possible to delete predefined and/or immutable variables?
+>> ...
+
+DONE: Sat Jan  5 07:50:23 2002
+
+The hoc grammar now recognizes delete(symbol), a function that returns
+1 if the symbol was successfully deleted, and 0 if deletion was not
+allowed, or failed.  Here is an example:
+
+	% ./hoc -q
+	hoc> delete(x)
+	0
+	hoc> x = 3
+	hoc> delete(x)
+	1
+	hoc> delete(print)
+	0
+
+At present, only numeric and string variables may be deleted, and then
+only if they are not immutable constants.  I have not decided whether
+user-defined procedures and function should also be deletable.
+------------------------------------------------------------------------
+>> ...
+>> Wed Jan  2 11:47:05 2002
+>> (59) What should int(x), nint(x), ceil(x), and floor(x) return for
+>>      x sufficiently large that an integer value can no longer be
+>>      exactly represented?
+>>
+>>      In hoc, there is only one numeric data type, floating-point:
+>>      thus, all `integer' values are really floating-point values.  The
+>>      code currently takes this approach (assuming IEEE 754
+>>      arithmetic):
+>>
+>> 	int(x) -> Ceil(x) or Floor(x)
+>> 	Ceil(x) -> ceil(x)
+>> 	Floor(x) -> floor(x)
+>> 	Nint(x) -> min(2^53,x + 0.5)	(x >= 0), or
+>> 		   max(-2^53, x - 0.5)	(x < 0)
+>>
+>>      This leaves the values of hoc functions int(), ceil(), and
+>>      floor() implementation dependent, since different vendors may
+>>      choose different behavior of ceil() and floor().  It also makes
+>>      nint() possibly quite different from the other three.  Code in
+>>      two places in string.c REQUIRES this particular behavior of
+>>      Nint().
+>>
+>>      The Java Virtual Machine, and Fortran 77, 90, and 95, all define
+>>      int(x) to be the largest representable integer for sufficiently
+>>      large x.   In the words of Fortran 95, p. 246:
+>>
+>> 	13.14.48 INT (A [, KIND])
+>> 		...
+>> 		Case (ii):	If A is of type real, there are two
+>> 				cases: if |A| < 1, INT (A) has the
+>> 				value 0; if |A| >= 1, INT (A) is the
+>> 				integer whose magnitude is the largest
+>> 				integer that does not exceed the
+>> 				magnitude of A and whose sign is the
+>> 				same as the sign of A.
+>>
+>>      C89, C++98, and C99, on the other hand, define this to be
+>>      undefined: in the words of C99, p. 43:
+>>
+>> 	6.3.1.4 Real floating and integer
+>>
+>> 	When a finite value of real floating type is converted to an
+>> 	integer type other than _Bool, the fractional part is
+>> 	discarded (i.e., the value is truncated toward zero). If the
+>> 	value of the integral part cannot be represented by the
+>> 	integer type, the behavior is undefined.
+>> 				      ^^^^^^^^^
+>> ...
+
+PARTLY RESOLVED: Wed Jul 31 12:11:51 2002
+
+hoc produces
+
+	int(MAXNORMAL) == floor(MAXNORMAL) == ceil(MAXNORMAL) == MAXNORMAL
+	int(-MAXNORMAL) == floor(-MAXNORMAL) == ceil(-MAXNORMAL) == -MAXNORMAL
+
+However, nint(MAXNORMAL) is still system-dependent.
+
+------------------------------------------------------------------------
+>> ...
+>> Thu Jan  3 22:36:01 2002
+>> (60) Add endinput() function to terminate input from current file
+>>      (like TeX's \endinput): this is useful for bailing out early
+>>      in dynamically loaded files, such as protecting from wasted
+>>      reloads.
+>>
+>>      Perhaps add exit() function with alias bye() and quit().
+>> ...
+
+DONE: Thu Jan  3 23:09:59 2002
+
+Added endinput() and exit(reason), and then in the ./hoc.rc and
+./??/hoc.rc files, added aliases in various languages for exit().
+------------------------------------------------------------------------
+>> ...
+>> Thu Jan  3 23:10:54 2002
+>> I think that a defined("name"), or perhaps defined(name), function
+>> could be useful, e.g., for providing defaults like this:
+>>
+>> 	if (!defined(foobar)) foobar = 23
+>> 	if (!defined(site)) site = "My site name"
+>> 	...
+>>
+>> Together with a command-line option to set variables (-Dname=value),
+>> this could easily provide a conditional preprocessing capability.
+>> Coupled with eval(), this could do much of what the C preprocessor
+>> does, but with the cleanness of functions over macros, and the
+>> advantage of numerical and string expressions over constants.
+>> ...
+
+DONE: Fri Jan  4 10:14:06 2002
+
+defined is now a keyword in the grammar (changes in hoc.y and init.c),
+and new command-line options -D... and -U...  (changes in hoc.y,
+hoc.h, and symbol.c) work like they do in most C and C++ compilers.
+Here are examples:
+
+	% hoc -q --help
+	Usage:
+		./hoc   [ --author ] [ --? ] [ --copyright] [ --Dname ]
+			[ --Dname=number ] [ --Dname="string" ]
+			[ --Dname=symbol ] [ --help ] [ --no-banner ]
+			[ --no-help-file ] [ --no-load ] [ --no-logfile ]
+			[ --no-readline ] [ --no-save ] [ --no-site-file ]
+			[ --no-translation-file ] [ --no-user-file ] [ --quick ]
+			[ --silent ] [ --Uname ] [ --version ]
+			input-file(s) [ -- ] more-input-file(s)
+	% hoc -q
+	hoc> defined(x)
+	0
+
+	% hoc -q -Dx=123456789
+	hoc> defined(x)
+	0
+	hoc> x
+	123456789
+
+	% hoc -q -Dx=PI
+	hoc> x
+	3.1415926535897931
+
+	% hoc -q -Dx=PI -Ux
+	hoc> x
+	/dev/stdin:2:undefined variable x
+
+	% hoc -q '-Dx="This is a test"'
+	hoc> x
+	This is a test
+	hoc> who("x")
+	Symbols matching "x":
+
+		String variables:
+			x                       = "This is a test"
+
+	% hoc -q -Dfoo:=1 -Dfoo=37
+	command-line:0:illegal reassignment to immutable named constant foo=37
+
+	% hoc -q -Dfoo:=1 -Ufoo
+	command-line:0:deletion failed for symbol foo
+
+	% hoc -q -Dfoo=1 -Ufoo -Dfoo=3 -
+	hoc> foo
+	3
+------------------------------------------------------------------------
+>> ...
+>> Wed Jan  2 11:47:05 2002
+>> (61) As a possibly useful test of string programming in hoc, implement
+>>      a fortune cookie program.
+>> ...
+
+DONE: Fri Jan  4 xx:xx: xx 2002
+
+The installed library file fortune.hoc now provides pseudo-randomly
+selected fortune cookie quotes via the fortune() function.  The
+findfortune("text") function prints all quotes containing the
+specified text.  The quotes are mostly selected from their relation to
+numerical programming.
+
+Here is an example:
+
+	% hoc fortune -
+	hoc> fortune()
+
+	355/113 -- Not the famous irrational number PI, but an incredible
+	simulation!
+------------------------------------------------------------------------
+Thu Jan 10 11:27:42 2002
+(62) The implementation of load("filename") in io.c:Load() used in
+     version 7.0.0.beta pushes the input state, calls run(), and then
+     pops the input state.  This has two problems:
+
+	     (1) If an error causes execerror() to be called, the
+		 resulting longjmp() will prevent popping the input
+		 state, leaving a corrupted input state.
+
+	     (2) On Compaq/DEC Alpha systems with both OSF/1 and
+		 GNU/Linux, on return from Load(), a segment violation
+		 would sometimes occur (a problem that was first
+		 detected by the "make check" runs).
+
+     Problem (1) can be solved by calling setjmp() in Load() to get a
+     different jump buffer (after saving the previous one), and thus
+     causing execerror() to return to Load(), rather than run().
+
+     After several failed attempts to solve (2), for version
+     7.0.1.beta, I've therefore created a stopgap alternative
+     implementation of Load() that proceeds as follows (from the
+     header comments in io.c:run3()):
+
+		We handle load("filename") by pushing back into the
+		input stream the contents of filename, followed by
+		reassignments to reset the line number and filename to
+		their previous values.
+
+		Unfortunately, it requires making __LINE__ and
+		__FILE__ modifiable by user code, in violation of
+		their documentation.
+
+		This is not entirely satisfactory, since severe errors
+		in the loaded file will not terminate processing of
+		the file when execerror() is called, because it uses
+		fseek() to flush the file, but there will still be
+		data in the pushback buffer.
+
+		It also causes the test/endinput.hoc test to fail:
+		instead of terminating just the current nested load,
+		it terminates the entire current load, sigh...
+
+		However, until I can figure out a way to use run()
+		properly, handling the possibility of long jumps back
+		to main, and reallocation of dynamic arrays, this
+		seems to be the best solution.
+
+		This function also requires two additional
+		assumptions: (1) irl_unget_char() is the proper input
+		pushback function to call, and (2) unlimited pushback
+		is guaranteed.
+
+		We still need to find a simple, clean, safe, and
+		correct implementation of dynamic loading of hoc
+		files!
+
+	The endinput() function, and its associated test, is broken by
+	this change, so for the moment, the test/endinput.out file has
+	been declared `correct', and put into test/save/endinput.out.
+
+	However, at least the load() command now works as expected by
+	users, and the new provide() and require() functions in
+	require.hoc work correctly.  A properly-working load() is
+	essential if hoc.rc is to be split into a series of load()
+	commands for simpler files, which is becoming desirable as it
+	gets more complex.
+------------------------------------------------------------------------
+Wed Jan 30 16:37:00 2002
+(63) The addition to configure.in to handle the readline problem with
+     lcc only works if the configure (-C) cache has been selected.
+     Fix this!
+------------------------------------------------------------------------
+>> ...
+>> Sun Feb 10 09:20:44 2002
+>> (64) I needed a way to sum numbers extracted from FTPD and HTTPD log
+>>      files; the resulting sums can be over 1TB (1.0e12).  I have a
+>>      shell script wrapper that does that using awk, but I wanted to
+>>      try hoc: a simple awk extractor produced a data stream like this:
+>>      "309 +314 +0 +13661 + ... ", an expression longer than 80KB to
+>>      pipe into "hoc -q".  This produced a "program too big" complaint
+>>      from hoc, which in hoc.y says "max_prog = 32767;".
+>> ...
+
+RESOLVED: Sun Feb 10 09:20:44 2002
+
+Eventually, I'll work out the problems with growing the hoc prog
+array, but for now, it seems that a much larger value of max_prog is
+desirable, so I'm temporarily changing it to 8 * 1024 * 1024.
+------------------------------------------------------------------------
+>> ...
+>> Mon Feb 11 05:13:04 2002
+>> (65) Add FURTHER READING section to hoc.1, with references to Markstein,
+>>      Overton, Cody & Waite,
+>>      http://www.cs.berkeley.edu/~wkahan/ieee754status/o754story.html
+>>      for early history of floating-point, and the two K&P books.
+>> ...
+
+DONE: Mon Feb 18 17:26:22 2002
+
+I decided to omit reference to the later K&P book, since it does not
+discuss hoc.
+------------------------------------------------------------------------
+>> ...
+>> Fri Feb 15 06:47:49 2002
+>> (66) rats detected security holes in calls to msg_translate() in hoc.y
+>>      and io.c that contain format strings: they could be set by users
+>>      to cause core dumps.
+>>
+>>      All calls to strcpy(), strncpy(), strcat(), and strncat() should
+>>      be replaced by equivalent calls to strlcpy() and strlcat().
+>>
+>>      All uses of fixed size buffers need to be carefully rechecked.
+>> ...
+
+DONE: Mon Feb 18 15:00:48 2002
+
+The only remaining instances of strcat() and strcpy() are the safe
+references in the concat[2345]() functions in string.c.  I checked all
+of the code points flagged by rats and its4, and all appear to be
+completely safe, with bounds checks on all buffers that are stored
+into.  msg_translate() now calls a new function,
+compare_format_items(), to ensure that format items have not been
+maliciously altered to cause a denial of service.  All accesses to
+environment variables appear to be safe: any that are copied are
+dynamically allocated, and in any event, all current UNIX operating
+systems, and also Microsoft DOS and Windows, limit the size of the
+environment that can be passed to child processes.
+------------------------------------------------------------------------
+>> ...
+>> Wed May  8 15:05:19 2002
+>>
+>> (67) I made hoc flip the sign bit of Intel IA-32 NaNs, but forgot to
+>> do the same in the copysign() primitive: here is a sample of correct
+>> and incorrect output:
+>>
+>> Sun SPARC Solaris:
+>>
+>> 	hoc> NaN
+>> 	+QNaN
+>> 	hoc> -NaN
+>> 	-QNaN
+>> 	hoc> __hex(NaN)
+>> 	0x7fffffff_ffffffff == +QNaN +QNaN
+>> 	hoc> __hex(-NaN)
+>> 	0xffffffff_ffffffff == -QNaN -QNaN
+>> 	hoc> help_copysign()
+>> 		copysign(x,y) returns a value with the magnitude of x, and the
+>> 		sign of y.
+>> 	hoc> copysign(1,NaN)
+>> 	1
+>> 	hoc> copysign(1,-NaN)
+>> 	-1
+>>
+>> Intel Pentium GNU/Linux:
+>>
+>> 	hoc> NaN
+>> 	+NaN
+>> 	hoc> -NaN
+>> 	-NaN
+>> 	hoc> __hex(NaN)
+>> 	0xfff80000_00000000 == +NaN +NaN
+>> 	hoc> __hex(-NaN)
+>> 	0x7ff80000_00000000 == -NaN -NaN
+>> 	hoc> copysign(1,NaN)
+>> 	-1
+>> 	hoc> copysign(1,-NaN)
+>> 	1
+>> ...
+
+DONE: Thu Jul 18 12:14:34 2002
+Added architecture-specific code for Intel IA-32 and HP/Compaq/DEC
+Alpha in Copysign() in ieee754.c.
+------------------------------------------------------------------------
+
+>> ...
+>> Thu May 16 06:11:41 2002
+>>
+>> (68) Although hoc records negative zero internally, it does not
+>> display it correctly on output on FreeBSD, Apple Darwin, SGI IRIX,
+>>
+>> 	hoc> y = -0; __hex(y); y
+>> 	0x80000000_00000000 == 0 0
+>> 	0
+>>
+>> On DEC Alpha, IBM AIX, Intel IA-32, Intel IA-64, PPC GNU/Linux, Sun
+>> SPARC GNU/Linux, Sun Solaris, I get correct output:
+>>
+>> 	hoc> y = -0; __hex(y); y
+>> 	0x80000000_00000000 == 0 -0
+>> 	-0
+>>
+>> This depends on printf(), so we need special code to handle it
+>> correctly.
+>> ...
+
+PARTLY DONE: Wed Jul 31 11:51:00 2002
+
+Added special code in fmtnum() in code.c so that unformatted output of
+negative zero now works properly.  However, output of negative zero
+from printf and sprintf is still erroneous on some systems.
+------------------------------------------------------------------------
+>> ...
+>> Fri May 24 07:17:00 2002
+>>
+>> (69) Revisit the following paper, and see what functions from it are
+>> missing in hoc:
+>>
+>> @@Article{Cody:1993:AFS,
+>>   author =       "W. J. Cody and J. T. Coonen",
+>>   title =        "{Algorithm 722}: Functions to Support the {IEEE}
+>>                  Standard for Binary Floating-Point Arithmetic",
+>>   journal =      j-TOMS,
+>>   volume =       "19",
+>>   number =       "4",
+>>   pages =        "443--451",
+>>   month =        dec,
+>>   year =         "1993",
+>>   CODEN =        "ACMSCU",
+>>   ISSN =         "0098-3500",
+>>   bibdate =      "Fri Sep 16 20:08:53 1994",
+>>   bibsource =    "garbo.uwasa.fi:/pc/doc-soft/fpbiblio.txt",
+>>   URL =          "http://www.acm.org/pubs/citations/journals/toms/1993-19-4/p443-cody/",
+>>   abstract =     "This paper describes C programs for the support
+>>                  functions {\em copysign(x,y), logb(x), scalb(x,n),
+>>                  nextafter(x,y), finite(x),} and {\em isnan(x)}
+>>                  recommended in the Appendix to the {\em IEEE Standard
+>>                  for Binary Floating-Point Arithmetic.} In the case of
+>>                  {\em logb}, the modified definition given in the later
+>>                  {\em IEEE Standard for Radix-Independent Floating-Point
+>>                  Arithmetic} is followed. These programs should run
+>>                  without modification on most systems conforming to the
+>>                  binary standard.",
+>>   acknowledgement = ack-nj,
+>>   keywords =     "algorithms; copysign; finite; isnan; logb;
+>>                  manipulative functions; nextafter; scalb",
+>>   subject =      "G.1.0 [Numerical Analysis]: General -- numerical
+>>                  algorithms; G.4 [Numerical Analysis]: Mathematical
+>>                  Software -- certification and testing",
+>> }
+>> ...
+
+DONE: Fri Aug  2 06:11:55 2002
+
+All of Cody and Coonen's functions have been in hoc 7 for several
+months, although with two name changes: Cody and Coonen have logb()
+and finite(), whereas hoc has log2() and isfinite().  hoc's logb(b,x)
+is log-to-the-base-b of x.
+------------------------------------------------------------------------
+>> ...
+>> Fri May 31 07:17:15 2002
+>> (70) There is a definite problem in hoc128:
+>>
+>> hoc128:
+>> 	hoc> log(10)
+>> 	2.30258509299404568401799145468436418
+>> 	hoc> log(10) - 1/0.434294481903251827651128918916605096e+0
+>> 	-5.82317887818556210332747886526199006e-17
+>>
+>> Maple:
+>> 	Digits := 50;
+>> 	evalf(log(10) - 1/0.434294481903251827651128918916605096e+0);
+>> 						       -34
+>> 				    .726657106178966 10
+>> 	> evalf(log(10));
+>> 		      2.3025850929940456840179914546843642076011014886288
+>> 	> 2.3025850929940456840179914546843642076011014886288 - 2.30258509299404568401799145468436418
+>> 	> ;
+>> 						       -34
+>> 				    .276011014886288 10
+>>
+>> It looks like hoc128 has some remnants of double!
+>> ...
+
+DONE: Sat Jun 15 12:24:49 2002
+
+There were two instances of calls to strtod() (in readline.c and
+string.c) that should have been inside a conditional that calls
+strtold() or strtod(), depending on the precision.  The solution was
+to add a check in configure.in for strtold(), add a declaration of it
+in fp_t.h if it is not available, add a simple implementation of it in
+string.c (calling sscanf() for the real work), and finally, install
+those two conditionals in readline.c and string.c.  [All fscanf()
+calls in hoc 7 have already been remapped to irl_fscanf(), which now
+calls strtold() in a quadruple-precision environment.]
+------------------------------------------------------------------------
+>> ...
+>> Thu Jun 13 06:50:57 2002
+>> (71) Subnormals can be enabled on SGI IRIX by adding a call from
+>> main()
+>>
+>> #if defined(__sgi)
+>>     flush_to_zero(0);
+>> #endif
+>>
+>> to this function (from "man sigfpe"):
+>>
+>> #if defined(__sgi)
+>> #include <sys/fpu.h>
+>>
+>> void
+>> flush_to_zero(int on_off)
+>> {
+>>      union fpc_csr  n;
+>>
+>>      n.fc_word = get_fpc_csr();
+>>      if ( on_off == 0 ) {
+>> 	  n.fc_struct.flush = 0;
+>>      } else {
+>> 	  n.fc_struct.flush = 1;
+>>      }
+>>      set_fpc_csr(n.fc_word);
+>> }
+>> #endif
+>> ...
+
+DONE: Sat Jun 15 12:40:32 2002
+
+The above code was simplified and added to hoc.y, with the call to
+flush_to_zero() in a new private function, init_fp_system(), that may
+be used to implement similar setups for other systems that need it.
+------------------------------------------------------------------------
+>> ...
+>> Sat Jun 15 09:39:37 2002
+>> (72) Look at this (notice the mistaken F on the end of the constant,
+>> which make C7BY16 a string constant)
+>> % hoc
+>> hoc> C7BY16 = 0.4375e+00F
+>> hoc> delete(C7BY16)
+>> 1
+>> hoc> C7BY16 = 0.4375
+>> ^C^Z
+>> ...infinite loop, or if more work had been done in the session, a
+>> segmentation fault!...
+>> ...
+
+DONE: Sat Jun 15 11:36:45 2002
+
+There was a missing assignment to the pointer "last" at the end of the
+symbol table traversal loop in delete_symbol_unchecked() in symbol.c,
+sigh...
+------------------------------------------------------------------------
+>> ...
+>> Sat Jun 15 11:42:16 2002
+>> (73) The previous bug, exposed by the single-precision suffix F on an
+>> input constant copied from a C program, suggests that we really
+>> should accept the F, f, L, and l suffixes of C/C++, and possibly
+>> the D, d, F, and f suffixes of Java, and the E, D, and Q exponent
+>> letters of Fortran.
+>> ...
+
+DONE: Sat Jun 15 13:17:13 2002
+
+Added irl_scan_suffix() function in readline.c to allow a final number
+suffix matching [FfLl].
+
+The Fortran D and Q exponent letters conflict with Java's D,d
+suffixes: y = 2.34d+45 could be interpreted as "2.34e+45" (Fortran) or
+as "(2.34d) + 45" (Java).  The Java D,d suffixes are rare, and not
+defined at all in C/C++, while the Fortran D,d,Q,q exponent letters
+are common.  I therefore modified irl_scan_exponent() in readline.c to
+map the Fortran exponent letters to C/C++ "e".  This makes it much
+more convenient to cut-and-paste into hoc programs numbers that come
+from C, C++, Fortran, and Java source code and their output.
+------------------------------------------------------------------------
+Sat Jun 15 10:25:12 2002
+(74) When I use hexfp(), hexint(), and __hex() for comparative purposes,
+it is confusing to have trailing zeros trimmed.  I think that
+zero-trimming should be suppressed for hex formats, though perhaps a
+companion set of functions could supply the trimming (a global trim
+flag seems a very bad idea!).
+------------------------------------------------------------------------
+>> ...
+>> Sat Jun 15 14:36:10 2002
+>> (75) While using hoc128 today, I wanted to be able to truncate results
+>> to 32-bit and 64-bit precision for comparison with output from
+>> hoc32 and hoc64.    It would be nice to have functions to do this
+>> truncation.
+>> ...
+
+DONE: Sat Jun 15 14:37:50 2002
+
+Add functions double() and single() in hoc, with support functions
+Double() and Single() in math.c, in the built-in function table in
+init.c, and with prototypes in hoc.h.
+------------------------------------------------------------------------
+Sat Jun 15 17:04:20 2002
+
+(76) It might be handy to have functions cdc60(), cdc120(), cray64(),
+cray128(), ibm32(), ibm64(), ibm128(), ieee32(), ieee64(), ieee80(),
+ieee128(), pdp10_36(), pdp10_72(), pdp10_144(), pdp11_32(),
+pdp11_64(), vax_d(), vax_f(), vax_g(), vax_h(), to display hex or
+octal formats of local numbers in encodings for those other systems.
+------------------------------------------------------------------------
+Tue Jun 18 16:03:36 2002
+
+>> ...
+>> (77) There is an error in the C99-style hex floating point output in
+>> hoc128:
+>>
+>> hoc32:	__hex(-0.00033765770795601405270221764884779206)
+>> 	0xb9b107a7 == -0x1.620f4ep-12 -0.000337657722
+>> hoc64:	__hex(-0.00033765770795601405270221764884779206)
+>> 	0xbf3620f4_d01b17b1 == -0x1.620f4d01b17b1p-12 	-0.00033765770795601407
+>> hoc128:	__hex(-0.00033765770795601405270221764884779206)
+>> 	0xbff3620f_4d01b17b_0be64b8b_77599780 == -0x1.620f4d01b17b0be64b8b77 -0.00033765770795601405270221764884779206
+>>								^^^^^^^^^^^^exponent missing!
+>> ...
+
+DONE: Sat Jun 22 16:15:20 2002
+
+Increased size of hexadecimal floating-point buffer in xfptos() in
+string.c; it was too small for the case of quadruple-precision
+numbers, and SNPRINTFn() safely prevented buffer overrun, truncating
+the generated numbers.  I have therefore changed the SNPRINTFn()
+definitions in hoc.h to report a buffer-too-small warning when this
+happens
+------------------------------------------------------------------------
+
+>> ...
+>> Tue Jun 18 16:09:25 2002
+>>
+>> (78) It would be helpful if the prompt used the program name, rather than
+>> just hoc:
+>> 	hoc32>
+>> 	hoc64>
+>> 	hoc80>
+>> 	hoc128>
+>> with
+>> 	hoc>
+>> for the times when the numberless name is invoked.
+>> ...
+
+RESOLVED: Thu Jul 18 11:52:25 2002
+
+Leave the code unchanged, since the user can set the __PROMPT__
+variable in the $HOME/.hocrc if this feature is desired.
+
+------------------------------------------------------------------------
+
+>> ...
+>> Wed Jun 19 21:33:21 2002
+>> (79) Another core dump:
+>>
+>> hoc32
+>> ------------------------------------------------------------------------
+>> Welcome to the extensible high-order calculator, hoc.
+>> This is hoc version 7.0.4.beta [15-Jun-2002].
+>> Type help() for help, news() for news, and author() for author
+>> information.
+>> This system supports IEEE 754 floating-point arithmetic.
+>> ------------------------------------------------------------------------
+>> hoc> func a(){return -expm1(-$2*log1p($1))/$1}
+>> hoc> func b(){return (1 - (1 + $1)^-$2/$1}
+>> /dev/stdin:1:syntax error
+>> hoc> func b(){return (1 - (1 + $1)^-$2)/$)}
+>> /dev/stdin:2:strange $...
+>> hoc> a(0.10,20)
+>> 8.51356411
+>> hoc> b(0.10,20)
+>> Segmentation fault
+>>
+>> [Notice the final $ in b(): should have been $1]
+>> ...
+
+DONE: Thu Jun 20 07:46:40 2002
+
+A bad input program like the example above results in a NULL pointer
+in the bytecode list, but code.c:execute() did not check for that
+possibility.  Now it does:
+
+hoc32> func b(){return (1 - (1 + $1)^-$2)/$)}
+/dev/stdin:0:strange $...
+hoc32> b(0.10,20)
+...no output...
+------------------------------------------------------------------------
+>> ...
+>> Thu Jun 20 05:50:33 2002
+>> (80) It might be useful to have a command-line option -i nnn to request
+>> indenting output lines by nnn spaces; this could be a variable inside
+>> hoc, __INDENT__ = nnn.  That could help to make output more easily
+>> distinguished from input.  More generally, __INDENT__ could be a
+>> string.
+>> ...
+
+RESOLVED: Wed Jul 17 07:53:41 2002
+
+Add support for __INDENT__ variable, but not for a new command-line
+option.
+------------------------------------------------------------------------
+
+>> ...
+>> Thu Jun 20 07:16:21 2002
+>> (81) Perhaps we should make the default prompt reflect the precision.
+>> At present, it is set at hoc.y:1066 from PACKAGE_NAME, which comes from
+>> the Makefile:
+>>
+>> PACKAGE_NAME	= hoc
+>>
+>> It could be changed in Makefile.in like this:
+>>
+>> PACKAGE_NAME	= @@PACKAGE_NAME@@$(HOCSUFFIX)
+>> PROGRAM		= @@PACKAGE_NAME@@
+>>
+>> [the change in PROGRAM is needed to ensure that "make check" works]
+>>
+>> Alternatively, private customization is possible in $HOME/.hocrc:
+>> I now have this:
+>>
+>> if      (P == 24)  __PROMPT__ = "hoc32> " \
+>> else if (P == 53)  __PROMPT__ = "hoc64> " \
+>> else if (P == 64)  __PROMPT__ = "hoc80> " \
+>> else if (P == 113) __PROMPT__ = "hoc128> "
+>> ...
+RESOLVED: Thu Jul 18 11:52:25 2002
+
+Leave the code unchanged, since the user can set the __PROMPT__
+variable in the $HOME/.hocrc if this feature is desired.
+------------------------------------------------------------------------
+>> ...
+>> Sat Jun 22 15:29:14 2002
+>> (82) hoc should record which mathematical functions are native, as
+>> opposed to supplied by hoc, so that if there is any question about
+>> the accuracy or correctness of one of them, we know where to look.
+>> ...
+
+DONE: Sat Jun 22 15:30:21 2002
+
+In init_symbols() in hoc.y, define __NATIVE_xxx__ to 1 if xxx() is a
+native function, and 0 if not (and thus, emulated by hoc).
+------------------------------------------------------------------------
+>> ...
+>> Sun Jun 23 13:01:28 2002
+>> (83) store() is defined with call-by-value instead of
+>> call-by-reference; fix that!
+>> ...
+
+DONE: Tue Jun 25 17:04:40 2002
+
+Mea maxima culpa, sigh....
+------------------------------------------------------------------------
+>> ...
+>> Tue Jul 16 22:14:52 2002
+>> (84) Now that printf is working, need a clean way to ensure that the new
+>> __INDENT__ support works with newlines embedded in printf calls.  It
+>> looks like the call to printf() in code.c:prtext2() needs to be
+>> replaced by call to a lower-level function that handles padding and
+>> adjustment, and gives newlines special processing.
+>> ...
+
+DONE: Thu Aug  1 10:36:35 2002
+
+Rewrote body of prtext2() in code.c, and added new functions prchar(),
+pronechar(), and prtext3().
+------------------------------------------------------------------------
+Tue Jul 16 22:18:59 2002
+(85) The printf with integer format items has implementation-dependent
+behavior for conversions of NaN, Infinity, and large magnitude
+floating-point values to integer values, and for negative values to
+unsigned values.  Should these be made consistent across platforms?
+------------------------------------------------------------------------
+>> ...
+>> Tue Jul 16 22:36:11 2002
+>> (86) Should have sprintf capability, but the problem is that this requires
+>> support for varargs in hoc functions,
+>> 	s = sprintf("fmt", arg1, arg2, ...)
+>> or else an irregular syntax
+>> 	s = sprintf "fmt", arg1, arg2, ...
+>> or ... ??? ...
+>> ...
+
+DONE: Sun Jul 28 12:34:40 2002
+
+Implemented ``sprintf "fmt", arg1, arg2, ...'' to return a string value.
+------------------------------------------------------------------------
+>> ...
+>> Wed Jul 17 07:50:12 2002
+>> (87) Perhaps add clobber (== distclean) target to Makefile.in
+>> ...
+
+DONE: Wed Jul 17 18:43:27 2002
+------------------------------------------------------------------------
+>> ...
+>> Wed Jul 17 07:50:35 2002
+>> (88) The locale/* directories are not being installed...why?  They
+>> used to be.
+>> ...
+
+DONE: Wed Jul 17 18:42:46 2002
+
+A directory component was missing in install-xlt commands in Makefile.in.
+------------------------------------------------------------------------
+>> ...
+>> Wed Jul 17 18:49:55 2002
+>> (89) It would be convenient to generalize the who() command to match
+>> patterns, instead of just prefixes.
+>> ...
+
+DONE: Wed Jul 17 18:50:56 2002
+
+Add new match() function in new file, match.c, and update is_match() in
+symbol.c to call it.  Add match.c to SRCS and PRSRCS in Makefile.in.
+match() supports UNIX shell `glob' pattern matching with * and ?.
+------------------------------------------------------------------------
+>> ...
+>> Mon Jul 22 08:33:51 2002
+>> (90) Look at this:
+>>
+>> hoc128> println 1,2,3
+>> 1 2 3
+>>
+>> hoc128> println 1,sqrt(23)
+>> 1 4.79583152331271954159743806416269428
+>>
+>> hoc128> println 1,__hex(x)
+>> 10x403e0000_00000000_00020000_00000000 == +0x1.0000000000000002p+63  9223372036854775809
+>>  ^---space lost:
+>> The reason is that __hex() is a function with side-effects: for the
+>> example above, it prints "0x403e0000_00000000_00020000_00000000 ==
+>> +0x1.0000000000000002p+63", then returns 9223372036854775809 as a
+>> numeric value which is the printed.  With late-July-2002 improvements
+>> to hoc, this function should be reimplemented to simply return a
+>> string, without printing on its own.
+>> ...
+
+DONE: Wed Jul 31 11:28:08 2002
+
+Simplified hoc grammar by moving all function keywords into built-in
+function tables.  __hex() now behaves like any other string function.
+
+------------------------------------------------------------------------
+>> ...
+>> Tue Jul 23 08:49:23 2002
+>> (91) In hoc.y, check (Inst)$1->u.XXXX calls: it appears that some of
+>> the XXXX values are inconsistent (they all point to a union of
+>> identically sized members, so the mismatch is only cosmetic).
+>> ...
+
+DONE: Wed Jul 31 11:29:41 2002
+
+Simple changes in hoc.y.
+------------------------------------------------------------------------
+>> ...
+>> Wed Jul 24 08:02:41 2002
+>> (92) Implement break and continue statements in loop
+>> ...
+
+DONE: Fri Jul 26 08:33:07 2002
+
+Implementation and testing of these new statements also led to a fix
+for the return-statement bug in item (93) below.
+------------------------------------------------------------------------
+>> ...
+>> Wed Jul 24 08:05:57 2002
+>> (93) In decrypt.hoc, the statement
+>> 	if (__n == 255) return
+>> does not cause return, but
+>> 	if (__n == 255) {return}
+>> does.  What is going on!
+>>
+>> This problem can be produced like this:
+>>
+>> proc f() {if ($1 == 0) {return} ; println "ARG = ", $1}
+>> f(0)
+>> f(1)
+>> ARG =  1
+>>
+>> proc f() {if ($1 == 0) return ; println "ARG = ", $1}
+>> f(0)
+>> ARG =  0
+>> f(1)
+>> ARG =  1
+>>
+>> The bug is ancient: here is what the original K&P code does:
+>>
+>> /usr/local/bin/hoc-6.0
+>> proc f() {if ($1 == 0) return \
+>> print "ARG = ",$1,"\n"}
+>> f(1)
+>> ARG = 1
+>> f(0)
+>> Segmentation fault (core dumped)
+>>
+>> /usr/local/bin/hoc-6.0
+>> proc f() {if ($1 == 0) { return } \
+>> print "ARG = ",$1,"\n"}
+>> f(1)
+>> ARG = 1
+>> f(0)
+>>
+>> ...
+
+DONE: Fri Jul 26 08:32:16 2002
+
+Fixed 1984 bug in RETURN action: $$ was not being set.
+------------------------------------------------------------------------
+Fri Aug  2 06:18:00 2002
+(94) Implement named, rather than numbered, func/proc arguments.
+------------------------------------------------------------------------
+Fri Aug  2 06:18:24 2002
+(95) Make all variables in functions local by default, unless listed
+     in a global declaration statement, or builtin immutable, or named
+     with two or more leading underscores.  [Exact conditions for
+     globality to be worked out.]
+------------------------------------------------------------------------
+Fri Aug  2 06:20:51 2002
+(96) Add support for associative arrays, a la awk.
+------------------------------------------------------------------------
+Fri Aug  2 12:35:42 2002
+(97) Create a small hoc test file that examines floating-point
+     properties and attempts to predict the architecture, from unusual
+     behavior, e.g.,
+	MIPS: -NaN -> NaN
+	MIPS & Intel: issnan(QNaN) -> 1
+	Intel IA-32: sign bit set in NaN
+	HP PA RISC: different bit convention for signalling and quiet NaN
+	no gradual underflow: MINNORMAL == MINSUBNORMAL
+------------------------------------------------------------------------
+Tue Aug  6 15:54:52 2002
+(98) In hoc,
+	n = 99ABC
+     stores "990" in n.  This happens because the grammar defines
+     concatenation such that str_concat_nn() is called: 99 is already
+     a number, and ABC is converted to the number 0.
+
+     By contrast, awk returns "99" for that assignment, because ABC is
+     an undefined variable that evaluates to "".
+
+     For the similar assignment
+	m = 999 888
+     both hoc and awk return the string "999888".
+------------------------------------------------------------------------
+Tue Aug  6 18:28:23 2002
+(99) Resolve what should happen if user tries delete(x), where x
+     is a function/procedure argument?  This should return 0 (deletion
+     failed).  At present, it generates a syntax error:
+
+	proc f(x){delete(x)}
+	/dev/stdin:0:syntax error
+
+     because x here is not a true variable (VAR or STRVAR), but
+     instead an ARG. The hoc.y grammar rule that applies is
+
+	expr: BLTIN1I '(' otherword ')'
+	otherword: STRVAR | VAR
+
+     and since ARG is not part of otherword, delete(x) in the function
+     is rejected as a syntax error.
+
+     Perhaps we can leave the behavior unchanged, or perhaps a more
+     meaningful error message than "syntax error" should be produced.
+------------------------------------------------------------------------
+Tue Aug  6 19:23:24 2002
+(100) If we continue to permit $1, $2, ... inside function/procedure
+      bodies, then we could define a special symbol, e.g., __NARGS__
+      or __ARGC__, that holds the count of arguments.  If $ can be
+      followed by a variable that evaluates to an integer, as is the
+      case for awk field references, then we could support variable
+      numbers of arguments relatively cleanly: e.g.,
+
+	func max() \
+	{
+		v = -MAXNORMAL
+		for (k = 1; k < __ARGC__; ++k) \
+			if (v < $k) v = $k
+		return (v)
+	}
+
+      	max()
+	-1.7976931348623157e+308
+
+      	max(1)
+	1
+
+	max(1,2)
+	2
+
+	max(1,2,3,4,5)
+	5
+------------------------------------------------------------------------
+>> ...
+>> Wed Aug  7 12:05:57 2002
+>> (101) Document in hoc.1 the significance of the placement of the
+>>       global statement inside functions and procedures:
+>>
+>> 	y = 3; proc foo(x) {println y; global y; println y}; foo(3)
+>>
+>>       prints
+>>
+>> 	0
+>> 	3
+>>
+>>       which is probably not what the naive user expected.
+>> ...
+
+DONE: Wed Aug  7 18:54:19 2002
+
+Added more discussion in hoc.1.
+------------------------------------------------------------------------
+Wed Aug  7 18:55:31 2002
+(102) Changes for hoc-7.0.6.beta made undefined variables evaluate to
+      0, instead of raising an error ``undefined variable'' as
+      previously done.  Is this a good thing?  Should the default
+      value be instead an empty string?  If so, it would resolve the
+      difference from awk noted in item (98) above.
+------------------------------------------------------------------------
+@
+
+
+1.21
+log
+@Development snapshot.
+@
+text
+@d2472 89
+@
+
+
+1.20
+log
+@Development snapshot.
+@
+text
+@d999 1
+a999 1
+>> 
+d1003 1
+a1003 1
+>> 
+d1020 1
+a1020 1
+xxx_MANT_DIG, xxx_MIN_EXP, xxx_MAX_EXP, DBL_MIN, and DBL_MAX.  
+d1216 1
+a1216 1
+>> 
+d1220 1
+a1220 1
+>> 
+d1478 10
+a1487 8
+Mon Dec 31 19:16:11 2001
+(55) Since we generate unique signaling NaNs via SNaN() in ieee754.c,
+     perhaps we should make them available to user code via a new
+     function snan().  At present, except for the undocumented __hex()
+     function, there is no way for hoc code to examine the bits of
+     a NaN to be able to distinguish between different signaling NaNs.
+     Do we need some other primitive to fetch the raw bits, like
+     significand(), but without any special handling of NaN and Inf?
+d1489 1
+a1489 1
+NOTE ADDED: Wed Jul 31 11:53:59 2002
+d1491 2
+a1492 2
+     the raw native bits.  There is still no snan() function to return
+     unique SNaNs.
+d1593 1
+a1593 1
+>> 
+d1598 1
+a1598 1
+>> 
+d1604 1
+a1604 1
+>> 
+d1611 1
+a1611 1
+>> 
+d1615 1
+a1615 1
+>> 
+d1625 1
+a1625 1
+>> 
+d1628 1
+a1628 1
+>> 
+d1630 1
+a1630 1
+>> 
+d1641 1
+a1641 1
+hoc produces 
+d1932 1
+a1932 1
+>> 
+d1935 1
+a1935 1
+>> 
+d1939 1
+a1939 1
+>> 
+d1942 1
+a1942 1
+>> 
+d1946 1
+a1946 1
+>> 
+d1957 39
+a1995 1
+Fri May 24 07:17:00 2002
+d1997 1
+a1997 2
+(69) Revisit the following paper, and see what functions from it are
+missing in hoc:
+d1999 4
+a2002 32
+@@Article{Cody:1993:AFS,
+  author =       "W. J. Cody and J. T. Coonen",
+  title =        "{Algorithm 722}: Functions to Support the {IEEE}
+                 Standard for Binary Floating-Point Arithmetic",
+  journal =      j-TOMS,
+  volume =       "19",
+  number =       "4",
+  pages =        "443--451",
+  month =        dec,
+  year =         "1993",
+  CODEN =        "ACMSCU",
+  ISSN =         "0098-3500",
+  bibdate =      "Fri Sep 16 20:08:53 1994",
+  bibsource =    "garbo.uwasa.fi:/pc/doc-soft/fpbiblio.txt",
+  URL =          "http://www.acm.org/pubs/citations/journals/toms/1993-19-4/p443-cody/",
+  abstract =     "This paper describes C programs for the support
+                 functions {\em copysign(x,y), logb(x), scalb(x,n),
+                 nextafter(x,y), finite(x),} and {\em isnan(x)}
+                 recommended in the Appendix to the {\em IEEE Standard
+                 for Binary Floating-Point Arithmetic.} In the case of
+                 {\em logb}, the modified definition given in the later
+                 {\em IEEE Standard for Radix-Independent Floating-Point
+                 Arithmetic} is followed. These programs should run
+                 without modification on most systems conforming to the
+                 binary standard.",
+  acknowledgement = ack-nj,
+  keywords =     "algorithms; copysign; finite; isnan; logb;
+                 manipulative functions; nextafter; scalb",
+  subject =      "G.1.0 [Numerical Analysis]: General -- numerical
+                 algorithms; G.4 [Numerical Analysis]: Mathematical
+                 Software -- certification and testing",
+}
+a2003 1
+
+d2362 1
+a2362 1
+>> 
+d2365 1
+a2365 1
+>> 
+d2368 1
+a2368 1
+>> 
+d2451 21
+@
+
+
+1.19
+log
+@Rename misnamed __LINENO__ to __LINE__.
+@
+text
+@d2286 13
+a2298 6
+Tue Jul 16 22:14:52 2002
+(84) Now that printf is working, need a clean way to ensure that the new
+__INDENT__ support works with newlines embedded in printf calls.  It
+looks like the call to printf() in code.c:prtext2() needs to be
+replaced by call to a lower-level function that handles padding and
+adjustment, and gives newlines special processing.
+@
+
+
+1.18
+log
+@Development snapshot.
+@
+text
+@d536 1
+a536 1
+		__LINENO__             = 14
+d1782 1
+a1782 1
+		Unfortunately, it requires making __LINENO__ and
+@
+
+
+1.17
+log
+@Development snapshot.
+@
+text
+@d450 11
+a461 4
+PARTLY DONE: Sun Dec  9 11:32:39 2001
+	The grammar now supports concatenation of adjacent string
+	expressions.  To be added is a rule for number with string,
+	and string with number.
+d997 29
+a1025 1
+Sun Dec 16 16:13:29 2001
+a1026 13
+(41) Today I added MAXNORMAL, MINNORMAL, and MINSUBNORMAL.  Are
+     there other such named constants that should be provided,
+     such as these values from float.h?
+
+	#define	DBL_MANT_DIG	53
+	#define	DBL_EPSILON	2.2204460492503131E-16
+	#define	DBL_DIG		15
+	#define	DBL_MIN_EXP	(-1021)
+	#define	DBL_MIN		2.2250738585072014E-308
+	#define	DBL_MIN_10_EXP	(-307)
+	#define	DBL_MAX_EXP	(+1024)
+	#define	DBL_MAX		1.7976931348623157E+308
+	#define	DBL_MAX_10_EXP	(+308)
+d1213 12
+a1224 2
+Mon Dec 24 15:09:35 2001
+(48) Code about line 25 of ieee754.c contains this comment:
+d1226 10
+a1235 3
+	/* TO DO: Should Ceil(-Infinity) return a finite number or
+	not? Sun's returns ceil(Infinity) as 2^63, and ceil(-Infinity)
+	as -2^63, which both seem inconsistent. */
+a1236 1
+     Resolve this.  [See also item (59) below.]
+d1486 5
+d1586 59
+a1644 26
+Wed Jan  2 11:47:05 2002
+(59) What should int(x), nint(x), ceil(x), and floor(x) return for
+     x sufficiently large that an integer value can no longer be
+     exactly represented?
+
+     In hoc, there is only one numeric data type, floating-point:
+     thus, all `integer' values are really floating-point values.  The
+     code currently takes this approach (assuming IEEE 754
+     arithmetic):
+
+	int(x) -> Ceil(x) or Floor(x)
+	Ceil(x) -> ceil(x)
+	Floor(x) -> floor(x)
+	Nint(x) -> min(2^53,x + 0.5)	(x >= 0), or
+		   max(-2^53, x - 0.5)	(x < 0)
+
+     This leaves the values of hoc functions int(), ceil(), and
+     floor() implementation dependent, since different vendors may
+     choose different behavior of ceil() and floor().  It also makes
+     nint() possibly quite different from the other three.  Code in
+     two places in string.c REQUIRES this particular behavior of
+     Nint().
+
+     The Java Virtual Machine, and Fortran 77, 90, and 95, all define
+     int(x) to be the largest representable integer for sufficiently
+     large x.   In the words of Fortran 95, p. 246:
+a1645 21
+	13.14.48 INT (A [, KIND])
+		...
+		Case (ii):	If A is of type real, there are two
+				cases: if |A| < 1, INT (A) has the
+				value 0; if |A| >= 1, INT (A) is the
+				integer whose magnitude is the largest
+				integer that does not exceed the
+				magnitude of A and whose sign is the
+				same as the sign of A.
+
+     C89, C++98, and C99, on the other hand, define this to be
+     undefined: in the words of C99, p. 43:
+
+	6.3.1.4 Real floating and integer
+
+	When a finite value of real floating type is converted to an
+	integer type other than _Bool, the fractional part is
+	discarded (i.e., the value is truncated toward zero). If the
+	value of the integral part cannot be represented by the
+	integer type, the behavior is undefined.
+				      ^^^^^^^^^
+a1926 1
+Thu May 16 06:11:41 2002
+d1928 26
+a1953 16
+(68) Although hoc records negative zero internally, it does not
+display it correctly on output on FreeBSD, Apple Darwin, SGI IRIX,
+
+	hoc> y = -0; __hex(y); y
+	0x80000000_00000000 == 0 0
+	0
+
+On DEC Alpha, IBM AIX, Intel IA-32, Intel IA-64, PPC GNU/Linux, Sun
+SPARC GNU/Linux, Sun Solaris, I get correct output:
+
+	hoc> y = -0; __hex(y); y
+	0x80000000_00000000 == 0 -0
+	-0
+
+This depends on printf(), so we need special code to handle it
+correctly.
+d2342 25
+a2366 2
+Mon Jul 22 08:33:51 2002
+(90) Look at this:
+d2368 7
+a2374 2
+hoc128> println 1,2,3
+1 2 3
+d2376 1
+a2376 2
+hoc128> println 1,sqrt(23)
+1 4.79583152331271954159743806416269428
+d2378 1
+a2378 14
+hoc128> println 1,__hex(x)
+10x403e0000_00000000_00020000_00000000 == +0x1.0000000000000002p+63  9223372036854775809
+ ^---space lost:
+The reason is that __hex() is a function with side-effects: for the
+example above, it prints "0x403e0000_00000000_00020000_00000000 ==
++0x1.0000000000000002p+63", then returns 9223372036854775809 as a
+numeric value which is the printed.  With late-July-2002 improvements
+to hoc, this function should be reimplemented to simply return a
+string, without printing on its own.
+------------------------------------------------------------------------
+Tue Jul 23 08:49:23 2002
+(91) In hoc.y, check (Inst)$1->u.XXXX calls: it appears that some of
+the XXXX values are inconsistent (they all point to a union of
+identically sized members, so the mismatch is only cosmetic).
+@
+
+
+1.16
+log
+@Development snapshot.
+@
+text
+@d2289 7
+a2295 1
+ ^---space lost: why???
+@
+
+
+1.15
+log
+@Development snapshot.
+@
+text
+@d2235 13
+a2247 7
+Tue Jul 16 22:36:11 2002
+(86) Should have sprintf capability, but the problem is that this requires
+support for varargs in hoc functions,
+	s = sprintf("fmt", arg1, arg2, ...)
+or else an irregular syntax
+	s = sprintf "fmt", arg1, arg2, ...
+or ... ??? ...
+@
+
+
+1.14
+log
+@Development snapshot.
+@
+text
+@d686 1
+a686 1
+>> 
+d690 1
+a690 1
+>> 
+d693 1
+a693 1
+>> 
+d696 1
+a696 1
+>> 
+d699 1
+a699 1
+>> 
+d702 1
+a702 1
+>> 
+d714 1
+a714 1
+>> 
+d716 1
+a716 1
+>> 
+d720 1
+a720 1
+>> 
+d725 1
+a725 1
+>> 
+d730 1
+a730 1
+>> 
+d740 1
+a740 1
+>> 
+d1779 1
+a1779 1
+>>      from hoc, which in hoc.y says "max_prog = 32767;".  
+d1829 1
+a1829 1
+>> 
+d1833 1
+a1833 1
+>> 
+d1835 1
+a1835 1
+>> 
+d1851 1
+a1851 1
+>> 
+d1853 1
+a1853 1
+>> 
+d2080 1
+a2080 1
+>> 
+d2102 1
+a2102 1
+>> 
+d2177 1
+a2177 1
+>> 
+d2179 1
+a2179 1
+>> 
+d2181 1
+a2181 1
+>> 
+d2184 1
+a2184 1
+>> 
+d2186 1
+a2186 1
+>> 
+d2189 1
+a2189 1
+>> 
+d2290 9
+a2298 2
+Wed Jul 24 08:02:41 2002
+(92) Implement break and continue statements in loop
+d2300 43
+a2342 6
+Wed Jul 24 08:05:57 2002
+(93) In decrypt.hoc, the statement 
+	if (__n == 255) return
+     does not cause return, but
+	if (__n == 255) {return}
+     does.  What is going on!
+@
+
+
+1.13
+log
+@Routine update
+@
+text
+@d2272 28
+@
+
+
+1.12
+log
+@Routine update
+@
+text
+@d683 75
+a757 60
+Mon Dec 10 06:14:48 2001
+(30) Consider the extra post-item space in this output:
+
+	hoc> print "abc", 123, "xyz", sqrt(27), "\n\n"
+	abc123_xyz5.196152422706632_
+	## _ marks space
+
+     The extra space comes from code.c:prexpr(), which prints numeric
+     values with a "%.*g " format.
+
+     In awk, the convention is that a comma in an expression list produces
+     an inter-item space.
+
+     The inconsistency above arises because code.c:prstr() does not also
+     print a trailing space, but should.
+
+     Now that we have string expressions, if we extend the grammar to
+     include rule to coerce strings in numeric expressions to numbers
+
+	expr : ...
+		| expr + strexpr { ... }
+		| strexpr + expr  { ... }
+		| expr - strexpr { ... }
+		| strexpr - expr  { ... }
+		| expr * strexpr { ... }
+		| strexpr * expr  { ... }
+		| expr / strexpr { ... }
+		| strexpr / expr  { ... }
+		| expr ^ strexpr { ... }
+		| strexpr ^ expr  { ... }
+
+     and numbers in string expressions to strings:
+
+	strexpr : ...
+		| expr strexpr { ... }
+		| strexpr expr { ... }
+
+     then the print statement can take lists of items separated by space,
+     rather than comma, and thus avoid the output of unwanted extra space,
+     while retaining the convenience of getting separating space between
+     items from comma-separated lists.
+
+     The problem for implementing this is that the numeric grammar pushes
+     Datum values onto the stack, but Datum is just a union of double,
+     string pointer, and symbol pointer values, without an accompanying
+     flag that records what actually got stored there.
+
+     The only source file that contains references to Datum values is
+     code.c, but there are 60 such references.  Each may have to be changed
+     if we expand Datum to include a union and a type field.  It might be
+     cleanest to replace inline references to Datum fields by access
+     functions, a la C++/Java classes, but this makes code for things like
+     "a += b" in addeq() messier, since we would need both get_xxx() and
+     set_xxx() access functions.  Otherwise a careful global substitution
+     of .var, .str, and .sym with .u.var, .u.str, and .u.sym, with
+     associated typechecks, can keep the code simple.
+
+     Eventually the post-item space from prexpr() and prstr() should be
+     replaced by an interitem space from the prlist grammar, to avoid an
+     unnecessary trailing space.
+d1075 1
+a1075 1
+who("") now reports something like this:
+d1106 1
+d1148 1
+d1152 1
+a1152 1
+	hoc> who("__MAX")
+d1186 1
+d1308 1
+d1376 1
+d1428 1
+d1479 1
+d1510 1
+d1525 1
+d1603 1
+d1624 1
+d1679 1
+a1679 1
+>> (60) As a possibly useful test of string programming in hoc, implement
+d1684 1
+d1700 1
+a1700 1
+(61) The implementation of load("filename") in io.c:Load() used in
+d1767 1
+a1767 1
+(62) The addition to configure.in to handle the readline problem with
+d1771 16
+a1786 11
+Sun Feb 10 09:20:44 2002
+(63) I needed a way to sum numbers extracted from FTPD and HTTPD log
+     files; the resulting sums can be over 1TB (1.0e12).  I have a
+     shell script wrapper that does that using awk, but I wanted to
+     try hoc: a simple awk extractor produced a data stream like this:
+     "309 +314 +0 +13661 + ... ", an expression longer than 80KB to
+     pipe into "hoc -q".  This produced a "program too big" complaint
+     from hoc, which in hoc.y says "max_prog = 32767;".  Eventually,
+     I'll work out the problems with growing the hoc prog array, but
+     for now, it seems that a much larger value of max_prog is
+     desirable, so I'm temporarily changing it to 8 * 1024 * 1024.
+d1790 1
+a1790 1
+>> (64) Add FURTHER READING section to hoc.1, with references to Markstein,
+d1795 5
+a1799 3
+Mon Feb 18 17:26:22 2002
+DONE:  [I decided to omit reference to the later K&P book, since it
+       does not discuss hoc.]
+d1803 1
+a1803 1
+>> (65) rats detected security holes in calls to msg_translate() in hoc.y
+a1811 37
+Mon Feb 18 15:00:48 2002
+DONE: The only remaining instances of strcat() and strcpy() are the
+      safe references in the concat[2345]() functions in string.c.  I
+      checked all of the code points flagged by rats and its4, and all
+      appear to be completely safe, with bounds checks on all buffers
+      that are stored into.  msg_translate() now calls a new function,
+      compare_format_items(), to ensure that format items have not
+      been maliciously altered to cause a denial of service.  All
+      accesses to environment variables appear to be safe: any that
+      are copied are dynamically allocated, and in any event, all
+      current UNIX operating systems, and also Microsoft DOS and
+      Windows, limit the size of the environment that can be passed to
+      child processes.
+------------------------------------------------------------------------
+Wed May  8 15:05:19 2002
+
+I made hoc flip the sign bit of Intel IA-64 NaNs, but forgot to do the
+same in the copysign() primitive: here is a sample of correct and
+incorrect output:
+
+Sun SPARC Solaris:
+
+	hoc> NaN
+	+QNaN
+	hoc> -NaN
+	-QNaN
+	hoc> __hex(NaN)
+	0x7fffffff_ffffffff == +QNaN +QNaN
+	hoc> __hex(-NaN)
+	0xffffffff_ffffffff == -QNaN -QNaN
+	hoc> help_copysign()
+		copysign(x,y) returns a value with the magnitude of x, and the
+		sign of y.
+	hoc> copysign(1,NaN)
+	1
+	hoc> copysign(1,-NaN)
+	-1
+d1813 1
+a1813 1
+Intel Pentium GNU/Linux:
+d1815 56
+a1870 12
+	hoc> NaN
+	+NaN
+	hoc> -NaN
+	-NaN
+	hoc> __hex(NaN)
+	0xfff80000_00000000 == +NaN +NaN
+	hoc> __hex(-NaN)
+	0x7ff80000_00000000 == -NaN -NaN
+	hoc> copysign(1,NaN)
+	-1
+	hoc> copysign(1,-NaN)
+	1
+d1874 2
+a1875 2
+Although hoc records negative zero internally, it does not display it
+correctly on output on FreeBSD, Apple Darwin, SGI IRIX,
+d1893 1
+a1893 1
+Revisit the following paper, and see what functions from it are
+d1932 2
+a1933 1
+>> There is a definite problem in hoc128:
+d1969 2
+a1970 1
+>> Subnormals can be enabled on SGI IRIX by adding a call from main()
+d2005 2
+a2006 2
+>> Look at this (notice the mistaken F on the end of the constant, which
+>> make C7BY16 a string constant)
+d2025 1
+a2025 1
+>> The previous bug, exposed by the single-precision suffix F on an
+d2047 2
+a2048 2
+When I use hexfp(), hexint(), and __hex() for comparative purposes, it
+is confusing to have trailing zero trimmed.  I think that
+d2055 1
+a2055 1
+>> While using hoc128 today, I wanted to be able to truncate results
+d2069 1
+a2069 1
+It might be handy to have functions cdc60(), cdc120(), cray64(),
+d2077 41
+a2117 2
+There is an error in the C99-style hex floating point output in
+hoc128:
+a2118 19
+hoc32:	__hex(-0.00033765770795601405270221764884779206)
+	0xb9b107a7 == -0x1.620f4ep-12 -0.000337657722
+hoc64:	__hex(-0.00033765770795601405270221764884779206)
+	0xbf3620f4_d01b17b1 == -0x1.620f4d01b17b1p-12 	-0.00033765770795601407
+hoc128:	__hex(-0.00033765770795601405270221764884779206)
+	0xbff3620f_4d01b17b_0be64b8b_77599780 == -0x1.620f4d01b17b0be64b8b77 -0.00033765770795601405270221764884779206
+								^^^^^^^^^^^^exponent missing!
+------------------------------------------------------------------------
+Tue Jun 18 16:09:25 2002
+
+It would be helpful if the prompt used the program name, rather than
+just hoc:
+	hoc32>
+	hoc64>
+	hoc80>
+	hoc128>
+with
+	hoc>
+for the times when the numberless name is invoked.
+d2123 2
+a2124 2
+>> Another core dump:
+>> 
+d2142 1
+a2142 1
+>> 
+d2147 1
+d2157 39
+a2195 28
+Thu Jun 20 05:50:33 2002
+It might be useful to have a command-line option -i nnn to request
+indenting output lines by nnn spaces; this could be a variable inside
+hoc, __INDENT__ = nnn.  That could help to make output more easily
+distinguished from input.  More generally, __INDENT__ could be a
+string.
+------------------------------------------------------------------------
+Thu Jun 20 07:16:21 2002
+Perhaps we should make the default prompt reflect the precision.  At
+present, it is set at hoc.y:1066 from PACKAGE_NAME, which comes from
+the Makefile:
+
+PACKAGE_NAME	= hoc
+
+It could be changed in Makefile.in like this:
+
+PACKAGE_NAME	= @@PACKAGE_NAME@@$(HOCSUFFIX)
+PROGRAM		= @@PACKAGE_NAME@@
+
+[the change in PROGRAM is needed to ensure that "make check" works]
+
+Alternatively, private customization is possible in $HOME/.hocrc:
+I now have this:
+
+if      (P == 24)  __PROMPT__ = "hoc32> " \
+else if (P == 53)  __PROMPT__ = "hoc64> " \
+else if (P == 64)  __PROMPT__ = "hoc80> " \
+else if (P == 113) __PROMPT__ = "hoc128> "
+d2197 2
+d2202 3
+a2204 3
+>> hoc should record which mathematical functions are native, as opposed
+>> to supplied by hoc, so that if there is any question about the
+>> accuracy or correctness of one of them, we know where to look.
+d2208 1
+d2214 2
+a2215 2
+>> store() is defined with call-by-value instead of call-by-reference;
+>> fix that!
+d2219 1
+d2221 51
+@
+
+
+1.11
+log
+@Update with to-do items from May and June 2002.
+@
+text
+@d2027 115
+a2141 4
+cray128(), ieee32(), ieee64(), ieee80(), ieee128(), vax_f(), vax_d(),
+vax_g(), vax_h(), ibm32(), ibm64(), ibm128(), pdp10_36(), pdp10_72(),
+pdp10_144() to display hex or octal formats of local numbers in
+encodings for those other systems.
+@
+
+
+1.10
+log
+@Routine update
+@
+text
+@d1262 1
+a1262 1
+>> 
+d1284 1
+a1284 1
+>> 
+d1759 1
+a1759 1
+>>      Overton, Cody & Waite, 
+d1772 1
+a1772 1
+>>      
+d1775 1
+a1775 1
+>> 
+d1791 240
+@
+
+
+1.9
+log
+@Update with an item about Sun Solaris math library extensions.
+@
+text
+@d1738 53
+@
+
+
+1.8
+log
+@Routine update
+@
+text
+@a1257 2
+Sat Dec 29 14:49:51 2001
+(51) Sun's math library has these extra functions:
+d1259 29
+a1287 21
+	annuity(r,n)		annuity(r,n) computes (1 -
+				(1+r)**-n)/r, the present value of
+				annuity factor.
+	compound(r,n)		computes  (1+r)**n the  compound interest factor.
+	cosp(x)			???
+	cospi(x)		???
+	exp10(x)		10**x
+	exp2(x)			2**x
+	irint() 		double-to-int using current rounding direction
+	iszero()		returns 1 if x is zero
+	max_normal()            IEEE largest positive normalized number
+	max_subnormal()         IEEE largest positive subnormal number
+	min_normal()            IEEE smallest positive normalized number
+	min_subnormal()         IEEE smallest positive subnormal number
+	quiet_nan()             IEEE quiet NaN
+	signaling_nan()         IEEE signaling NaN
+	signbit()               IEEE sign bit test
+	sinp()                  ???
+	sinpi()                 ???
+	tanp()                  ???
+	tanpi()			???
+d1289 18
+a1306 2
+Consider them for inclusion in hoc.  The max_*() and min_(*) and
+*_nan() functions already exist in hoc under names.
+@
+
+
+1.7
+log
+@Routine update
+@
+text
+@d1154 13
+a1166 1
+Mon Dec 24 15:07:36 2001
+d1168 4
+a1171 9
+(47) Code about line 290 of string.c contains this comment:
+
+		/* TO-DO: What we really need here is a test for
+		   predefined, NOT immutable.  However, the symbol
+		   table does not yet contain that information, so for
+		   now, we just assume immutable means built-in, which
+		   is not true in general. */
+
+      Fix that blemish.
+@
+
+
+1.6
+log
+@Update with resolution of item 58: should there be a delete(var) function.
+@
+text
+@a1044 1
+Thu Dec 20 15:59:24 2001
+d1046 20
+a1065 7
+(43) The new strftime() function does not show up in the who() display
+     because it is not a member of the built-in function tables: its
+     argument list signature doesn't match any of them, so it is
+     handled specially.  A similar problem applies to the new
+     index(s,sub), length(s), and substr(s,m,n) functions.  This can
+     be solved by special code for the who() command that reports
+     miscellaneous functions.
+d1101 36
+a1136 1
+Mon Dec 24 09:23:03 2001
+d1138 9
+a1146 12
+(45) It might be helpful to have pwd, cd, and ls commands in hoc; some
+     other interactive programs (e.g., matlab) do.  Alternatively, or
+     additionally, !command could escape to subshell and execute that
+     command.   This would need a -no-shell command-line option for
+     security.
+------------------------------------------------------------------------
+Mon Dec 24 12:24:30 2001
+
+(46) The new __MAX_xxx___ options make the compile-time dimension
+     choices visible to the user, and the help_limits() function
+     is provided to display them.  However, the manual pages in hoc.1
+     note a TO-DO item for the future:
+d1148 5
+a1152 2
+	A design goal for future versions of hoc is to eliminate these
+	limits entirely, making them subject only to available memory.
+d1420 44
+a1463 5
+Wed Jan  2 08:10:25 2002
+(57) Should the load() function search for its file on a search path
+     defined by an environment variable, say HOCINPUT or HOCPATH?
+     This is the only place where that might be useful: all other
+     files that are opened have known paths.
+d1545 1
+a1545 1
+>> 
+d1557 1
+a1557 1
+>> 
+d1561 1
+a1561 1
+>> 
+d1563 1
+a1563 1
+>> this could easily provide a conditional preprocessing capability.  
+d1585 1
+a1585 1
+	% hoc -q 
+d1611 98
+a1708 1
+------------------------------------------------------------------------
+@
+
+
+1.5
+log
+@Routine update
+@
+text
+@d1379 24
+a1402 4
+Wed Jan  2 08:11:59 2002
+(58) Should there be a delete(var) function to delete a variable from
+     the symbol table?  awk has one.  And if we add it, should it be
+     possible to delete predefined and/or immutable variables?
+a1525 1
+   @
+
+
+1.4
+log
+@Routine update
+@
+text
+@d1433 74
+@
+
+
+1.3
+log
+@Major update.
+@
+text
+@d1102 1
+a1102 1
+     note a to-do item for the future:
+d1126 1
+a1126 1
+     Resolve this.
+d1208 1
+a1208 1
+				(1+r)**-n)/r, the present value of 
+a1231 2
+Sun Dec 30 08:35:45 2001
+(52) Subnormals are output incorrectly by xdbltos():
+d1233 50
+a1282 41
+4.9406564584124654e-324  0x00000000_00000001 == +0x0.0p-1074
+1.2648080533535912e-321  0x00000000_00000100 == +0x0.0p-1066
+3.2379086165851934e-319  0x00000000_00010000 == +0x0.0p-1058
+8.289046058458095e-317  0x00000000_01000000 == +0x0.0p-1050
+2.1219957909652723e-314  0x00000001_00000000 == +0x0.0p-1042
+5.4323092248710971e-312  0x00000100_00000000 == +0x0.0p-1034
+1.3906711615670009e-309  0x00010000_00000000 == +0x0.0p-1026
+
+They should be 0x1.... instead of 0x0....
+
+This was then fixed by changing IsNormal(x) to 1 at string.c:625.
+However, there are still differences on Intel x86 and Alpha
+architectures.  On the latter, the powers of 2 are coming out zero for
+subnormals:
+
+< 4.9406564584124654e-324  0x00000000_00000001 == +0x1.0p+0
+< 1.2648080533535912e-321  0x00000000_00000100 == +0x1.0p+0
+< 3.2379086165851934e-319  0x00000000_00010000 == +0x1.0p+0
+< 8.289046058458095e-317  0x00000000_01000000 == +0x1.0p+0
+< 2.1219957909652723e-314  0x00000001_00000000 == +0x1.0p+0
+< 5.4323092248710971e-312  0x00000100_00000000 == +0x1.0p+0
+< 1.3906711615670009e-309  0x00010000_00000000 == +0x1.0p+0
+
+SGI output has off-by-one exponents:
+
+26c32
+< 1.396701497859909e-250  0x0c100000_00000000 == +0x1.0p-829
+---
+> 1.396701497859909e-250  0x0c100000_00000000 == +0x1.0p-830
+34c40
+< 2.576459507838853e-231  0x10100000_00000000 == +0x1.0p-765
+---
+> 2.576459507838853e-231  0x10100000_00000000 == +0x1.0p-766
+
+and some that are off by 2:
+
+< 4.7527289157379e-212  0x14100000_00000000 == +0x1.0p-700
+< 1.216698602428902e-209  0x14900000_00000000 == +0x1.0p-692
+---
+> 4.7527289157379e-212  0x14100000_00000000 == +0x1.0p-702
+> 1.216698602428902e-209  0x14900000_00000000 == +0x1.0p-694
+d1288 2
+a1289 2
+>> 
+>> 
+d1292 1
+a1292 1
+>> 
+d1295 1
+a1295 1
+>> 
+d1310 1
+a1310 1
+>> 
+d1329 1
+a1329 1
+>> 
+d1333 1
+a1333 1
+ 
+d1339 3
+a1341 1
+     stderr.
+d1351 82
+@
+
+
+1.2
+log
+@Routine update
+@
+text
+@d28 2
+a29 1
+DONE: Fri Dec  7 11:16:18 2001:
+d75 1
+d85 1
+d100 14
+a113 8
+(6) Add command to include a file at run time, with filename
+    completion.  E.g., load("filename").  This should have a default
+    search path of ".", "$HOME/hoc", and "$(shrlibdir)", but this
+    should be settable via a HOCPATH environment variable.
+    This appears to be difficult with the current implementation of
+    the GNU readline package, since it doesn't provide any way to
+    preserve the current stdin, temporarily switching to another input
+    stream.
+d130 28
+a157 19
+(8) Why does home machine and eilat, henry, mosso, wombat give this
+    (hundreds of them)?
+
+	./hoc
+	...
+	readline: warning: rl_prep_terminal: cannot get terminal
+	settingsreadline: warning: rl_prep_terminal: cannot get terminal
+	settings....
+
+    uinta and suncore do not.  On home and uinta, TERM is vt100,
+    and readline libraries both are 4.2a.
+
+    Is there an option (function or variable) in the readline library
+    that can suppress the fancy input processing?  If so, we could
+    turn it on for noninteractive functions.  Otherwise, we have to
+    interpose yet another software layer between hoc and readline, or
+    else use a dynamically-assigned function pointer to holds either
+    the library readline function address, or a private one that just
+    returns a line at a time.
+d169 1
+a169 1
+>> 	Need to fix this, and probably other builtin functions with
+d235 1
+d261 1
+a261 1
+DONE: Fri Dec  7 19:23:28 2001 [but only empty argument form]
+d512 1
+d582 7
+a588 3
+Sat Dec  8 08:39:13 2001
+(22) Replace all double types by new typedefed type fp_t, to ease
+     the addition of support for long double.
+d603 2
+a604 1
+	New functions ran(), randl(), and setran() provide this
+d609 1
+a609 1
+	hoc> for (k = 0; k < 10; ++k ) print ran(0)
+d620 1
+a620 1
+	hoc> for (k = 0; k < 10; ++k ) print setran(0)
+d623 1
+a623 1
+	hoc> for (k = 0; k < 10; ++k ) print setran(0)
+d633 1
+d635 1
+d642 1
+a642 1
+>>      functions.  Then maybe can offer arg-less setran().
+d646 2
+a647 1
+	ran() now takes no arguments.  There are now three function
+d658 1
+d670 1
+d756 1
+d772 1
+d799 1
+d844 1
+d864 1
+d868 38
+a905 2
+Tue Dec 11 18:05:30 2001
+(36) Add a getenv() function to lookup environment variables.
+d907 25
+a931 15
+Tue Dec 11 18:06:01 2001
+(37) Add QNaN() and SNaN() functions to return quiet and signalling
+     NaNs.
+------------------------------------------------------------------------
+Tue Dec 11 18:06:43 2001
+(38) Internationalize all internal strings that can be seen by users.
+     
+     While this could be done with the X/Open message catalog
+     facilities (gencat(1), catclose(3C), catgets(3C), catopen(3C),
+     gettext(3C), and setlocale(3C)), or the GNU gettext library, a
+     cleaner, simpler, and more portable solution is to use the new
+     hoc extensible multilingual help system instead.  That is, each
+     embedded output string should be produced by a function call,
+     where that function is defined in the hoc source code, but is not
+     immutable, and thus can be redefined by dynamically-loaded code.
+d933 409
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d660 2
+a661 2
+The extra space comes from code.c:prexpr(), which prints numeric
+values with a "%.*g " format.
+d663 2
+a664 2
+In awk, the convention is that a comma in an expression list produces
+an inter-item space.
+d666 2
+a667 2
+The inconsistency above arises because code.c:prstr() does not also
+print a trailing space, but should.
+d669 2
+a670 2
+Now that we have string expressions, if we extend the grammar to
+include rule to coerce strings in numeric expressions to numbers
+d684 1
+a684 1
+and numbers in string expressions to strings:
+d690 23
+a712 23
+then the print statement can take lists of items separated by space,
+rather than comma, and thus avoid the output of unwanted extra space,
+while retaining the convenience of getting separating space between
+items from comma-separated lists.
+
+The problem for implementing this is that the numeric grammar pushes
+Datum values onto the stack, but Datum is just a union of double,
+string pointer, and symbol pointer values, without an accompanying
+flag that records what actually got stored there.
+
+The only source file that contains references to Datum values is
+code.c, but there are 60 such references.  Each may have to be changed
+if we expand Datum to include a union and a type field.  It might be
+cleanest to replace inline references to Datum fields by access
+functions, a la C++/Java classes, but this makes code for things like
+"a += b" in addeq() messier, since we would need both get_xxx() and
+set_xxx() access functions.  Otherwise a careful global substitution
+of .var, .str, and .sym with .u.var, .u.str, and .u.sym, with
+associated typechecks, can keep the code simple.
+
+Eventually the post-item space from prexpr() and prstr() should be
+replaced by an interitem space from the prlist grammar, to avoid an
+unnecessary trailing space.
+d832 19
+@

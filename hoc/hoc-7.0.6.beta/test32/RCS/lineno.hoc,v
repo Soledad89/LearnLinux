@@ -1,0 +1,44 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.34;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@println __LINE__			# 1
+s = "two\
+three"
+println __LINE__			# 4
+s = "five\
+six\
+seven"
+println __LINE__			# 8
+s = "nine\nnine\nnine\nnine\nnine"
+println __LINE__			# 10
+s = \
+	\
+	\
+	\
+	"fifteen\
+sixteen\
+seventeen\
+"
+println __LINE__			# 19
+@

@@ -1,0 +1,79 @@
+### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.1.beta/es/hoc.rc, Thu Jan  3 20:56:56 2002
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+###
+### This is es/hoc.rc, with Spanish translations of hoc functions.
+### If requested by the settings of the environment variables LC_ALL,
+### LC_MESSAGES, or LANG (in that order of priority), this file will be
+### loaded AFTER hoc.rc.  This means that it can gradually be augmented
+### with translations of messages, leaving the original English text as
+### a fallback.
+###
+### [18-Dec-2001]
+### ====================================================================
+
+### Spanish synonyms for some commands: the function name is Spanish,
+### but the resulting help will be in English until more work is done.
+
+proc adios()		exit($$1)
+proc noticias()		news()
+
+proc autor() \
+{
+	_internal_help_hrule()
+	print "En este libro, hoc es descrito en una serie de versiones que van\n"
+	print "aumentando progresivamente en su capacidad operativa:\n\n"
+
+	print "\tBrian W. Kernighan y Rob Pike\n"
+	print "\tThe UNIX Programming Environment\n"
+	print "\tPrentice-Hall\n"
+	print "\t1984\n"
+	print "\tpp. xii + 357\n"
+	print "\tISBN 0-13-937699-2 (hardcover), 0-13-937681-X (paperback)\n"
+	print "\tLCCN: QA76.76.O63 K48 1984\n\n"
+        
+	print "Extensiones a la aritmética IEEE 754, ayuda, constantes adicionales,\n"
+	print "ordenes, funciones, archivos para iniciar una sesion y (what is a\n"
+	print "readline support?) fueron añadidos por:\n\n"
+
+	print "\tNelson H. F. Beebe <beebe@math.utah.edu>\n\n"
+
+	print "TO XLT: A página oficial na internet de distrbuição do hoc é:\n\n"
+
+	print "\tftp://ftp.math.utah.edu/pub/hoc\n"
+	print "\thttp://www.math.utah.edu/pub/hoc/\n"
+	_internal_help_hrule()
+}
+
+
+### For now, we provide only a few sample translations.  The welcome
+### banner will be printed both in English (from hoc.rc) and in Portuguese
+### (from this file).
+proc _internal_bienvenido() \
+{
+	_internal_help_hrule()
+	print "Bienvenido a la calculadora extendible de alto orden, hoc.\n"
+	print "Esta es la version 7.0.0.beta [18-Dic-2001] de hoc.\n"
+	print "Oprima la tecla ayuda() para conseguir ayuda, noticias() por informacíon\n"
+	print "reciente, y autor() por informacíon de autores.\n"
+	if (__IEEE_754__) \
+		print "Este sistema permite el uso de la aritmética IEEE 754 de\n" \
+	else \
+		print "Este sistema no permite el uso de la aritmética IEEE 754 de\n"
+	print "punto flotante.\n\n"
+
+	print "\t****************************************************************\n"
+	print "\tTO DO: Translate this from Portuguese to Spanish:\n"
+	print "\tNOTA: a tradução para o Português do texto de ayuda para hoc\n"
+	print "\tainda está incompleta. O mantenedor ficará portanto grato em\n"
+	print "\treceber contribuições do usuário nesta área, e também sugestões\n"
+	print "\tsobre melhorias nas traduções e nos programas. Desde já\n"
+	print "\tobrigado!\n"
+	print "\t****************************************************************\n"
+
+	_internal_help_hrule()
+}
+
+### Print a welcome banner if option --no-banner was not specified:
+if (__BANNER__) _internal_bienvenido()

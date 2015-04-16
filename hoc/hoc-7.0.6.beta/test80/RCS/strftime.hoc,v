@@ -1,0 +1,156 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.07;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the strftime() function.
+### [20-Dec-2001]
+### ====================================================================
+
+### Define some fundamental constants
+seconds_per_day			:= 24 * 60 * 60
+seconds_per_non_leap_year	:= 365 * seconds_per_day
+seconds_per_leap_year		:= 366 * seconds_per_day
+seconds_per_week		:= 7 * seconds_per_day
+
+func isleap() \
+{
+	return ( ( (($1 % 4) == 0) && (($1 % 100) != 0) ) || \
+		 (($1 % 400) == 0) )
+}
+
+proc show_strftime_conversions() \
+{
+	seconds_since_epoch = $1
+
+	println "seconds since epoch:                                                \t", seconds_since_epoch
+	println "locale's full weekday name:                                       %A\t", strftime("%A", seconds_since_epoch)
+	println "locale's abbreviated weekday name:                                %a\t", strftime("%a", seconds_since_epoch)
+	println "locale's full month name:                                         %B\t", strftime("%B", seconds_since_epoch)
+	println "locale's abbreviated month name:                                  %b\t", strftime("%b", seconds_since_epoch)
+	println "locale's appropriate date and time representation:                %c\t", strftime("%c", seconds_since_epoch)
+	println "day of month as decimal number (01--31):                          %d\t", strftime("%d", seconds_since_epoch)
+	println "hour (24-hour clock) as decimal number (00--23):                  %H\t", strftime("%H", seconds_since_epoch)
+	println "hour (12-hour clock) as decimal number (01--12):                  %I\t", strftime("%I", seconds_since_epoch)
+	println "day of year as decimal number (001--366):                         %j\t", strftime("%j", seconds_since_epoch)
+	println "minute as decimal number (00--59):                                %M\t", strftime("%M", seconds_since_epoch)
+	println "month as decimal number (01--12):                                 %m\t", strftime("%m", seconds_since_epoch)
+	println "locale's equivalent of either ``AM'' or ``PM'':                   %p\t", strftime("%p", seconds_since_epoch)
+	println "second as decimal number (00--60):                                %S\t", strftime("%S", seconds_since_epoch)
+	println "week number of year (Sunday == first) as decimal number (00--53): %U\t", strftime("%U", seconds_since_epoch)
+	println "week number of year (Monday == first) as decimal number (00--53): %W\t", strftime("%W", seconds_since_epoch)
+	println "weekday (Sunday == first) as decimal number (0--6):               %w\t", strftime("%w", seconds_since_epoch)
+	println "locale's appropriate time representation:                         %X\t", strftime("%X", seconds_since_epoch)
+	println "locale's appropriate date representation:                         %x\t", strftime("%x", seconds_since_epoch)
+	println "year with century as decimal number:                              %Y\t", strftime("%Y", seconds_since_epoch)
+	println "year without century as decimal number (00--99):                  %y\t", strftime("%y", seconds_since_epoch)
+	println "time zone name:                                                   %Z\t", strftime("%Z", seconds_since_epoch)
+	println "%%:                                                               %%\t", strftime("%%", seconds_since_epoch)
+	println ""
+}
+
+proc show_selected_strftime_conversions () \
+{
+	println "------------------------------------------------------------------------"
+	println "Current time local is:", getenv("LC_TIME"), "\n"
+
+	show_strftime_conversions(0)
+
+	show_strftime_conversions(10^9 - seconds_per_non_leap_year)
+	show_strftime_conversions(10^9)
+	show_strftime_conversions(10^9 + seconds_per_non_leap_year)
+
+	show_strftime_conversions(2^30 - seconds_per_non_leap_year)
+	show_strftime_conversions(2^30)
+	show_strftime_conversions(2^30 + seconds_per_non_leap_year)
+
+	println ""
+	println "------------------------------------------------------------------------"
+}
+
+### We need to initialize these loop body variables for now until a
+### problem in the yacc grammar for hoc is resolved.
+year_string = ""
+month_string = ""
+day_of_month_string = ""
+day_of_year_string = ""
+
+### NB: The UNIX calendar epoch, or starting year, 1970, is NOT a leap
+### year.  We use a time base in mid-February, so as to be before the
+### leap day, February 29.
+seconds_since_epoch = -seconds_per_non_leap_year + 6 * seconds_per_week
+
+for (year = 1970; year <= 2037; ++year) \
+{
+	if (isleap(year)) \
+		seconds_since_epoch += seconds_per_leap_year \
+	else \
+		seconds_since_epoch += seconds_per_non_leap_year
+
+	year_string           = strftime("%Y",seconds_since_epoch)
+	month_string          = strftime("%m",seconds_since_epoch)
+	day_of_month_string   = strftime("%d",seconds_since_epoch)
+	day_of_year_string    = strftime("%j",seconds_since_epoch)
+	println year, seconds_since_epoch, year_string, month_string, \
+		day_of_month_string, day_of_year_string "\t" \
+		strftime("%c",seconds_since_epoch)
+}
+
+### Now test some locale-specific settings.  First set the environment
+### to the C/C++ standard default:
+ignore = putenv("LANG",		"C")
+ignore = putenv("LC_COLLATE",	"C")
+ignore = putenv("LC_CTYPE",	"C")
+ignore = putenv("LC_MESSAGES",	"C")
+ignore = putenv("LC_MONETARY",	"C")
+ignore = putenv("LC_NUMERIC",	"C")
+ignore = putenv("LC_TIME",	"C")
+
+show_selected_strftime_conversions()
+
+### Do the same in each of the language locales known to the current
+### distribution of hoc.  Because some of these require different code
+### pages (noted in comments), display of the output file will be
+### incorrect for some of them in any other code page.  However,
+### output should be identical across platforms that have proper
+### locale support.
+
+ignore = putenv("LC_TIME",	"da")	# ISO8859-1 (Latin-1): Danish
+show_selected_strftime_conversions()
+
+ignore = putenv("LC_TIME",	"de")	# ISO8859-1 (Latin-1): German
+show_selected_strftime_conversions()
+
+ignore = putenv("LC_TIME",	"fr")	# ISO8859-1 (Latin-1): French
+show_selected_strftime_conversions()
+
+ignore = putenv("LC_TIME",	"pt")	# ISO8859-1 (Latin-1): Portuguese
+show_selected_strftime_conversions()
+
+ignore = putenv("LC_TIME",	"ru")	# ISO8859-5 (Latin-4): Russian
+show_selected_strftime_conversions()
+
+ignore = putenv("LC_TIME",	"tr")	# ISO8859-9 (Latin-5): Turkish
+show_selected_strftime_conversions()
+@

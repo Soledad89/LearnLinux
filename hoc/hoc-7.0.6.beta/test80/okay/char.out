@@ -1,0 +1,2 @@
+These tests are expected to fail with an EBCDIC host character set,
+but must succeed with ASCII, ISO 8859-n, or Unicode character sets.

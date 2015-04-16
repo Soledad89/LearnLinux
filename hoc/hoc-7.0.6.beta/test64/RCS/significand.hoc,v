@@ -1,0 +1,124 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2002.08.06.13.42.51;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@### -*-hoc-*-
+### ====================================================================
+### Test the significand() function, without requiring exponent() to
+### work properly.
+### [31-Dec-2001]
+### ====================================================================
+
+for (x = MINSUBNORMAL; x <= MAXNORMAL; x *= 2) \
+{
+	s = significand(x)
+	__TEST__ = "significand(x) == 1.0"
+	__assert   (significand(x) == 1.0)
+}
+
+eps = macheps(1)
+scale_plus = 1 + eps
+scale_minus = 1 - eps/2
+scale_alt = 4/3			# alternating 0 and 1 bits: +0x1.5555555555555p+0
+
+for (x = MINNORMAL; x < MAXNORMAL; x *= 2) \
+{
+	s = significand(x * scale_plus)
+	## println "DEBUG:", x, x * scale_plus, hexfp(x * scale_plus), "", s, hexfp(s)
+	__TEST__ = "significand(x) == (1 + macheps(1))"
+	__assert   (s == scale_plus)
+}
+
+for (x = 2*MINNORMAL; x <= MAXNORMAL; x *= 2) \
+{
+	s = significand(x * scale_minus)
+	## println "DEBUG:", x, x * scale_minus, hexfp(x * scale_minus), "", s, hexfp(s)
+	__TEST__ = "significand(x) == 2*(1 - macheps(1)/2)"
+	__assert   (s == 2*scale_minus)
+}
+
+for (x = MINNORMAL; x < MAXNORMAL; x *= 2) \
+{
+	s = significand(x * scale_alt)
+	## println "DEBUG:", x, x * scale_alt, hexfp(x * scale_alt), "", s, hexfp(s)
+	__TEST__ = "significand(x) == 4/3"
+	__assert   (s == scale_alt)
+}
+
+### Tests with special arguments
+
+__TEST__ = "isnan(significand(NaN))"
+__assert   (isnan(significand(NaN)))
+
+__TEST__ = "isnan(significand(QNaN))"
+__assert   (isnan(significand(QNaN)))
+
+__TEST__ = "isnan(significand(SNaN))"
+__assert   (isnan(significand(SNaN)))
+
+
+__TEST__ = "isnan(significand(-NaN))"
+__assert   (isnan(significand(-NaN)))
+
+__TEST__ = "isnan(significand(-QNaN))"
+__assert   (isnan(significand(-QNaN)))
+
+__TEST__ = "isnan(significand(-SNaN))"
+__assert   (isnan(significand(-SNaN)))
+
+
+__TEST__ = "isnan(significand(+NaN))"
+__assert   (isnan(significand(+NaN)))
+
+__TEST__ = "isnan(significand(+QNaN))"
+__assert   (isnan(significand(+QNaN)))
+
+__TEST__ = "isnan(significand(+SNaN))"
+__assert   (isnan(significand(+SNaN)))
+
+
+__TEST__ = "isinf(significand(Inf)) && (copysign(1,significand(Inf)) == 1)"
+__assert   (isinf(significand(Inf)) && (copysign(1,significand(Inf)) == 1))
+
+__TEST__ = "isinf(significand(-Inf)) && (copysign(1,significand(-Inf)) == -1)"
+__assert   (isinf(significand(-Inf)) && (copysign(1,significand(-Inf)) == -1))
+
+__TEST__ = "isinf(significand(+Inf)) && (copysign(1,significand(Inf)) == 1)"
+__assert   (isinf(significand(+Inf)) && (copysign(1,significand(Inf)) == 1))
+
+
+__TEST__ = "(significand(+0) == 0) && (copysign(1,significand(+0)) == +1)"
+__assert   ((significand(+0) == 0) && (copysign(1,significand(+0)) == +1))
+
+__TEST__ = "(significand(-0) == 0) && (copysign(1,significand(-0)) == -1)"
+__assert   ((significand(-0) == 0) && (copysign(1,significand(-0)) == -1))
+
+
+__TEST__ = "(significand(+MINSUBNORMAL/2) == 0) && (copysign(1,significand(+MINSUBNORMAL/2)) == +1)"
+__assert   ((significand(+MINSUBNORMAL/2) == 0) && (copysign(1,significand(+MINSUBNORMAL/2)) == +1))
+
+__TEST__ = "(significand(-MINSUBNORMAL/2) == 0) && (copysign(1,significand(-MINSUBNORMAL/2)) == -1)"
+__assert   ((significand(-MINSUBNORMAL/2) == 0) && (copysign(1,significand(-MINSUBNORMAL/2)) == -1))
+
+
+@

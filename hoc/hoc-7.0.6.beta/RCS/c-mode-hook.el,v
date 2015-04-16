@@ -1,0 +1,49 @@
+head	1.1;
+access;
+symbols;
+locks
+	beebe:1.1; strict;
+comment	@; @;
+
+
+1.1
+date	2002.01.30.17.11.55;	author beebe;	state Exp;
+branches;
+next	;
+
+
+desc
+@Original version
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@;;; Special c-mode-hook for editing hoc source code, which uses tabs
+;;; for indentation, rather than my usual 4 spaces
+(setq c-mode-hook
+      '(lambda ()
+	 (define-key c-mode-map "{" 'c-brace)
+	 (modify-syntax-entry 95 "word") ; _ is a word character
+	 (setq c-argdecl-indent 0
+	       c-auto-newline t
+	       c-basic-offset 8
+	       c-brace-imaginary-offset 0
+	       c-brace-offset 0
+	       c-continued-statement-offset 0
+	       c-indent-level 8
+	       c-label-offset -8
+	       case-fold-search nil	;case sensitive searching in C
+	       comment-column 40)
+	 (if (equal (point-max) (point-min))
+	     (progn
+	       (insert-file (concat "~" BEEBE "/emacs/template.c"))
+	       (goto-line 2)
+	       (date)
+	       (goto-line 2)
+	       (push-mark (point) nil)
+	       (not-modified)))))
+@

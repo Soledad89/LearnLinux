@@ -1,0 +1,16 @@
+### -*-hoc-*-
+### ====================================================================
+### Report test results for "make check" runs.  If the test is
+### successful, as indicate by __NFAIL__ == 0, there is no report.
+### [10-Dec-2001]
+### ====================================================================
+
+if (__NFAIL__ > 0) \
+{
+	if (__NOKAY__ > 0) \
+		print "Partial success:", __NTEST__, "tests:", \
+			__NOKAY__, "okay,", \
+			__NFAIL__, "failed\n" \
+	else \
+		print "Complete failure:", __NFAIL__, "failed\n"
+}

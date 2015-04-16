@@ -1,0 +1,80 @@
+### -*-hoc-*-
+### /usr/local/src/hoc/hoc-7.0.0.beta/tr/help.hoc, Mon Dec 17 11:37:10 2001
+### Edit by Nelson H. F. Beebe <beebe@math.utah.edu>
+### ====================================================================
+###
+### This is tr/hoc.hlp, with Turkish translations of hoc help functions.
+### If requested by the settings of the environment variables LC_ALL,
+### LC_MESSAGES, or LANG (in that order of priority), this file will be
+### loaded AFTER hoc.hlp.  This means that it can gradually be augmented
+### with translations of messages, leaving the original English text as
+### a fallback.
+###
+### NB: The Turkish text is in the ISO8859-9 encoding, and will only be
+### display correctly in a window with that text encoding.
+###
+### [17-Dec-2001]
+### ====================================================================
+
+### Turkish translations of new (or existing) commands
+
+proc yardým() \
+{
+	__internal_help_hrule()
+
+	print "\tEk olarak yardým almak mümkündür. Bunun için yardým_ÝSÝM(), ki\n"
+	print "\tÝSÝM kýsmýna herhangi bir adlandýrýlmýþ sabit, bir ifade, bir\n"
+	print "\tkonu baþlýðý yada üretilmiþ fonksiyon yazýlabilir:\n\n"
+
+	print "\tAdlandýrýlmýþ sabitler:\n\n"
+	print "\t\tCATALAN, DEG, E, GAMMA, INF, Inf, Infinity, MAXNORMAL,\n"
+	print "\t\tMINNORMAL, MINSUBNORMAL, NAN, NaN, PHI, PI, QNAN,\n"
+	print "\t\tQNaN, SNAN, SNaN\n\n"
+
+	print "\tÜretilmiþ sayýsal fonksiyonlar:\n"
+	print "\t\tabs(), acos(), acosh(), asin(), asinh(), atan(),\n"
+	print "\t\tatanh(), cbrt(), ceil(), cos(), cosd(), cosh(), erf(),\n"
+	print "\t\terfc(), exp(), expm1(), factorial(), floor(), gamma(),\n"
+	print "\t\tgcd(), hypot(), int(), J0(), J1(), Jn(), lcm(),\n"
+	print "\t\tlgamma(), ln(), log(), log10(), log1p(), log2(), logb(),\n"
+	print "\t\tmacheps(), max(), min(), nint(), rand(), randint(),\n"
+	print "\t\trandl(), rint(), rsqrt(), second(), setrand(), sin(),\n"
+	print "\t\tsind(), sinh(), sqrt(), systime(), tan(), tand(), tanh(),\n"
+	print "\t\ttrunc(), Y0(), Y1(), Yn()\n\n"
+
+	print "\tÜretilmiþ IEEE 754 deneme fonksiyonlarý:\n"
+	print "\t\tcopysign(), fmod(), ilogb(), isfinite(), isinf(),\n"
+	print "\t\tisnan(), isnormal(), isqnan(), issnan(), issubnormal(),\n"
+	print "\t\tldexp(), nearest(), nextafter(), remainder(), scalb(),\n"
+	print "\t\tsignificand()\n\n"
+
+	print "\tString fonksiyonlarý:\n"
+	print "\t\tgetenv(), index(), length(), putenv(), strftime(),\n"
+	print "\t\tsubstr(), tolower(), toupper()\n\n"
+
+	print "\t:Diðer fonksiyonlar:\n"
+	print "\t\tabort(), eval(), load(), logfile(), logon(), logoff(),\n"
+	print "\t\tnow(), save(), who(), __msg_translate(), __set_locale()\n\n"
+
+	print "\tIfadeler:\n"
+	print "\t\tassignment expression for function if operator print\n"
+	print "\t\tprintf proc read statement while\n\n"
+
+	print "\tKonular:\n"
+	print "\t\tconstants, environment, expressions, functions,\n"
+	print "\t\tieee_754, limits, locales, operators, random,\n"
+	print "\t\tstatements, string_functions, time\n\n"
+
+	print "\tyardým_hepsý() yazarak butun fonksýyonlarý detaylarý ile\n"
+	print "\töðrenebilirsiniz.\n"
+	__internal_help_hrule()
+}
+
+### For now, we just provide English help in response to a Turkish
+### help-all request, plus simplified names that are easier to type on
+### non-Turkish keyboards:
+
+proc yardým_hepsý()	help_all()
+
+proc yardim ()		yardým()
+proc yardim_hepsi ()	yardým_hepsý()

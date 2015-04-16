@@ -1,0 +1,115 @@
+Digits := 50:
+
+xbig := 1.0e+10:
+
+printf("__MAXULPS = 512\n\n");
+
+for n in [  0, 1 ] do
+	if (abs(evalf(BesselY(n,xbig))) > 1) then
+		printf("__TEST__ = \"isinf(Y%d(Inf))\"\n", n);
+		printf("__assert   (isinf(Y%d(Inf)))\n\n", n);
+	else
+		printf("__TEST__ = \"Y%d(Inf) == 0\"\n", n);
+		printf("__assert   (Y%d(Inf) == 0)\n\n", n);
+	end if
+end do;
+
+for n in [ 0, 1, 2, 3, 4, 5, 10, 20, 50, 100 ] do
+	if (abs(evalf(BesselY(n,xbig))) > 1) then
+		printf("__TEST__ = \"isinf(Yn(%3d,Inf))\"\n", n);
+		printf("__assert   (isinf(Yn(%3d,Inf)))\n\n", n);
+	else
+		printf("__TEST__ = \"Yn(%3d,Inf) == 0\"\n", n);
+		printf("__assert   (Yn(%3d,Inf) == 0)\n\n", n);
+	end if
+end do;
+
+for n in [  0, 1 ] do
+	printf("__TEST__ = \"isnan(Y%d(NaN))\"\n", n);
+	printf("__assert   (isnan(Y%d(NaN)))\n\n", n);
+end do;
+
+for n in [ 0, 1, 2, 3, 4, 5, 10, 20, 50, 100 ] do
+	printf("__TEST__ = \"isnan(Yn(%3d,NaN))\"\n", n);
+	printf("__assert   (isnan(Yn(%3d,NaN)))\n\n", n);
+end do;
+
+for n in [ 0, 1 ] do
+	for x from 0.5 to 10 by 0.5 do 
+		printf("__TEST__ = \"Y%d(%4.1f) == %51.50g\"\n", 
+			n, x, evalf(BesselY(n,x))); 
+		printf("__match    (Y%d(%4.1f), %53.50g)\n\n", 
+			n, x, evalf(BesselY(n,x)));
+	end do;
+	for x from 15 to 100 by 5 do 
+		printf("__TEST__ = \"Y%d(%4.1f) == %51.50g\"\n", 
+			n, x, evalf(BesselY(n,x))); 
+		printf("__match    (Y%d(%4.1f), %53.50g)\n\n", 
+			n, x, evalf(BesselY(n,x)));
+	end do;
+end do;
+
+for n in [ 0, 1 ] do
+	for x from 0.5 to 10 by 0.5 do 
+		printf("__TEST__ = \"Yn(%1d,%4.1f) == Y%1d(%4.1f)\"\n", 
+			n, x, n, x);
+		printf("__match    (Yn(%1d,%4.1f),   Y%1d(%4.1f))\n\n", 
+			n, x, n, x);
+	end do;
+	for x from 15 to 100 by 5 do 
+		printf("__TEST__ = \"Yn(%1d,%4.1f) == Y%1d(%4.1f)\"\n", 
+			n, x, n, x);
+		printf("__match    (Yn(%1d,%4.1f),   Y%1d(%4.1f))\n\n", 
+			n, x, n, x);
+	end do;
+end do;
+
+for n in [ 2, 3, 4, 5, 10, 20, 50, 100 ] do
+	for x from 0.5 to 10 by 0.5 do 
+		printf("__TEST__ = \"Yn(%3d,%4.1f) == %51.50g\"\n", 
+			n, x, evalf(BesselY(n,x))); 
+		printf("__match    (Yn(%3d,%4.1f), %53.50g)\n\n", 
+			n, x, evalf(BesselY(n,x)));
+	end do;
+	for x from 15 to 100 by 5 do 
+		printf("__TEST__ = \"Yn(%3d,%4.1f) == %51.50g\"\n", 
+			n, x, evalf(BesselY(n,x))); 
+		printf("__match    (Yn(%3d,%4.1f), %53.50g)\n\n", 
+			n, x, evalf(BesselY(n,x)));
+	end do;
+end do;
+
+for n in [ 0, 1, 2, 3, 4, 5, 10, 20 ] do
+	for x in [ 1.0e-8, 1.0e-6, 1.0e-4, 1.0e-2, 1.0e-1 ] do
+		printf("__TEST__ = \"Yn(%3d,%8.1e) == %51.50g\"\n", 
+			n, x, evalf(BesselY(n,x))); 
+		printf("__match    (Yn(%3d,%8.1e), %53.50g)\n\n", 
+			n, x, evalf(BesselY(n,x)));
+	end do;
+end do;
+
+for n in [ 50, 60, 70, 80 ] do
+	for x in [ 1.0e-2, 1.0e-1 ] do
+		printf("__TEST__ = \"Yn(%3d,%8.1e) == %51.50g\"\n", 
+			n, x, evalf(BesselY(n,x))); 
+		printf("__match    (Yn(%3d,%8.1e), %53.50g)\n\n", 
+			n, x, evalf(BesselY(n,x)));
+	end do;
+end do;
+
+printf("for (x = 0.5; x <= 100; x += 0.5) \\\n");
+printf("{\n");
+printf("\t__TEST__ = x \"*Yn(2,\" x \") == (2*Y1(\" x \") - \" x \"*Y0(\" x \"))\"\n");
+printf("\t__match   (x*Yn(2,x), 2*Y1(x) - x*Y0(x))\n");
+printf("}\n\n");
+
+printf("__MAXULPS = 32768\n\n");
+
+printf("for (k = 0; k <= 50; ++k) \\\n");
+printf("{\n");
+printf("\tfor (x = 0.5; x <= 100; x += 0.5) \\\n");
+printf("\t{\n");
+printf("\t\t__TEST__ = x \"*Yn(\" (k+2) \",\" x \") == (2*\" (k+1) \"*Yn(\" (k+1) \",\" x \") - \" x \"*Yn(\" k \",\" x \"))\"\n");
+printf("\t\t__match   (x*Yn(k+2,x), 2*(k+1)*Yn(k+1,x) - x*Yn(k,x))\n");
+printf("\t}\n");
+printf("}\n");
