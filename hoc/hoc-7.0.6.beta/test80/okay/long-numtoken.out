@@ -1,4 +1,0 @@
-The next assignment SHOULD NOT cause a MAX_TOKEN buffer overflow.
-Value read = 6.78899999999999999994 
-The next assignment SHOULD cause a MAX_TOKEN buffer overflow.
-Value read = 1.2345 

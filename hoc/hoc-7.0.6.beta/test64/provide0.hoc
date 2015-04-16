@@ -1,8 +1,0 @@
-### -*-hoc-*-
-### ====================================================================
-### This file is loaded by provide.hoc.
-### [07-Jan-2002]
-### ====================================================================
-println "provide0.hoc entered"
-provide("provide0.hoc")
-println "provide0.hoc left"

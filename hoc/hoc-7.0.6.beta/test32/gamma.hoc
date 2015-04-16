@@ -1,9 +1,0 @@
-{
-	n=0
-	b=0
-	while(b < 362880) {
-		n=n+1
-		b=int(gamma(n) + 0.5)
-		print b, "\n"
-	}
-}
