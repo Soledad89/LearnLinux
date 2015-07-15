@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
 	int c;
-	int strip;
+	int strip = 0;
 
 	if (argc > 1 && strcmp(argv[1], "-s") == 0)
 		strip = 1;
